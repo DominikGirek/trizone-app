@@ -1,0 +1,298 @@
+{
+  "tabs": {
+    "home": "Start",
+    "news": "News",
+    "events": "Events",
+    "standings": "Tabellen",
+    "deals": "Codes",
+    "calendar": "Kalender",
+    "results": "Ergebnisse",
+    "favorites": "Favoriten",
+    "more": "Mehr"
+  },
+  "deals": {
+    "title": "Rabattcodes",
+    "search": "Marke, Athlet:in oder Code …",
+    "yourAthletes": "Deine Athlet:innen",
+    "yourBrands": "Deine Marken",
+    "via": "von {{name}}",
+    "checkedAt": "geprüft am {{date}}",
+    "all": "Weitere Codes",
+    "allCodes": "Alle Codes",
+    "allCategories": "Alle",
+    "copied": "Code kopiert",
+    "toShop": "Zum Shop",
+    "validUntil": "gültig bis {{date}}",
+    "endingSoon": "läuft bald ab",
+    "ad": "Anzeige",
+    "thanksUp": "Danke! 👍",
+    "thanksDown": "Danke! Bei genug Meldungen fliegt der Code raus.",
+    "empty": "Noch keine Codes. Wir kuratieren echte, verifizierte Codes – bald kannst du auch eigene vorschlagen.",
+    "disclaimer": "Affiliate-Links – wir erhalten ggf. eine Provision.",
+    "cat": {
+      "bike": "Bike",
+      "wetsuit": "Neopren",
+      "run": "Laufen",
+      "nutrition": "Ernährung",
+      "tech": "Technik",
+      "apparel": "Bekleidung",
+      "other": "Sonstiges"
+    }
+  },
+  "events": {
+    "all": "Alle",
+    "near": "In der Nähe",
+    "past": "Vergangene",
+    "series": "Serien",
+    "pro": "Pro",
+    "empty": "Keine Events gefunden.",
+    "continent": "Kontinent",
+    "country": "Land",
+    "month": "Monat",
+    "reset": "Zurücksetzen",
+    "officialFinder": "Alle {{series}}-Rennen weltweit",
+    "officialNote": "Vollständige Renn-Suche auf der offiziellen Seite (nach Land/Monat filterbar)."
+  },
+  "continent": {
+    "EU": "Europa",
+    "NA": "Nordamerika",
+    "SA": "Südamerika",
+    "AS": "Asien",
+    "OC": "Ozeanien",
+    "AF": "Afrika",
+    "OT": "Andere"
+  },
+  "standings": {
+    "worldRanking": "Weltranglisten",
+    "leagues": "Ligen",
+    "imProSeries": "IRONMAN Pro Series",
+    "imProSeriesNote": "Die vollständige IRONMAN-Pro-Series-Wertung wird laufend aktualisiert. Öffne die offizielle Wertung für alle Plätze, Punkte und Rennen.",
+    "openOfficial": "Offizielle Wertung öffnen",
+    "updatedAt": "Stand: {{date}}"
+  },
+  "league": {
+    "table": "Tabelle",
+    "fixtures": "Wettkämpfe",
+    "place": "Pl.",
+    "team": "Team",
+    "empty": "Noch keine Tabellendaten für diese Saison.",
+    "source": "Quelle: Triathlon-Bundesliga (DTU)",
+    "live": "Live-Tabelle",
+    "external": "offizielle Tabelle",
+    "searchPlaceholder": "Liga oder Verband suchen …",
+    "coverageNote": "Live in der App: Bundesliga, Regionalliga Nord, SHTU. Weitere Verbände öffnen ihre offizielle Tabelle."
+  },
+  "dashboard": {
+    "liveNow": "Jetzt live",
+    "raceWeek": "Renn-Woche",
+    "athleteMoment": "Dein Favorit",
+    "myRace": "Mein Rennen",
+    "mainRace": "Hauptrennen",
+    "askTitle": "Bei welchem Rennen startest du als Nächstes?",
+    "askSubtitle": "Leg dein Zielevent fest – wir zählen runter.",
+    "topNews": "News",
+    "seeAll": "Alle",
+    "personalizeTitle": "Mach TriZone zu deiner App",
+    "personalizeHint": "Wähle Lieblings-Athlet:innen und Serien für einen persönlichen Start.",
+    "personalize": "Favoriten wählen",
+    "watchLive": "Live verfolgen"
+  },
+  "common": {
+    "loading": "Lädt …",
+    "error": "Etwas ist schiefgelaufen.",
+    "retry": "Erneut versuchen",
+    "today": "Heute",
+    "tomorrow": "Morgen",
+    "yesterday": "Gestern",
+    "men": "Männer",
+    "women": "Frauen",
+    "points": "Pkt.",
+    "viewSource": "Zur Quelle",
+    "readMore": "Weiterlesen",
+    "noResults": "Keine Einträge"
+  },
+  "news": {
+    "title": "News",
+    "empty": "Keine News verfügbar. Zieh zum Aktualisieren nach unten.",
+    "loadError": "News konnten nicht geladen werden.",
+    "live": "Live",
+    "aboutRace": "News zum Rennen",
+    "foryou": "Für dich",
+    "all": "Alle",
+    "saved": "Gemerkt",
+    "allTopics": "Alle Themen",
+    "allLanguages": "Sprache",
+    "personalizeTitle": "Mach die News zu deinen",
+    "personalizeHint": "Wähle Lieblings-Athlet:innen und Serien – wir sortieren die News nach deinen Interessen.",
+    "topics": {
+      "pro": "Profis",
+      "long": "Langdistanz",
+      "agegroup": "Age-Group",
+      "training": "Training",
+      "gear": "Material"
+    }
+  },
+  "calendar": {
+    "title": "Rennkalender",
+    "next": "Nächstes Rennen",
+    "upcoming": "Anstehend",
+    "past": "Vergangen",
+    "empty": "Keine Rennen im Kalender.",
+    "hasResults": "Ergebnisse verfügbar",
+    "pro": "Pro",
+    "local": "Lokal"
+  },
+  "local": {
+    "nearby": "In deiner Nähe",
+    "all": "Alle Events",
+    "searchPlaceholder": "Ort oder Event suchen …",
+    "enableLocation": "Standort aktivieren für Events in deiner Nähe",
+    "empty": "Keine Events gefunden.",
+    "distances": "Distanzen",
+    "registration": "Anmeldung",
+    "live": "Live verfolgen",
+    "liveTicker": "Live-Ticker",
+    "results": "Ergebnisse",
+    "website": "Veranstalter",
+    "organizer": "Veranstalter",
+    "map": "Karte",
+    "via": "via {{provider}}",
+    "info": "Events aus dem DTU-Veranstaltungskalender."
+  },
+  "results": {
+    "title": "Ergebnisse & Rangliste",
+    "raceResults": "Renn-Ergebnisse",
+    "standings": "Weltrangliste",
+    "selectRace": "Rennen wählen",
+    "rank": "Pl.",
+    "time": "Zeit",
+    "athlete": "Athlet:in",
+    "noResultsYet": "Für dieses Rennen liegen noch keine Ergebnisse vor."
+  },
+  "favorites": {
+    "title": "Favoriten",
+    "empty": "Noch keine Favoriten.",
+    "hint": "Tippe auf das Stern-Symbol bei Athlet:innen oder Serien, um sie hier zu sammeln.",
+    "athletes": "Athlet:innen",
+    "series": "Serien",
+    "brands": "Marken",
+    "added": "Zu Favoriten hinzugefügt",
+    "removed": "Aus Favoriten entfernt"
+  },
+  "following": {
+    "title": "Following",
+    "subtitle": "Wähle, worüber du auf dem Laufenden bleiben willst – steuert deinen „Für dich\"-Feed.",
+    "series": "Serien",
+    "brands": "Marken",
+    "athletes": "Athlet:innen",
+    "addAthletes": "Suchen",
+    "seeAll": "Alle ansehen",
+    "close": "Schließen"
+  },
+  "more": {
+    "title": "Mehr",
+    "settings": "Einstellungen",
+    "language": "Sprache",
+    "languageSystem": "Systemsprache",
+    "theme": "Darstellung",
+    "themeSystem": "System",
+    "themeLight": "Hell",
+    "themeDark": "Dunkel",
+    "about": "Über TriZone",
+    "aboutText": "TriZone ist deine App für Triathlon-News, Rennkalender und Ergebnisse – Schwimmen, Rad und Laufen an einem Ort.",
+    "dataSource": "News aus öffentlichen RSS-Feeds. Rennkalender & WTCS-Weltrangliste von World Triathlon. Renn-Ergebnisse sind in dieser Version Beispieldaten.",
+    "version": "Version"
+  },
+  "onboarding": {
+    "welcomeTitle": "Willkommen bei TriZone",
+    "welcomeSubtitle": "Deine App für Triathlon: News, Rennkalender, Ergebnisse und Weltranglisten – Schwimmen, Rad, Laufen an einem Ort.",
+    "start": "Los geht's",
+    "skip": "Überspringen",
+    "continue": "Weiter",
+    "finish": "Fertig",
+    "pickSeriesTitle": "Welche Serien verfolgst du?",
+    "pickSeriesSubtitle": "Wähle deine Lieblingsserien – wir heben sie für dich hervor.",
+    "pickAthletesTitle": "Wem folgst du?",
+    "pickAthletesSubtitle": "Markiere Athlet:innen, die du im Blick behalten willst.",
+    "selectedCount": "{{count}} ausgewählt"
+  },
+  "search": {
+    "placeholder": "Athlet:innen, Rennen suchen …",
+    "empty": "Keine Treffer.",
+    "prompt": "Suche nach Athlet:innen oder Rennen.",
+    "athletes": "Athlet:innen",
+    "races": "Rennen"
+  },
+  "weather": {
+    "title": "Wetter",
+    "unavailable": "Wettervorhersage nur für die kommenden Tage verfügbar."
+  },
+  "actions": {
+    "share": "Teilen",
+    "addToCalendar": "Zum Kalender",
+    "save": "Merken",
+    "saved": "Gespeichert",
+    "savedToast": "Artikel gemerkt",
+    "unsavedToast": "Aus Gemerkt entfernt",
+    "calendarAdded": "Zum Kalender hinzugefügt",
+    "all": "Alle",
+    "remind": "Erinnern",
+    "reminderOn": "Erinnerung gesetzt",
+    "reminderOff": "Erinnerung entfernt",
+    "reminderDenied": "Benachrichtigungen nicht erlaubt",
+    "imRacing": "Ich starte hier",
+    "racingAddedToast": "Zu deinen Rennen hinzugefügt",
+    "racingRemovedToast": "Aus deinen Rennen entfernt"
+  },
+  "myRaces": {
+    "title": "Meine Rennen",
+    "note": "Wähle ein Hauptrennen (🏆) – sonst zählt das zeitlich nächste Rennen.",
+    "main": "Hauptrennen",
+    "add": "Rennen hinzufügen",
+    "empty": "Noch keine Rennen ausgewählt. Öffne ein Rennen und tippe „Ich starte hier\".",
+    "manageCount": "Meine Rennen ({{count}})"
+  },
+  "reminder": {
+    "title": "Bald geht's los: {{name}}",
+    "body": "{{location}} – nicht verpassen!"
+  },
+  "live": {
+    "title": "Live-Ticker",
+    "final": "Endergebnis",
+    "liveNow": "LIVE",
+    "noData": "Noch keine Ergebnisse.",
+    "poweredBy": "Daten: raceresult"
+  },
+  "status": {
+    "upcoming": "Anstehend",
+    "live": "Live",
+    "finished": "Beendet"
+  },
+  "discipline": {
+    "swim": "Schwimmen",
+    "bike": "Rad",
+    "run": "Laufen"
+  },
+  "format": {
+    "sprint": "Sprint",
+    "olympic": "Olympisch",
+    "middle": "Mitteldistanz (70.3)",
+    "long": "Langdistanz",
+    "mixed_relay": "Mixed-Staffel"
+  },
+  "series": {
+    "wtcs": "WTCS",
+    "ironman": "IRONMAN",
+    "ironman703": "IRONMAN 70.3",
+    "pto": "PTO Tour",
+    "t100": "T100",
+    "other": "Sonstige"
+  },
+  "countdown": {
+    "days": "T",
+    "hours": "Std",
+    "minutes": "Min",
+    "seconds": "Sek",
+    "soon": "Bald"
+  }
+}

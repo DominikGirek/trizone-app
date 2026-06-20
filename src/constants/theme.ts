@@ -9,20 +9,37 @@ import { Platform } from 'react-native';
 
 export const Colors = {
   light: {
-    text: '#000000',
-    background: '#ffffff',
-    backgroundElement: '#F0F0F3',
-    backgroundSelected: '#E0E1E6',
-    textSecondary: '#60646C',
+    text: '#11181C',
+    textSecondary: '#5A6169',
+    background: '#FFFFFF',
+    backgroundElement: '#F3F4F6',
+    backgroundSelected: '#E4E6EA',
+    border: '#E4E6EA',
+    primary: '#E2231A',
+    onPrimary: '#FFFFFF',
+    swim: '#0EA5E9',
+    bike: '#F59E0B',
+    run: '#EF4444',
+    success: '#16A34A',
   },
   dark: {
-    text: '#ffffff',
-    background: '#000000',
-    backgroundElement: '#212225',
-    backgroundSelected: '#2E3135',
-    textSecondary: '#B0B4BA',
+    text: '#ECEDEE',
+    textSecondary: '#9BA1A6',
+    background: '#0B0B0C',
+    backgroundElement: '#17181B',
+    backgroundSelected: '#26282C',
+    border: '#2A2C30',
+    primary: '#FF483D',
+    onPrimary: '#FFFFFF',
+    swim: '#38BDF8',
+    bike: '#FBBF24',
+    run: '#F87171',
+    success: '#22C55E',
   },
 } as const;
+
+/** Brand color used for the TriZone wordmark / accents, independent of scheme. */
+export const Brand = '#E2231A';
 
 export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
 

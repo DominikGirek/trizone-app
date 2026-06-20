@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm --version)",
+      "Bash(npx create-expo-app@latest . --template default --no-install)",
+      "Read(//private/tmp/**)",
+      "Bash(rm -rf trizone-scaffold)",
+      "Bash(npx create-expo-app@latest trizone-scaffold --template default --no-install)",
+      "Bash(bash -c 'shopt -s dotglob && mv /tmp/trizone-scaffold/* \"/Users/dominikgirek/TriZone App/\"')"
+    ]
+  }
+}

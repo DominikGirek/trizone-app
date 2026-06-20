@@ -1,0 +1,298 @@
+{
+  "tabs": {
+    "home": "Home",
+    "news": "News",
+    "events": "Events",
+    "standings": "Standings",
+    "deals": "Codes",
+    "calendar": "Calendar",
+    "results": "Results",
+    "favorites": "Favorites",
+    "more": "More"
+  },
+  "deals": {
+    "title": "Discount codes",
+    "search": "Brand, athlete or code …",
+    "yourAthletes": "Your athletes",
+    "yourBrands": "Your brands",
+    "via": "by {{name}}",
+    "checkedAt": "checked {{date}}",
+    "all": "More codes",
+    "allCodes": "All codes",
+    "allCategories": "All",
+    "copied": "Code copied",
+    "toShop": "To shop",
+    "validUntil": "valid until {{date}}",
+    "endingSoon": "ending soon",
+    "ad": "Ad",
+    "thanksUp": "Thanks! 👍",
+    "thanksDown": "Thanks! Enough reports remove the code.",
+    "empty": "No codes yet. We curate real, verified codes – soon you can submit your own.",
+    "disclaimer": "Affiliate links – we may earn a commission.",
+    "cat": {
+      "bike": "Bike",
+      "wetsuit": "Wetsuit",
+      "run": "Run",
+      "nutrition": "Nutrition",
+      "tech": "Tech",
+      "apparel": "Apparel",
+      "other": "Other"
+    }
+  },
+  "events": {
+    "all": "All",
+    "near": "Near you",
+    "past": "Past",
+    "series": "Series",
+    "pro": "Pro",
+    "empty": "No events found.",
+    "continent": "Continent",
+    "country": "Country",
+    "month": "Month",
+    "reset": "Reset",
+    "officialFinder": "All {{series}} races worldwide",
+    "officialNote": "Full race finder on the official site (filter by country/month)."
+  },
+  "continent": {
+    "EU": "Europe",
+    "NA": "North America",
+    "SA": "South America",
+    "AS": "Asia",
+    "OC": "Oceania",
+    "AF": "Africa",
+    "OT": "Other"
+  },
+  "standings": {
+    "worldRanking": "World rankings",
+    "leagues": "Leagues",
+    "imProSeries": "IRONMAN Pro Series",
+    "imProSeriesNote": "The full IRONMAN Pro Series standings update continuously. Open the official standings for all places, points and races.",
+    "openOfficial": "Open official standings",
+    "updatedAt": "Updated: {{date}}"
+  },
+  "league": {
+    "table": "Table",
+    "fixtures": "Fixtures",
+    "place": "Pos.",
+    "team": "Team",
+    "empty": "No standings yet this season.",
+    "source": "Source: Triathlon-Bundesliga (DTU)",
+    "live": "Live table",
+    "external": "official table",
+    "searchPlaceholder": "Search league or association …",
+    "coverageNote": "Live in-app: Bundesliga, Regionalliga Nord, SHTU. Other associations open their official standings."
+  },
+  "dashboard": {
+    "liveNow": "Live now",
+    "raceWeek": "Race week",
+    "athleteMoment": "Your favorite",
+    "myRace": "My race",
+    "mainRace": "Main race",
+    "askTitle": "Which race are you racing next?",
+    "askSubtitle": "Set your goal event – we'll count down.",
+    "topNews": "News",
+    "seeAll": "See all",
+    "personalizeTitle": "Make TriZone yours",
+    "personalizeHint": "Pick favorite athletes and series for a personal start screen.",
+    "personalize": "Choose favorites",
+    "watchLive": "Follow live"
+  },
+  "common": {
+    "loading": "Loading …",
+    "error": "Something went wrong.",
+    "retry": "Try again",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "yesterday": "Yesterday",
+    "men": "Men",
+    "women": "Women",
+    "points": "pts",
+    "viewSource": "View source",
+    "readMore": "Read more",
+    "noResults": "No entries"
+  },
+  "news": {
+    "title": "News",
+    "empty": "No news available. Pull down to refresh.",
+    "loadError": "Could not load news.",
+    "live": "Live",
+    "aboutRace": "Race news",
+    "foryou": "For you",
+    "all": "All",
+    "saved": "Saved",
+    "allTopics": "All topics",
+    "allLanguages": "Language",
+    "personalizeTitle": "Make the news yours",
+    "personalizeHint": "Pick favorite athletes and series – we'll sort the news by your interests.",
+    "topics": {
+      "pro": "Pros",
+      "long": "Long course",
+      "agegroup": "Age group",
+      "training": "Training",
+      "gear": "Gear"
+    }
+  },
+  "calendar": {
+    "title": "Race calendar",
+    "next": "Next race",
+    "upcoming": "Upcoming",
+    "past": "Past",
+    "empty": "No races in the calendar.",
+    "hasResults": "Results available",
+    "pro": "Pro",
+    "local": "Local"
+  },
+  "local": {
+    "nearby": "Near you",
+    "all": "All events",
+    "searchPlaceholder": "Search town or event …",
+    "enableLocation": "Enable location for events near you",
+    "empty": "No events found.",
+    "distances": "Distances",
+    "registration": "Register",
+    "live": "Follow live",
+    "liveTicker": "Live ticker",
+    "results": "Results",
+    "website": "Organizer",
+    "organizer": "Organizer",
+    "map": "Map",
+    "via": "via {{provider}}",
+    "info": "Events from the official DTU event calendar."
+  },
+  "results": {
+    "title": "Results & rankings",
+    "raceResults": "Race results",
+    "standings": "World ranking",
+    "selectRace": "Select race",
+    "rank": "Pos.",
+    "time": "Time",
+    "athlete": "Athlete",
+    "noResultsYet": "No results available for this race yet."
+  },
+  "favorites": {
+    "title": "Favorites",
+    "empty": "No favorites yet.",
+    "hint": "Tap the star icon on athletes or series to collect them here.",
+    "athletes": "Athletes",
+    "series": "Series",
+    "brands": "Brands",
+    "added": "Added to favorites",
+    "removed": "Removed from favorites"
+  },
+  "following": {
+    "title": "Following",
+    "subtitle": "Pick what you want to stay on top of – it powers your \"For you\" feed.",
+    "series": "Series",
+    "brands": "Brands",
+    "athletes": "Athletes",
+    "addAthletes": "Search",
+    "seeAll": "See all",
+    "close": "Close"
+  },
+  "more": {
+    "title": "More",
+    "settings": "Settings",
+    "language": "Language",
+    "languageSystem": "System language",
+    "theme": "Appearance",
+    "themeSystem": "System",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "about": "About TriZone",
+    "aboutText": "TriZone is your app for triathlon news, race calendar and results – swim, bike and run in one place.",
+    "dataSource": "News from public RSS feeds. Race calendar & WTCS world ranking from World Triathlon. Race results are sample data in this version.",
+    "version": "Version"
+  },
+  "onboarding": {
+    "welcomeTitle": "Welcome to TriZone",
+    "welcomeSubtitle": "Your triathlon app: news, race calendar, results and world rankings – swim, bike, run in one place.",
+    "start": "Get started",
+    "skip": "Skip",
+    "continue": "Continue",
+    "finish": "Done",
+    "pickSeriesTitle": "Which series do you follow?",
+    "pickSeriesSubtitle": "Pick your favorite series – we'll highlight them for you.",
+    "pickAthletesTitle": "Who do you follow?",
+    "pickAthletesSubtitle": "Mark athletes you want to keep an eye on.",
+    "selectedCount": "{{count}} selected"
+  },
+  "search": {
+    "placeholder": "Search athletes, races …",
+    "empty": "No matches.",
+    "prompt": "Search for athletes or races.",
+    "athletes": "Athletes",
+    "races": "Races"
+  },
+  "weather": {
+    "title": "Weather",
+    "unavailable": "Forecast only available for the next few days."
+  },
+  "actions": {
+    "share": "Share",
+    "addToCalendar": "Add to calendar",
+    "save": "Save",
+    "saved": "Saved",
+    "savedToast": "Article saved",
+    "unsavedToast": "Removed from saved",
+    "calendarAdded": "Added to calendar",
+    "all": "All",
+    "remind": "Remind me",
+    "reminderOn": "Reminder set",
+    "reminderOff": "Reminder removed",
+    "reminderDenied": "Notifications not allowed",
+    "imRacing": "I'm racing here",
+    "racingAddedToast": "Added to your races",
+    "racingRemovedToast": "Removed from your races"
+  },
+  "myRaces": {
+    "title": "My races",
+    "note": "Pick a main race (🏆) – otherwise the chronologically next one counts.",
+    "main": "Main race",
+    "add": "Add a race",
+    "empty": "No races selected yet. Open a race and tap \"I'm racing here\".",
+    "manageCount": "My races ({{count}})"
+  },
+  "reminder": {
+    "title": "Starting soon: {{name}}",
+    "body": "{{location}} – don't miss it!"
+  },
+  "live": {
+    "title": "Live ticker",
+    "final": "Final results",
+    "liveNow": "LIVE",
+    "noData": "No results yet.",
+    "poweredBy": "Data: raceresult"
+  },
+  "status": {
+    "upcoming": "Upcoming",
+    "live": "Live",
+    "finished": "Finished"
+  },
+  "discipline": {
+    "swim": "Swim",
+    "bike": "Bike",
+    "run": "Run"
+  },
+  "format": {
+    "sprint": "Sprint",
+    "olympic": "Olympic",
+    "middle": "Middle (70.3)",
+    "long": "Long distance",
+    "mixed_relay": "Mixed relay"
+  },
+  "series": {
+    "wtcs": "WTCS",
+    "ironman": "IRONMAN",
+    "ironman703": "IRONMAN 70.3",
+    "pto": "PTO Tour",
+    "t100": "T100",
+    "other": "Other"
+  },
+  "countdown": {
+    "days": "d",
+    "hours": "h",
+    "minutes": "m",
+    "seconds": "s",
+    "soon": "Soon"
+  }
+}
