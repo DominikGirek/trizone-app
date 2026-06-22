@@ -1,27 +1,21 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import * as Clipboard from 'expo-clipboard';
-import * as WebBrowser from 'expo-web-browser';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
+import { CodeCard } from '@/components/CodeCard';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { useToast } from '@/components/Toast';
 import { TopBar } from '@/components/TopBar';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import type { AppLanguage } from '@/i18n';
 import {
   activeCodes,
   codeAthleteName,
-  codeEmoji,
   CODE_CATEGORIES,
   type CodeCategory,
   type DiscountCode,
 } from '@/lib/discountCodes';
-import { formatDate } from '@/lib/format';
-import { haptics } from '@/lib/haptics';
 import { useCodeVotes } from '@/store/codeVotes';
 import { useFavorites } from '@/store/favorites';
 
@@ -35,115 +29,6 @@ function Chip({ label, active, onPress }: { label: string; active: boolean; onPr
         {label}
       </ThemedText>
     </Pressable>
-  );
-}
-
-function CodeCard({ code }: { code: DiscountCode }) {
-  const theme = useTheme();
-  const { t, i18n } = useTranslation();
-  const lang = i18n.language as AppLanguage;
-  const { show } = useToast();
-  const { vote, voteOf } = useCodeVotes();
-  const myVote = voteOf(code.id);
-  const athlete = codeAthleteName(code);
-
-  const daysLeft = code.validUntil ? Math.ceil((+new Date(code.validUntil) - Date.now()) / 86400000) : null;
-  const soon = daysLeft != null && daysLeft <= 14;
-
-  const onCopy = async () => {
-    haptics.light();
-    await Clipboard.setStringAsync(code.code);
-    show(t('deals.copied'), 'checkmark-circle');
-  };
-
-  const onVote = (dir: 'up' | 'down') => {
-    haptics.light();
-    vote(code.id, dir);
-    show(dir === 'up' ? t('deals.thanksUp') : t('deals.thanksDown'), dir === 'up' ? 'checkmark-circle' : 'flag');
-  };
-
-  return (
-    <View style={[styles.card, { borderColor: theme.border, backgroundColor: theme.background }]}>
-      <View style={styles.cardTop}>
-        <ThemedText style={styles.emoji}>{codeEmoji(code)}</ThemedText>
-        <View style={{ flex: 1 }}>
-          <ThemedText type="smallBold" numberOfLines={1}>
-            {code.brand}
-          </ThemedText>
-          <ThemedText style={[styles.deal, { color: theme.primary }]} numberOfLines={2}>
-            {code.deal}
-          </ThemedText>
-          {!!athlete && (
-            <ThemedText type="small" themeColor="textSecondary" numberOfLines={1} style={{ fontSize: 12 }}>
-              🏃 {t('deals.via', { name: athlete })}
-            </ThemedText>
-          )}
-        </View>
-        {(soon || code.validUntil) && (
-          <ThemedText type="small" style={{ color: soon ? theme.primary : theme.textSecondary, fontSize: 11 }}>
-            {soon ? t('deals.endingSoon') : t('deals.validUntil', { date: formatDate(code.validUntil!, lang) })}
-          </ThemedText>
-        )}
-      </View>
-
-      {!!code.description && (
-        <ThemedText type="small" themeColor="textSecondary" numberOfLines={2}>
-          {code.description}
-        </ThemedText>
-      )}
-
-      <View style={styles.actions}>
-        <Pressable
-          onPress={onCopy}
-          style={({ pressed }) => [styles.codePill, { borderColor: theme.primary }, pressed && { opacity: 0.6 }]}>
-          <ThemedText type="smallBold" style={{ color: theme.primary, letterSpacing: 1 }}>
-            {code.code}
-          </ThemedText>
-          <Ionicons name="copy-outline" size={15} color={theme.primary} />
-        </Pressable>
-        <Pressable
-          onPress={() => WebBrowser.openBrowserAsync(code.url)}
-          style={({ pressed }) => [styles.shopBtn, { backgroundColor: theme.primary }, pressed && { opacity: 0.85 }]}>
-          <ThemedText type="smallBold" style={{ color: theme.onPrimary }}>
-            {t('deals.toShop')}
-          </ThemedText>
-          <Ionicons name="open-outline" size={15} color={theme.onPrimary} />
-        </Pressable>
-      </View>
-
-      <View style={styles.footer}>
-        <ThemedText type="small" themeColor="textSecondary" style={styles.ad}>
-          {t('deals.ad')}
-          {code.checkedAt ? ` · ${t('deals.checkedAt', { date: formatDate(code.checkedAt, lang) })}` : ''}
-        </ThemedText>
-        <View style={styles.thumbs}>
-          <Pressable onPress={() => onVote('up')} hitSlop={6} style={styles.thumbBtn}>
-            <Ionicons
-              name={myVote === 'up' ? 'thumbs-up' : 'thumbs-up-outline'}
-              size={15}
-              color={myVote === 'up' ? theme.primary : theme.textSecondary}
-            />
-            {(code.thumbsUp ?? 0) > 0 && (
-              <ThemedText type="small" themeColor="textSecondary" style={styles.thumbCount}>
-                {code.thumbsUp}
-              </ThemedText>
-            )}
-          </Pressable>
-          <Pressable onPress={() => onVote('down')} hitSlop={6} style={styles.thumbBtn}>
-            <Ionicons
-              name={myVote === 'down' ? 'thumbs-down' : 'thumbs-down-outline'}
-              size={15}
-              color={myVote === 'down' ? theme.primary : theme.textSecondary}
-            />
-            {(code.thumbsDown ?? 0) > 0 && (
-              <ThemedText type="small" themeColor="textSecondary" style={styles.thumbCount}>
-                {code.thumbsDown}
-              </ThemedText>
-            )}
-          </Pressable>
-        </View>
-      </View>
-    </View>
   );
 }
 

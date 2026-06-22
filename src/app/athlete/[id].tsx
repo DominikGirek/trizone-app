@@ -6,6 +6,7 @@ import * as WebBrowser from 'expo-web-browser';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
+import { CodeCard } from '@/components/CodeCard';
 import { FavoriteButton } from '@/components/FavoriteButton';
 import { NewsCard } from '@/components/NewsCard';
 import { SeriesTag } from '@/components/SeriesTag';
@@ -17,6 +18,7 @@ import { useTheme } from '@/hooks/use-theme';
 import type { AppLanguage } from '@/i18n';
 import { haptics } from '@/lib/haptics';
 import { countryFlag, formatDate } from '@/lib/format';
+import { codesForAthlete } from '@/lib/discountCodes';
 import { getAthleteById } from '@/services/athletes';
 import { fetchAthleteNews } from '@/services/raceNews';
 import { getAthleteResults } from '@/services/races';
@@ -63,6 +65,7 @@ export default function AthleteScreen() {
   if (athlete.residence) facts.push({ label: t('profile.residence'), value: athlete.residence });
 
   const links = LINK_META.filter((l) => athlete.links?.[l.key]);
+  const codes = codesForAthlete(athlete.id);
   const Header = ({ title }: { title: string }) => (
     <ThemedText type="smallBold" themeColor="textSecondary" style={styles.sectionHeader}>
       {title.toUpperCase()}
@@ -152,6 +155,15 @@ export default function AthleteScreen() {
                 </Pressable>
               ))}
             </View>
+          </>
+        )}
+
+        {codes.length > 0 && (
+          <>
+            <Header title={t('profile.codes')} />
+            {codes.map((c) => (
+              <CodeCard key={c.id} code={c} />
+            ))}
           </>
         )}
 

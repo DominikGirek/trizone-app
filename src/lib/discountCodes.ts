@@ -75,8 +75,8 @@ export const DISCOUNT_CODES: DiscountCode[] = [
   // Schnellerwerden Laufpodcast
   { id: 'dc-dextro-sw', brandId: 'dextro', brand: 'Dextro Energy', code: 'Schnellerwerden15', deal: '15 %', description: 'via Schnellerwerden Laufpodcast', url: 'https://www.dextro-energy.com', category: 'nutrition', checkedAt: '2026-06-19', verified: true },
   // Frodeno Going Mental
-  { id: 'dc-canyon-frodeno', brandId: 'canyon', brand: 'Canyon', code: 'FRODENO5GRAIL', deal: '5 %', description: 'Canyon Grail · via Frodeno Going Mental', url: 'https://www.canyon.com', category: 'bike', checkedAt: '2026-06-19', verified: true },
-  { id: 'dc-pillar-frodeno', brandId: 'pillar', brand: 'PILLAR Performance', code: 'GOINGMENTAL', deal: '15 %', description: 'Erste Bestellung · via Frodeno Going Mental', url: 'https://pillarperformance.shop', category: 'nutrition', checkedAt: '2026-06-19', verified: true },
+  { id: 'dc-canyon-frodeno', brandId: 'canyon', athleteId: 'jan-frodeno', brand: 'Canyon', code: 'FRODENO5GRAIL', deal: '5 %', description: 'Canyon Grail · via Frodeno Going Mental', url: 'https://www.canyon.com', category: 'bike', checkedAt: '2026-06-19', verified: true },
+  { id: 'dc-pillar-frodeno', brandId: 'pillar', athleteId: 'jan-frodeno', brand: 'PILLAR Performance', code: 'GOINGMENTAL', deal: '15 %', description: 'Erste Bestellung · via Frodeno Going Mental', url: 'https://pillarperformance.shop', category: 'nutrition', checkedAt: '2026-06-19', verified: true },
   // Laufen ist einfach (Jan Fitschen)
   { id: 'dc-cep-jan', brandId: 'cep', brand: 'CEP', code: 'JAN20', deal: '20 %', description: 'Kompression · via Laufen ist einfach', url: 'https://www.cepsports.com', category: 'apparel', checkedAt: '2026-06-19', verified: true },
   { id: 'dc-truemotion-jan', brandId: 'truemotion', brand: 'True Motion', code: 'JAN10', deal: '10 %', description: 'Laufschuhe · via Laufen ist einfach', url: 'https://www.truemotion.run', category: 'run', checkedAt: '2026-06-19', verified: true },
@@ -118,4 +118,9 @@ export function activeCodes(now = Date.now()): DiscountCode[] {
   return DISCOUNT_CODES.filter(
     (c) => (!c.validUntil || +new Date(c.validUntil) >= now) && !isHiddenByVotes(c),
   );
+}
+
+/** Active codes tied to a specific athlete (for the athlete profile). */
+export function codesForAthlete(athleteId: string): DiscountCode[] {
+  return activeCodes().filter((c) => c.athleteId === athleteId);
 }
