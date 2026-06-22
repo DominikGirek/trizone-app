@@ -33,6 +33,14 @@ export interface AthleteLinks {
   strava?: string;
 }
 
+export interface AthleteStart {
+  date: string; // ISO (YYYY-MM-DD)
+  event: string;
+  series?: SeriesId;
+  location?: string;
+  url?: string;
+}
+
 export interface Athlete {
   id: string;
   name: string;
@@ -41,6 +49,7 @@ export interface Athlete {
   series: SeriesId[];
   photoUrl?: string;
   bio?: string;
+  upcomingStarts?: AthleteStart[];
   // Curated profile facts — all optional, all from verifiable public sources.
   // Never fabricated; missing fields are simply hidden in the UI.
   birthYear?: number;

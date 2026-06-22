@@ -17,7 +17,7 @@ import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import type { AppLanguage } from '@/i18n';
 import { haptics } from '@/lib/haptics';
-import { countryFlag, formatDate } from '@/lib/format';
+import { countryFlag, formatDate, monthShort } from '@/lib/format';
 import { codesForAthlete } from '@/lib/discountCodes';
 import { getAthleteById } from '@/services/athletes';
 import { fetchAthleteNews } from '@/services/raceNews';
@@ -66,6 +66,9 @@ export default function AthleteScreen() {
 
   const links = LINK_META.filter((l) => athlete.links?.[l.key]);
   const codes = codesForAthlete(athlete.id);
+  const starts = (athlete.upcomingStarts ?? [])
+    .filter((s) => +new Date(s.date) >= Date.now() - 86400000)
+    .sort((a, b) => +new Date(a.date) - +new Date(b.date));
   const Header = ({ title }: { title: string }) => (
     <ThemedText type="smallBold" themeColor="textSecondary" style={styles.sectionHeader}>
       {title.toUpperCase()}
@@ -113,6 +116,42 @@ export default function AthleteScreen() {
                 </View>
               ))}
             </View>
+          </>
+        )}
+
+        {starts.length > 0 && (
+          <>
+            <Header title={t('profile.upcoming')} />
+            {starts.map((s, i) => (
+              <Pressable
+                key={i}
+                onPress={() => s.url && WebBrowser.openBrowserAsync(s.url)}
+                style={({ pressed }) => [
+                  styles.resultRow,
+                  { borderColor: theme.border },
+                  pressed && !!s.url && { backgroundColor: theme.backgroundElement },
+                ]}>
+                <View style={styles.startDate}>
+                  <ThemedText style={[styles.startDay, { color: theme.primary }]}>
+                    {new Date(s.date).getDate()}
+                  </ThemedText>
+                  <ThemedText type="small" themeColor="textSecondary" style={{ fontSize: 10 }}>
+                    {monthShort(new Date(s.date).getMonth(), lang)}
+                  </ThemedText>
+                </View>
+                <View style={{ flex: 1 }}>
+                  <ThemedText type="smallBold" numberOfLines={1}>
+                    {s.event}
+                  </ThemedText>
+                  {!!s.location && (
+                    <ThemedText type="small" themeColor="textSecondary" numberOfLines={1}>
+                      {s.location}
+                    </ThemedText>
+                  )}
+                </View>
+                {s.series && <SeriesTag series={s.series} />}
+              </Pressable>
+            ))}
           </>
         )}
 
@@ -274,6 +313,8 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   position: { fontSize: 18, fontWeight: '800', width: 30 },
+  startDate: { width: 38, alignItems: 'center' },
+  startDay: { fontSize: 18, fontWeight: '800', lineHeight: 22 },
   incomplete: {
     flexDirection: 'row',
     alignItems: 'center',
