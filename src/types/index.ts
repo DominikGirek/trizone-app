@@ -29,6 +29,7 @@ export interface AthleteLinks {
   instagram?: string; // full URL
   youtube?: string;
   website?: string;
+  podcast?: string;
   strava?: string;
 }
 

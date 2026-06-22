@@ -23,6 +23,7 @@ import type { AthleteLinks } from '@/types';
 const LINK_META: { key: keyof AthleteLinks; icon: any; label: string }[] = [
   { key: 'instagram', icon: 'logo-instagram', label: 'Instagram' },
   { key: 'youtube', icon: 'logo-youtube', label: 'YouTube' },
+  { key: 'podcast', icon: 'mic-outline', label: 'Podcast' },
   { key: 'website', icon: 'globe-outline', label: 'Website' },
   { key: 'strava', icon: 'fitness-outline', label: 'Strava' },
 ];
