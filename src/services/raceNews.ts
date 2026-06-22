@@ -21,3 +21,9 @@ export async function fetchRaceNews(query: string): Promise<Article[]> {
     return [];
   }
 }
+
+/** Current news about a specific athlete (name-scoped to the triathlon context). */
+export function fetchAthleteNews(name: string): Promise<Article[]> {
+  if (!name.trim()) return Promise.resolve([]);
+  return fetchRaceNews(`"${name}" Triathlon`);
+}

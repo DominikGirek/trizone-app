@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { FavoriteButton } from '@/components/FavoriteButton';
+import { NewsCard } from '@/components/NewsCard';
 import { SeriesTag } from '@/components/SeriesTag';
 import { EmptyState, LoadingState } from '@/components/States';
 import { ThemedText } from '@/components/themed-text';
@@ -17,6 +18,7 @@ import type { AppLanguage } from '@/i18n';
 import { haptics } from '@/lib/haptics';
 import { countryFlag, formatDate } from '@/lib/format';
 import { getAthleteById } from '@/services/athletes';
+import { fetchAthleteNews } from '@/services/raceNews';
 import { getAthleteResults } from '@/services/races';
 import type { AthleteLinks } from '@/types';
 
@@ -41,6 +43,11 @@ export default function AthleteScreen() {
   const { data: history } = useQuery({
     queryKey: ['athleteResults', id],
     queryFn: () => getAthleteResults(id),
+  });
+  const { data: news } = useQuery({
+    queryKey: ['athleteNews', id],
+    queryFn: () => fetchAthleteNews(athlete!.name),
+    enabled: !!athlete,
   });
 
   if (isLoading) return <LoadingState />;
@@ -170,6 +177,15 @@ export default function AthleteScreen() {
                   </ThemedText>
                 </View>
               </Pressable>
+            ))}
+          </>
+        )}
+
+        {!!news?.length && (
+          <>
+            <Header title={t('profile.news')} />
+            {news.slice(0, 6).map((a) => (
+              <NewsCard key={a.id} article={a} onPress={() => WebBrowser.openBrowserAsync(a.link)} />
             ))}
           </>
         )}
