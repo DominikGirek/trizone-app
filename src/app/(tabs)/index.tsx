@@ -106,17 +106,19 @@ export default function DashboardScreen() {
   const athleteMoment = useMemo(() => {
     if (relevantLive || !athleteNames.length) return null;
     const cutoff = Date.now() - 48 * 3600 * 1000;
-    return (
-      (news ?? []).find((a) => {
-        if (+new Date(a.publishedAt) < cutoff || !RESULT_RE.test(a.title)) return false;
-        const hay = `${a.title} ${a.summary}`.toLowerCase();
-        return athleteNames.some((n) => {
-          const nn = n.toLowerCase();
-          const last = nn.split(/\s+/).pop()!;
-          return hay.includes(nn) || (last.length > 3 && hay.includes(last));
-        });
-      }) ?? null
-    );
+    // Require a followed athlete in the HEADLINE (word-boundary) of a fresh result
+    // story — so the win actually belongs to them, not a body-text mention.
+    const inTitle = (title: string, term: string) =>
+      new RegExp(`\\b${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i').test(title);
+    for (const a of news ?? []) {
+      if (+new Date(a.publishedAt) < cutoff || !RESULT_RE.test(a.title)) continue;
+      const name = athleteNames.find((n) => {
+        const last = n.split(/\s+/).pop()!;
+        return inTitle(a.title, n) || (last.length > 3 && inTitle(a.title, last));
+      });
+      if (name) return { article: a, name };
+    }
+    return null;
   }, [relevantLive, news, athleteNames]);
 
   const nextDays = myNext ? Math.ceil((+new Date(myNext.date) - Date.now()) / 86400000) : null;
@@ -148,7 +150,17 @@ export default function DashboardScreen() {
     const arr = news ?? [];
     let list = arr.filter((a) => a.lang === uiLang);
     if (!list.length) list = arr;
-    return pickForYou(list, { athleteNames, seriesIds, brandIds }, sessionSeed + newsBucket, 3);
+    if (!list.length) return [];
+    // Lead with the freshest article so the top story is always current
+    // (ideally hours old); fill the rest with the personalized mix.
+    const lead = [...list].sort((a, b) => +new Date(b.publishedAt) - +new Date(a.publishedAt))[0];
+    const rest = pickForYou(
+      list.filter((a) => a.id !== lead.id),
+      { athleteNames, seriesIds, brandIds },
+      sessionSeed + newsBucket,
+      2,
+    );
+    return [lead, ...rest];
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [news, uiLang, athleteNames.join('|'), seriesIds.join('|'), brandIds.join('|'), sessionSeed, newsBucket]);
 
@@ -226,24 +238,24 @@ export default function DashboardScreen() {
           renderRaceHero(t('dashboard.raceWeek'))
         ) : athleteMoment ? (
           <Pressable
-            onPress={() => openArticle(athleteMoment.link)}
+            onPress={() => openArticle(athleteMoment.article.link)}
             style={({ pressed }) => [styles.hero, { backgroundColor: theme.primary }, pressed && { opacity: 0.9 }]}>
             <View style={styles.heroTop}>
-              <Pill label={t('dashboard.athleteMoment')} color={theme.primary} background={theme.onPrimary} />
+              <Pill label={athleteMoment.name} color={theme.primary} background={theme.onPrimary} />
               <Ionicons name="trophy-outline" size={20} color={theme.onPrimary} />
             </View>
             <ThemedText style={[styles.heroName, { color: theme.onPrimary, fontSize: 19 }]} numberOfLines={3}>
-              {athleteMoment.title}
+              {athleteMoment.article.title}
             </ThemedText>
             <ThemedText type="small" style={{ color: theme.onPrimary, opacity: 0.9 }}>
-              {athleteMoment.source} · {timeAgo(athleteMoment.publishedAt, lang)}
+              {athleteMoment.article.source} · {timeAgo(athleteMoment.article.publishedAt, lang)}
             </ThemedText>
           </Pressable>
         ) : myNext ? (
           renderRaceHero(isMain(myNext.id) ? t('dashboard.mainRace') : t('dashboard.myRace'))
         ) : (
           <Pressable
-            onPress={() => router.push('/events')}
+            onPress={() => router.push('/pick-race')}
             style={({ pressed }) => [
               styles.prompt,
               { borderColor: theme.primary, backgroundColor: theme.backgroundElement },

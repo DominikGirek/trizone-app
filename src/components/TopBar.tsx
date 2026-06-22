@@ -66,6 +66,7 @@ const styles = StyleSheet.create({
   actions: { flexDirection: 'row', alignItems: 'center', gap: Spacing.three },
   title: {
     fontSize: 26,
+    lineHeight: 32,
     fontWeight: '800',
     letterSpacing: -0.3,
   },

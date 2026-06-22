@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
     marginTop: Spacing.three,
   },
   temps: { flexDirection: 'row', alignItems: 'baseline', gap: Spacing.one },
-  tempMax: { fontSize: 26, fontWeight: '800' },
+  tempMax: { fontSize: 26, lineHeight: 32, fontWeight: '800' },
   wind: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   label: { marginLeft: 'auto', textTransform: 'uppercase', letterSpacing: 0.5 },
 });

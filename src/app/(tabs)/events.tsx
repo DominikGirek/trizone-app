@@ -8,6 +8,7 @@ import { FlatList, Pressable, ScrollView, StyleSheet, View } from 'react-native'
 
 import { LocalEventCard } from '@/components/LocalEventCard';
 import { RaceCard } from '@/components/RaceCard';
+import { ReportNotFound } from '@/components/ReportNotFound';
 import { ListSkeleton } from '@/components/Skeleton';
 import { EmptyState } from '@/components/States';
 import { ThemedText } from '@/components/themed-text';
@@ -212,6 +213,11 @@ export default function EventsScreen() {
             )
           }
           ListEmptyComponent={<EmptyState icon="calendar-outline" message={t('events.empty')} />}
+          ListFooterComponent={
+            <View style={styles.listFooter}>
+              <ReportNotFound type="race" />
+            </View>
+          }
           contentContainerStyle={list.length ? undefined : styles.empty}
         />
       )}
@@ -221,6 +227,7 @@ export default function EventsScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  listFooter: { paddingBottom: Spacing.six },
   kindRow: { flexDirection: 'row', gap: Spacing.two, paddingHorizontal: Spacing.three, paddingVertical: Spacing.two },
   facetWrap: { height: 38, marginBottom: Spacing.two, overflow: 'hidden' },
   facetScroll: { flexGrow: 0, height: 38 },

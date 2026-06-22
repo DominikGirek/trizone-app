@@ -48,7 +48,7 @@ Beide Stores verlangen eine **öffentliche URL** zur Datenschutzerklärung.
 
 ## Phase 3 — Build-Config (schon erledigt ✅)
 Bereits im Projekt gesetzt:
-- `app.json`: `ios.bundleIdentifier` + `android.package` = `com.trizone.app`
+- `app.json`: `ios.bundleIdentifier` + `android.package` = `app.trizone.mobile`
 - `eas.json`: Profile `preview` (Test) und `production` (Store)
 
 Beim allerersten Build verknüpft EAS das Projekt automatisch (legt eine `projectId` an) — einfach den Anweisungen im Terminal folgen.
@@ -80,7 +80,7 @@ Texte/Keywords/Angaben liegen fertig in [`docs/store-listing.md`](store-listing.
 
 ### Apple — App Store Connect (https://appstoreconnect.apple.com)
 1. „Meine Apps" → **+** → Neue App.
-2. Plattform iOS, Name **TriZone**, Sprache Deutsch, Bundle-ID **com.trizone.app**, SKU z. B. `trizone-001`.
+2. Plattform iOS, Name **TriZone**, Sprache Deutsch, Bundle-ID **app.trizone.mobile**, SKU z. B. `trizone-001`.
 3. Datenschutz-URL eintragen, Kategorie **Sport**, Alter **4+**.
 4. **App-Datenschutz** (Privacy Labels): „Standort – App-Funktionalität, nicht mit Identität verknüpft, kein Tracking"; sonst nichts.
 

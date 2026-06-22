@@ -79,8 +79,9 @@
     "source": "Quelle: Triathlon-Bundesliga (DTU)",
     "live": "Live-Tabelle",
     "external": "offizielle Tabelle",
-    "searchPlaceholder": "Liga oder Verband suchen …",
-    "coverageNote": "Live in der App: Bundesliga, Regionalliga Nord, SHTU. Weitere Verbände öffnen ihre offizielle Tabelle."
+    "searchPlaceholder": "Liga, Verband oder Team suchen …",
+    "teamMatch": "Team: {{team}}",
+    "coverageNote": "Live in der App: Bundesliga, Regionalliga Nord, SHTU. Weitere Verbände öffnen ihre offizielle Tabelle. Team-Suche deckt die live lesbaren Ligen ab."
   },
   "dashboard": {
     "liveNow": "Jetzt live",
@@ -214,7 +215,13 @@
     "pickSeriesSubtitle": "Wähle deine Lieblingsserien – wir heben sie für dich hervor.",
     "pickAthletesTitle": "Wem folgst du?",
     "pickAthletesSubtitle": "Markiere Athlet:innen, die du im Blick behalten willst.",
-    "selectedCount": "{{count}} ausgewählt"
+    "selectedCount": "{{count}} ausgewählt",
+    "searchAthletes": "Athlet:in suchen …",
+    "noResults": "Keine Treffer für „{{query}}“",
+    "athleteNotFoundTitle": "Athlet:in nicht gefunden?",
+    "athleteNotFoundHint": "Melde sie uns – wir pflegen sie ein.",
+    "reportSubject": "Athlet:in-Vorschlag für TriZone",
+    "reportBody": "Hi TriZone-Team,\n\nbitte nehmt folgende:n Athlet:in auf:\n\nName: {{name}}\nWeitere Infos (Land, Disziplin): \n\nDanke!"
   },
   "search": {
     "placeholder": "Athlet:innen, Rennen suchen …",
@@ -250,7 +257,55 @@
     "main": "Hauptrennen",
     "add": "Rennen hinzufügen",
     "empty": "Noch keine Rennen ausgewählt. Öffne ein Rennen und tippe „Ich starte hier\".",
-    "manageCount": "Meine Rennen ({{count}})"
+    "manageCount": "Meine Rennen ({{count}})",
+    "pickSearch": "Rennen suchen …",
+    "pickHint": "Tippe dein Zielrennen an – wir merken es dir vor.",
+    "notFoundTitle": "Rennen nicht gefunden?",
+    "notFoundHint": "Melde es uns – wir pflegen es ein."
+  },
+  "report": {
+    "titleGeneral": "Etwas melden",
+    "titleRace": "Rennen melden",
+    "titleAthlete": "Athlet:in melden",
+    "titleBrand": "Marke melden",
+    "subtitleRace": "Sag uns, welches Rennen fehlt – wir pflegen es ein.",
+    "subtitleAthlete": "Sag uns, wer fehlt – wir pflegen die Person ein.",
+    "subtitleBrand": "Sag uns, welche Marke fehlt – wir prüfen sie.",
+    "chooseKind": "Was fehlt?",
+    "kindRace": "Rennen",
+    "kindAthlete": "Athlet:in",
+    "kindBrand": "Marke",
+    "nameRace": "Name des Rennens",
+    "nameAthlete": "Name der Athletin / des Athleten",
+    "nameBrand": "Name der Marke",
+    "link": "Link (optional)",
+    "linkPlaceholder": "z. B. Website oder Ergebnis-Link",
+    "note": "Anmerkung (optional)",
+    "submit": "Absenden",
+    "sent": "Danke! Wir kümmern uns drum.",
+    "error": "Senden fehlgeschlagen – bitte später erneut versuchen.",
+    "nameRequired": "Bitte einen Namen eingeben.",
+    "rowRaceTitle": "Rennen nicht gefunden?",
+    "rowAthleteTitle": "Athlet:in nicht gefunden?",
+    "rowBrandTitle": "Marke nicht gefunden?",
+    "rowGeneralTitle": "Nicht gefunden?",
+    "rowHint": "Melde es uns – wir pflegen es ein."
+  },
+  "profile": {
+    "facts": "Steckbrief",
+    "born": "Geboren",
+    "age": "Alter",
+    "years": "{{count}} Jahre",
+    "height": "Größe",
+    "weight": "Gewicht",
+    "residence": "Wohnort",
+    "series": "Serien",
+    "vita": "Über",
+    "achievements": "Erfolge",
+    "links": "Links & Social",
+    "results": "Renn-Ergebnisse",
+    "incompleteTitle": "Angaben unvollständig?",
+    "incompleteHint": "Schick uns Infos zu diesem Athleten – wir ergänzen sie."
   },
   "reminder": {
     "title": "Bald geht's los: {{name}}",

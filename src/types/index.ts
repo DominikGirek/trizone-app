@@ -25,6 +25,13 @@ export interface Article {
   lang?: 'de' | 'en';
 }
 
+export interface AthleteLinks {
+  instagram?: string; // full URL
+  youtube?: string;
+  website?: string;
+  strava?: string;
+}
+
 export interface Athlete {
   id: string;
   name: string;
@@ -33,6 +40,14 @@ export interface Athlete {
   series: SeriesId[];
   photoUrl?: string;
   bio?: string;
+  // Curated profile facts — all optional, all from verifiable public sources.
+  // Never fabricated; missing fields are simply hidden in the UI.
+  birthYear?: number;
+  heightCm?: number;
+  weightKg?: number;
+  residence?: string;
+  achievements?: string[];
+  links?: AthleteLinks;
 }
 
 /** A scheduled or finished race in the calendar. */

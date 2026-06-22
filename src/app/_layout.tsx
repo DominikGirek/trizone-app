@@ -37,11 +37,14 @@ function NavigationStack() {
           headerTintColor: colors.primary,
           headerTitleStyle: { color: colors.text },
           contentStyle: { backgroundColor: colors.background },
+          headerBackButtonDisplayMode: 'minimal',
         }}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="onboarding" options={{ headerShown: false, animation: 'fade' }} />
         <Stack.Screen name="news" options={{ title: '', headerBackTitle: '' }} />
         <Stack.Screen name="search" options={{ headerShown: false, presentation: 'modal' }} />
+        <Stack.Screen name="pick-race" options={{ headerShown: false, presentation: 'modal' }} />
+        <Stack.Screen name="report" options={{ headerShown: false, presentation: 'modal' }} />
         <Stack.Screen name="following" options={{ headerShown: false, presentation: 'modal' }} />
         <Stack.Screen name="my-races" options={{ headerShown: false, presentation: 'modal' }} />
         <Stack.Screen name="event/[id]" options={{ title: '', headerBackTitle: '' }} />

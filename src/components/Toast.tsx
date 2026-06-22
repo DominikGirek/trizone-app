@@ -13,6 +13,7 @@ type ToastIcon =
   | 'bookmark'
   | 'bookmark-outline'
   | 'checkmark-circle'
+  | 'alert-circle'
   | 'flag'
   | 'flag-outline';
 

@@ -9,7 +9,7 @@
 ## Deutsch
 
 **Verantwortlich:** Dominik Girek, Europaplatz 10, 46399 Bocholt, kontakt@trizone.app
-**Stand:** 20. Juni 2026
+**Stand:** 22. Juni 2026
 
 TriZone ist eine Triathlon-App (News, Rennkalender, Weltranglisten, Live-Ticker). Wir legen Wert auf Datensparsamkeit.
 
@@ -30,6 +30,9 @@ Renn-Erinnerungen sind **lokale** Benachrichtigungen, die auf deinem Gerät gepl
 ### Inhalte von Drittanbietern
 Zum Laden von Inhalten ruft die App Dienste Dritter auf: World Triathlon (triathlon.org), DTU-Kalender (dtu-kalender.de), raceresult (my.raceresult.com), racepedia (racepedia.de), open-meteo.com, öffentliche RSS-Feeds (u. a. tri-mag.de, tri2b.com, tri247.com) sowie externe Links im In-App-Browser. Diese Anbieter erhalten technisch bedingt deine IP-Adresse und unterliegen ihren eigenen Datenschutzbestimmungen.
 
+### Melde-Formular
+Wenn du über die „Melden"-Funktion ein fehlendes Rennen, eine Athlet:in oder eine Marke meldest, werden die von dir eingegebenen Angaben (Name sowie optional Link und Anmerkung) über den Dienstleister **Web3Forms** (web3forms.com) per E-Mail an uns übermittelt. Dabei wird technisch bedingt deine IP-Adresse an diesen Anbieter übertragen. Die Nutzung ist freiwillig.
+
 ### Deine Rechte / Löschung
 Da wir keine personenbezogenen Daten speichern, genügt zum Löschen aller lokalen Daten das Deinstallieren der App. Bei Fragen: kontakt@trizone.app.
 
@@ -38,7 +41,7 @@ Da wir keine personenbezogenen Daten speichern, genügt zum Löschen aller lokal
 ## English
 
 **Controller:** Dominik Girek, Europaplatz 10, 46399 Bocholt, Germany, kontakt@trizone.app
-**Last updated:** 20 June 2026
+**Last updated:** 22 June 2026
 
 TriZone is a triathlon app (news, race calendar, world rankings, live ticker). We are committed to data minimization.
 
@@ -58,6 +61,9 @@ Race reminders are **local** notifications scheduled on your device. There is no
 
 ### Third-party content
 To load content the app calls third-party services: World Triathlon (triathlon.org), the DTU calendar (dtu-kalender.de), raceresult (my.raceresult.com), racepedia (racepedia.de), open-meteo.com, public RSS feeds (incl. tri-mag.de, tri2b.com, tri247.com) and external links opened in the in-app browser. These providers necessarily receive your IP address and are subject to their own privacy policies.
+
+### Report form
+If you use the "Report" feature to tell us about a missing race, athlete or brand, the details you enter (name plus optional link and note) are sent to us by e-mail via the processor **Web3Forms** (web3forms.com). Your IP address is necessarily transmitted to this provider. Use is voluntary.
 
 ### Your rights / deletion
 Since we store no personal data, uninstalling the app removes all local data. Questions: kontakt@trizone.app.

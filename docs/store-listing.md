@@ -6,9 +6,11 @@ Frei anpassbar. `[…]` = noch ausfüllen.
 ---
 
 ## Eckdaten
-- **Name:** TriZone
+- **Name (App Store, öffentlich):** TriZone – Triathlon Hub  *(„TriZone" allein ist im App Store vergeben)*
+- **Interner/Marken-Name:** TriZone
+- **ASC App ID:** 6782834855 · **Bundle/Package:** `app.trizone.mobile`
 - **Kategorie:** Sport
-- **Bundle ID / Package:** `com.trizone.app`
+- **Bundle ID / Package:** `app.trizone.mobile`
 - **Altersfreigabe:** 4+ / USK 0 (keine bedenklichen Inhalte)
 - **Preis:** kostenlos
 - **Datenschutz-URL:** https://trizone.app/datenschutz
@@ -87,7 +89,7 @@ eas submit -p android          # → Play Console (interner Test → Produktion)
 ## Pre-Submission-Checkliste
 - [ ] Apple Developer Program aktiv (99 $/J) · Google Play Developer (25 $ einmalig)
 - [ ] Datenschutz-URL live + in beiden Konsolen eingetragen
-- [ ] App-Records angelegt (Name, Bundle ID `com.trizone.app` / Package)
+- [ ] App-Records angelegt (Name, Bundle ID `app.trizone.mobile` / Package)
 - [ ] Screenshots + (Android) Feature-Grafik hochgeladen
 - [ ] Privacy Labels / Data Safety ausgefüllt (siehe oben)
 - [ ] Auf echtem Gerät getestet (preview-Build / TestFlight): News lädt, Standort-Abfrage, „Ich starte hier"→Countdown, Live-Ticker, Sprache DE/EN

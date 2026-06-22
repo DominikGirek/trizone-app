@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { ReportNotFound } from '@/components/ReportNotFound';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
@@ -131,6 +132,7 @@ export default function FollowingScreen() {
             />
           ))}
         </View>
+        <ReportNotFound type="brand" />
 
         <ThemedText type="smallBold" themeColor="textSecondary" style={styles.section}>
           {t('following.athletes').toUpperCase()}
@@ -154,6 +156,7 @@ export default function FollowingScreen() {
             </ThemedText>
           </Pressable>
         </View>
+        <ReportNotFound type="athlete" />
       </ScrollView>
 
       <View style={[styles.footer, { paddingBottom: insets.bottom + Spacing.two, borderColor: theme.border }]}>

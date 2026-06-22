@@ -11,7 +11,7 @@ import { EmptyState } from '@/components/States';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { getAllLeagues, type LeagueEntry } from '@/services/leagues';
+import { getAllLeagues, leaguesMatchingTeam, type LeagueEntry } from '@/services/leagues';
 
 const GROUP_ORDER = [
   '1. Bundesliga',
@@ -25,7 +25,7 @@ const GROUP_ORDER = [
   'Weitere',
 ];
 
-function LeagueRow({ item }: { item: LeagueEntry }) {
+function LeagueRow({ item, matchedTeam }: { item: LeagueEntry; matchedTeam?: string }) {
   const theme = useTheme();
   const { t } = useTranslation();
 
@@ -46,11 +46,17 @@ function LeagueRow({ item }: { item: LeagueEntry }) {
         <ThemedText type="smallBold" numberOfLines={1}>
           {item.name}
         </ThemedText>
-        <ThemedText
-          type="small"
-          style={{ color: item.live ? theme.success : theme.textSecondary, fontSize: 11 }}>
-          {item.live ? `● ${t('league.live')}` : `↗ ${t('league.external')}`}
-        </ThemedText>
+        {matchedTeam ? (
+          <ThemedText type="small" numberOfLines={1} style={{ color: theme.primary, fontSize: 11 }}>
+            {t('league.teamMatch', { team: matchedTeam })}
+          </ThemedText>
+        ) : (
+          <ThemedText
+            type="small"
+            style={{ color: item.live ? theme.success : theme.textSecondary, fontSize: 11 }}>
+            {item.live ? `● ${t('league.live')}` : `↗ ${t('league.external')}`}
+          </ThemedText>
+        )}
       </View>
       <Ionicons
         name={item.live ? 'chevron-forward' : 'open-outline'}
@@ -68,9 +74,12 @@ export function LeagueView() {
 
   const { data: leagues, isLoading } = useQuery({ queryKey: ['allLeagues'], queryFn: getAllLeagues });
 
+  const teamMatches = useMemo(() => leaguesMatchingTeam(query), [query]);
   const sections = useMemo(() => {
     const q = query.trim().toLowerCase();
-    const filtered = (leagues ?? []).filter((l) => !q || l.name.toLowerCase().includes(q));
+    const filtered = (leagues ?? []).filter(
+      (l) => !q || l.name.toLowerCase().includes(q) || (!!l.divisionGuid && teamMatches.has(l.divisionGuid)),
+    );
     const byGroup = new Map<string, LeagueEntry[]>();
     for (const l of filtered) {
       if (!byGroup.has(l.group)) byGroup.set(l.group, []);
@@ -83,7 +92,7 @@ export function LeagueView() {
         return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
       })
       .map(([title, data]) => ({ title, data }));
-  }, [leagues, query]);
+  }, [leagues, query, teamMatches]);
 
   if (isLoading) return <ListSkeleton count={10} />;
 
@@ -111,7 +120,9 @@ export function LeagueView() {
             {section.title.toUpperCase()}
           </ThemedText>
         )}
-        renderItem={({ item }) => <LeagueRow item={item} />}
+        renderItem={({ item }) => (
+          <LeagueRow item={item} matchedTeam={item.divisionGuid ? teamMatches.get(item.divisionGuid) : undefined} />
+        )}
         ListEmptyComponent={<EmptyState icon="search-outline" message={t('search.empty')} />}
         ListFooterComponent={
           <ThemedText type="small" themeColor="textSecondary" style={styles.note}>

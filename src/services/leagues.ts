@@ -1,3 +1,4 @@
+import teamIndexData from '@/data/teamIndex.json';
 import { eventStatusFromDate } from '@/lib/format';
 
 /**
@@ -94,6 +95,29 @@ export async function getAllLeagues(): Promise<LeagueEntry[]> {
     // ignore — link leagues still provide coverage
   }
   return [...live, ...LINK_LEAGUES];
+}
+
+// --- Team → league index (bundled snapshot from scripts/ingest-teams.mjs) ---
+// Lets the leagues search match a TEAM/town (e.g. "Bonn") and surface every
+// readable league that team competes in. Coverage = live it4sport leagues only.
+
+interface TeamIndex {
+  generatedAt: string;
+  leagues: { id: string; divisionGuid: string; name: string; teams: string[] }[];
+}
+
+const TEAM_INDEX = teamIndexData as TeamIndex;
+
+/** Map of divisionGuid → first matching team name, for the given query. */
+export function leaguesMatchingTeam(query: string): Map<string, string> {
+  const out = new Map<string, string>();
+  const q = query.trim().toLowerCase();
+  if (q.length < 2) return out;
+  for (const l of TEAM_INDEX.leagues) {
+    const hit = l.teams.find((tm) => tm.toLowerCase().includes(q));
+    if (hit) out.set(l.divisionGuid, hit);
+  }
+  return out;
 }
 
 // --- Live league detail (DTU it4sport) ---

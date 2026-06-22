@@ -2,7 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
@@ -29,6 +29,18 @@ export default function OnboardingScreen() {
   const [step, setStep] = useState(0);
   const [series, setSeries] = useState<Set<string>>(new Set());
   const [picked, setPicked] = useState<Set<string>>(new Set());
+  const [query, setQuery] = useState('');
+
+  const filteredAthletes = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return athletes;
+    return athletes.filter((a) => a.name.toLowerCase().includes(q));
+  }, [query]);
+
+  const reportAthlete = () => {
+    haptics.light();
+    router.push({ pathname: '/report', params: { type: 'athlete', prefill: query.trim() } });
+  };
 
   const toggle = (set: Set<string>, value: string, setter: (s: Set<string>) => void) => {
     haptics.selection();
@@ -127,13 +139,37 @@ export default function OnboardingScreen() {
       )}
 
       {step === 2 && (
-        <ScrollView contentContainerStyle={styles.body}>
-          <ThemedText style={styles.title}>{t('onboarding.pickAthletesTitle')}</ThemedText>
+        <View style={styles.athleteStep}>
+          <ThemedText style={[styles.title, styles.athleteTitle]}>{t('onboarding.pickAthletesTitle')}</ThemedText>
           <ThemedText type="small" themeColor="textSecondary" style={styles.subtitle}>
             {t('onboarding.pickAthletesSubtitle')}
           </ThemedText>
-          <View style={styles.athleteList}>
-            {athletes.map((a) => {
+
+          <View style={[styles.search, { backgroundColor: theme.backgroundElement, borderColor: theme.border }]}>
+            <Ionicons name="search" size={18} color={theme.textSecondary} />
+            <TextInput
+              value={query}
+              onChangeText={setQuery}
+              placeholder={t('onboarding.searchAthletes')}
+              placeholderTextColor={theme.textSecondary}
+              style={[styles.searchInput, { color: theme.text }]}
+              autoCorrect={false}
+              autoCapitalize="words"
+              returnKeyType="search"
+            />
+            {query.length > 0 && (
+              <Pressable onPress={() => setQuery('')} hitSlop={8}>
+                <Ionicons name="close-circle" size={18} color={theme.textSecondary} />
+              </Pressable>
+            )}
+          </View>
+
+          <ScrollView
+            style={{ flex: 1 }}
+            contentContainerStyle={styles.athleteList}
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode="on-drag">
+            {filteredAthletes.map((a) => {
               const active = picked.has(a.id);
               return (
                 <Pressable
@@ -158,8 +194,27 @@ export default function OnboardingScreen() {
                 </Pressable>
               );
             })}
-          </View>
-        </ScrollView>
+
+            {filteredAthletes.length === 0 && (
+              <ThemedText type="small" themeColor="textSecondary" style={styles.noResults}>
+                {t('onboarding.noResults', { query: query.trim() })}
+              </ThemedText>
+            )}
+
+            <Pressable
+              onPress={reportAthlete}
+              style={[styles.notFound, { borderColor: theme.border }]}>
+              <Ionicons name="add-circle-outline" size={22} color={theme.primary} />
+              <View style={{ flex: 1 }}>
+                <ThemedText type="smallBold">{t('onboarding.athleteNotFoundTitle')}</ThemedText>
+                <ThemedText type="small" themeColor="textSecondary">
+                  {t('onboarding.athleteNotFoundHint')}
+                </ThemedText>
+              </View>
+              <Ionicons name="mail-outline" size={18} color={theme.textSecondary} />
+            </Pressable>
+          </ScrollView>
+        </View>
       )}
 
       <View style={[styles.footer, { paddingBottom: insets.bottom + Spacing.three }]}>
@@ -189,7 +244,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.three,
   },
   body: { paddingTop: Spacing.five, gap: Spacing.two, paddingBottom: Spacing.four },
-  title: { fontSize: 28, fontWeight: '800', letterSpacing: -0.5, textAlign: 'center' },
+  title: { fontSize: 28, lineHeight: 36, fontWeight: '800', letterSpacing: -0.5, textAlign: 'center' },
   subtitle: { textAlign: 'center', lineHeight: 20, maxWidth: 340, alignSelf: 'center' },
   chipWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two, marginTop: Spacing.four, justifyContent: 'center' },
   bigChip: {
@@ -198,7 +253,31 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     borderWidth: 1.5,
   },
-  athleteList: { gap: Spacing.two, marginTop: Spacing.three },
+  athleteStep: { flex: 1, paddingTop: Spacing.five },
+  athleteTitle: { marginBottom: Spacing.two },
+  search: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+    paddingHorizontal: Spacing.three,
+    height: 44,
+    borderRadius: 12,
+    borderWidth: 1,
+    marginTop: Spacing.three,
+  },
+  searchInput: { flex: 1, fontSize: 16, paddingVertical: 0 },
+  noResults: { textAlign: 'center', marginTop: Spacing.three },
+  notFound: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.three,
+    padding: Spacing.three,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    marginTop: Spacing.three,
+  },
+  athleteList: { gap: Spacing.two, marginTop: Spacing.three, paddingBottom: Spacing.four },
   athleteCard: {
     flexDirection: 'row',
     alignItems: 'center',

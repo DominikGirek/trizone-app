@@ -1,4 +1,5 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -6,15 +7,21 @@ import { Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { FavoriteButton } from '@/components/FavoriteButton';
+import { ReportNotFound } from '@/components/ReportNotFound';
 import { SeriesTag } from '@/components/SeriesTag';
 import { EmptyState } from '@/components/States';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
+import { useLocation } from '@/hooks/use-location';
 import { useTheme } from '@/hooks/use-theme';
 import { countryFlag } from '@/lib/format';
 import { athletes } from '@/mocks/athletes';
-import { races } from '@/mocks/events';
+import { getAllEvents, type FeedItem } from '@/services/events';
+
+const nameOf = (i: FeedItem) => (i.kind === 'pro' ? i.race.name : i.event.name);
+const placeOf = (i: FeedItem) => (i.kind === 'pro' ? i.race.location : i.event.town);
+const ctryOf = (i: FeedItem) => (i.kind === 'pro' ? i.race.country : i.event.country);
 
 export default function SearchScreen() {
   const { t } = useTranslation();
@@ -22,16 +29,22 @@ export default function SearchScreen() {
   const insets = useSafeAreaInsets();
   const [query, setQuery] = useState('');
 
+  const { coords } = useLocation();
+  const { data: feed } = useQuery({
+    queryKey: ['allEvents', coords?.lat, coords?.lon],
+    queryFn: () => getAllEvents(coords),
+  });
+
   const q = query.trim().toLowerCase();
   const { foundAthletes, foundRaces } = useMemo(() => {
     if (!q) return { foundAthletes: [], foundRaces: [] };
     return {
       foundAthletes: athletes.filter((a) => a.name.toLowerCase().includes(q)),
-      foundRaces: races.filter(
-        (r) => r.name.toLowerCase().includes(q) || r.location.toLowerCase().includes(q),
-      ),
+      foundRaces: (feed ?? [])
+        .filter((i) => `${nameOf(i)} ${placeOf(i) ?? ''} ${ctryOf(i) ?? ''}`.toLowerCase().includes(q))
+        .slice(0, 40),
     };
-  }, [q]);
+  }, [q, feed]);
 
   const hasResults = foundAthletes.length > 0 || foundRaces.length > 0;
 
@@ -39,6 +52,7 @@ export default function SearchScreen() {
     if (router.canGoBack()) router.back();
     router.push(path);
   };
+  const openEvent = (i: FeedItem) => go(i.kind === 'pro' ? `/event/${i.id}` : `/local/${i.id}`);
 
   return (
     <ThemedView style={[styles.container, { paddingTop: insets.top + Spacing.two }]}>
@@ -68,7 +82,11 @@ export default function SearchScreen() {
       {!q ? (
         <EmptyState icon="search-outline" message={t('search.prompt')} />
       ) : !hasResults ? (
-        <EmptyState icon="sad-outline" message={t('search.empty')} />
+        <View style={{ flex: 1 }}>
+          <EmptyState icon="sad-outline" message={t('search.empty')} />
+          <ReportNotFound type="general" prefill={query.trim()} />
+          <View style={{ height: insets.bottom + Spacing.three }} />
+        </View>
       ) : (
         <ScrollView keyboardShouldPersistTaps="handled">
           {foundAthletes.length > 0 && (
@@ -100,10 +118,10 @@ export default function SearchScreen() {
               <ThemedText type="smallBold" themeColor="textSecondary" style={styles.section}>
                 {t('search.races').toUpperCase()}
               </ThemedText>
-              {foundRaces.map((r) => (
+              {foundRaces.map((i) => (
                 <Pressable
-                  key={r.id}
-                  onPress={() => go(`/event/${r.id}`)}
+                  key={`${i.kind}-${i.id}`}
+                  onPress={() => openEvent(i)}
                   style={({ pressed }) => [
                     styles.row,
                     { borderColor: theme.border },
@@ -111,17 +129,24 @@ export default function SearchScreen() {
                   ]}>
                   <View style={{ flex: 1, gap: 2 }}>
                     <ThemedText type="smallBold" numberOfLines={1}>
-                      {r.name}
+                      {nameOf(i)}
                     </ThemedText>
-                    <ThemedText type="small" themeColor="textSecondary">
-                      {countryFlag(r.country)} {r.location}
+                    <ThemedText type="small" themeColor="textSecondary" numberOfLines={1}>
+                      {countryFlag(ctryOf(i))} {placeOf(i)}
                     </ThemedText>
                   </View>
-                  <SeriesTag series={r.series} />
+                  {i.kind === 'pro' && i.race.series ? (
+                    <SeriesTag series={i.race.series} />
+                  ) : i.kind !== 'pro' && i.event.series ? (
+                    <ThemedText type="small" style={{ color: theme.primary, fontWeight: '800', fontSize: 11 }}>
+                      {i.event.series}
+                    </ThemedText>
+                  ) : null}
                 </Pressable>
               ))}
             </>
           )}
+          <ReportNotFound type="general" prefill={query.trim()} />
           <View style={{ height: insets.bottom + Spacing.five }} />
         </ScrollView>
       )}

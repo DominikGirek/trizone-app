@@ -1,0 +1,235 @@
+{
+  "generatedAt": "2026-06-22T10:14:22.369Z",
+  "leagues": [
+    {
+      "id": "dtu:2784739D-3114-499B-9262-84712E6C1F33",
+      "divisionGuid": "2784739D-3114-499B-9262-84712E6C1F33",
+      "name": "1. Triathlon Bundesliga Frauen",
+      "teams": [
+        "Dr. Loges Triathlon Team Lüneburg",
+        "PV Triathlon TG Witten",
+        "SSF Bonn Triathlon TEAM",
+        "Hylo Team Viernheim/Saar",
+        "Triathlon Team Thüringen",
+        "Team SYNERGY",
+        "Dresdner Spitzen Team Mitteldeutschland",
+        "Sparda-Bank Team Hagen",
+        "Tri-Team Freiburg",
+        "Absolute Teamsport KTT 01",
+        "Triathlon Potsdam",
+        "DSW12 Darmstadt",
+        "Team Berlin",
+        "Soprema Team TSV Mannheim"
+      ]
+    },
+    {
+      "id": "dtu:76AA8D5D-1371-4633-ABBD-1D856EBC5A47",
+      "divisionGuid": "76AA8D5D-1371-4633-ABBD-1D856EBC5A47",
+      "name": "1. Triathlon Bundesliga Männer",
+      "teams": [
+        "HYLO Team Saar",
+        "Team Berlin",
+        "VfL Münster REACard Triathlon Team",
+        "METALLART-Team AST Süßen",
+        "Absolute Teamsport KTT 01",
+        "PV Triathlon TG Witten",
+        "TSG 08 Roth / Hubert Schwarz Team",
+        "DSW12 Darmstadt",
+        "Team Weimarer Ingenieure",
+        "Triathlon Team Ratingen 08",
+        "SSF Bonn Triathlon TEAM",
+        "Triathlon Team Münsterland",
+        "Keramundo Team DLC Aachen I",
+        "Sportunion Neckarsulm",
+        "Triathlon Potsdam",
+        "Team Tri Post Trier"
+      ]
+    },
+    {
+      "id": "dtu:CB27F740-E752-4A9E-BF61-133FA164C272",
+      "divisionGuid": "CB27F740-E752-4A9E-BF61-133FA164C272",
+      "name": "2. Bundesliga Nord Frauen",
+      "teams": [
+        "HEIKOTEL Tri Team Hamburg I",
+        "Team Berlin II",
+        "Dresdner Spitzen Team Mitteldeutschland",
+        "Tri-Team Gütersloh",
+        "SG Tri Team Hagen / Geckos Dortmund",
+        "Hannover 96",
+        "Keramundo Team Aachen-Brand",
+        "Team TSV Bargteheide Tri",
+        "Absolute Teamsport KTT 01 II",
+        "SSF Bonn Triathlon TEAM II",
+        "Leifert Induction Tri Team Die Bären Oldenburg",
+        "WEICON Tri Finish Münster",
+        "RIDE Tri Team Düsseldorf",
+        "Triathlon Team Ratingen 08"
+      ]
+    },
+    {
+      "id": "dtu:709A95A0-7B99-469A-8515-4825F87F485D",
+      "divisionGuid": "709A95A0-7B99-469A-8515-4825F87F485D",
+      "name": "2. Bundesliga Nord Männer",
+      "teams": [
+        "Absolute Teamsport KTT 01 II",
+        "Team Weimarer Ingenieure II",
+        "Tri Team Hamburg",
+        "Triathlon Team Münsterland II",
+        "TriStar Oelde I",
+        "SSF Bonn Triathlon TEAM II",
+        "Team TSV Bargteheide Tri",
+        "Dresdner Spitzen Team Mitteldeutschland",
+        "Team B&H Sport-Club Itzehoe",
+        "Team Berlin II",
+        "Tri-Geckos Dortmund I",
+        "Tri-Team Gütersloh",
+        "Keramundo Team DLC Aachen II",
+        "Hannover 96",
+        "Leifert Induction Tri-Team Die Bären Oldenburg"
+      ]
+    },
+    {
+      "id": "dtu:FFF73B3C-ACA3-4630-B4AA-891DCD65F50B",
+      "divisionGuid": "FFF73B3C-ACA3-4630-B4AA-891DCD65F50B",
+      "name": "2. Bundesliga Süd Frauen",
+      "teams": [
+        "Mey Post-SV Tübingen",
+        "SV Würzburg 05",
+        "VfL Münster REACard Triathlon Team",
+        "Tri-Team Freiburg 2",
+        "Eintracht Frankfurt",
+        "mind solutions Team Nikar Heidelberg",
+        "TV 1848 Erlangen",
+        "DSW12 Darmstadt 2",
+        "MRRC München Tri Squad",
+        "TRISTAR Bundesligateam Regensburg",
+        "Team KREUL SSV Forchheim",
+        "LichtBlick-Foto Team ASC Konstanz",
+        "Timeless Planet Viktoria Augsburg",
+        "SRL Triathlon Koblenz",
+        "Team SYNERGY II",
+        "Soprema Team TSV Mannheim II"
+      ]
+    },
+    {
+      "id": "dtu:88C3B2B1-3722-4925-83CF-4201F74C07B7",
+      "divisionGuid": "88C3B2B1-3722-4925-83CF-4201F74C07B7",
+      "name": "2. Bundesliga Süd Männer",
+      "teams": [
+        "MRRC München Tri Squad",
+        "DSW12 Darmstadt 2",
+        "TV 1848 Erlangen",
+        "TWin Neumarkt",
+        "SG Elz/Limbach",
+        "GEALAN Tri TEAM IfL Hof",
+        "REA Card Triathlonteam TuS Griesheim",
+        "Karlsruher Lemminge",
+        "SV Ludwigsburg 08",
+        "SPANNRIT Team TSG Kleinostheim",
+        "MTV Stuttgart 1843",
+        "Tri-Team Freiburg",
+        "Eintracht Frankfurt",
+        "TCEC Intertours Mainz",
+        "SV Würzburg 05",
+        "Team Leo Express Logistik TSV Calw"
+      ]
+    },
+    {
+      "id": "dtu:48E7E14C-EE61-445F-AF90-D989374E3870",
+      "divisionGuid": "48E7E14C-EE61-445F-AF90-D989374E3870",
+      "name": "Triathlon Regionalliga Nord Frauen",
+      "teams": [
+        "Athletico Büdelsdorf",
+        "HEIKOTEL Tri Team Hamburg II",
+        "Team TSV Bargteheide Tri II",
+        "1. TC Oldenburg \"Die Bärinnen\" II",
+        "FC St. Pauli Regionalliga Deerns",
+        "Tri-Sport Lübeck 1. Damen",
+        "Triathlon Team Buxtehude Damen I",
+        "USC Kiel",
+        "SG Triathlon Club Bremen Damen",
+        "Kaifu Tri Team Damen"
+      ]
+    },
+    {
+      "id": "dtu:23260CE7-B68C-44A5-A7F5-54454C9854DA",
+      "divisionGuid": "23260CE7-B68C-44A5-A7F5-54454C9854DA",
+      "name": "Triathlon Regionalliga Nord Männer",
+      "teams": [
+        "ASC Göttingen Triathlon Team",
+        "USC Kiel#richtigBock",
+        "SG TTH-H",
+        "1. TC Oldenburg Die Bären II",
+        "TriVelos Flensburg",
+        "TC FIKO Rostock",
+        "SG Mittelholstein",
+        "Tri-Sport Lübeck Green Energy",
+        "SG Bremer Triathleten",
+        "TriAs Hildesheim",
+        "Team B&H Sport-Club Itzehoe II",
+        "Kaifu Tri Team Herren",
+        "Tri Team Hamburg e.V. II",
+        "SG Tri-Team Unterelbe",
+        "FC St. Pauli Triathlon Herren"
+      ]
+    },
+    {
+      "id": "dtu:5D80F100-966E-4623-B095-7A80CB062D6D",
+      "divisionGuid": "5D80F100-966E-4623-B095-7A80CB062D6D",
+      "name": "SHTU-Landesliga Damen",
+      "teams": [
+        "USC LL Damen",
+        "Team B&H Sport-Club Itzehoe IV",
+        "Tri-Sport Lübeck Golden Girls",
+        "Borener SV",
+        "Team TSV Bargteheide Tri III",
+        "triZack Rostock",
+        "3Maniacs Großhansdorf",
+        "SG Wasserratten Norderstedt Damen",
+        "Tri EMTV Elmshorn Damen"
+      ]
+    },
+    {
+      "id": "dtu:ED57529E-8128-4844-8566-C36AB1C643AD",
+      "divisionGuid": "ED57529E-8128-4844-8566-C36AB1C643AD",
+      "name": "SHTU-Landesliga Herren",
+      "teams": [
+        "TriVelos Flensburg II",
+        "SG Wasserratten Norderstedt Herren",
+        "TG triZack Rostock",
+        "TriTeam Neumünster",
+        "Eckernförder MTV",
+        "Schweriner Jungs",
+        "USC Kiel #BockaufBallern",
+        "Borener SV",
+        "3Maniacs Großhansdorf",
+        "Team B&H Sport-Club Itzehoe V",
+        "Triathlon Club Nord",
+        "Ratzeburger SV Triathlon",
+        "Tri EMTV Elmshorn",
+        "Tri-Sport Lübeck Green Synergy",
+        "Team TSV Bargteheide Tri II"
+      ]
+    },
+    {
+      "id": "dtu:FE692107-8AF2-4B24-BC6B-787672B2738A",
+      "divisionGuid": "FE692107-8AF2-4B24-BC6B-787672B2738A",
+      "name": "SHTU-Landesliga Mixed",
+      "teams": [
+        "Tri-Sport Lübeck Green Hornets",
+        "Spiridon Schleswig 1980 e.V",
+        "Triathlon-Team Südtondern",
+        "Triathlon Dänischer Wohld",
+        "Ratzeburger SV Triathlon Mixed",
+        "Tri Endurance Germany",
+        "TriTeam VfL Oldesloe",
+        "SG Wasserratten Norderstedt Mixed",
+        "Tri-Sport Lübeck Sturmmöwen",
+        "Triathlon-Team Südtondern II",
+        "TC FIKO Rostock Mixed",
+        "Team B&H Sport-Club Itzehoe III",
+        "Eckernförder MTV - Mixed Team"
+      ]
+    }
+  ]
+}

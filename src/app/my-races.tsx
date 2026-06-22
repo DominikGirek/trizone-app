@@ -24,7 +24,7 @@ export default function MyRacesScreen() {
   const sorted = [...races].sort((a, b) => +new Date(a.date) - +new Date(b.date));
   const addRace = () => {
     router.back();
-    router.push('/events');
+    router.push('/pick-race');
   };
 
   return (

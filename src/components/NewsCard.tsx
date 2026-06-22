@@ -1,5 +1,6 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Image } from 'expo-image';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, Share, StyleSheet, View } from 'react-native';
 
@@ -20,6 +21,7 @@ export function NewsCard({ article, onPress }: { article: Article; onPress: () =
   const { isSaved, toggle } = useBookmarks();
   const lang = i18n.language as AppLanguage;
   const saved = isSaved(article.id);
+  const [imgFailed, setImgFailed] = useState(false);
 
   const onSave = () => {
     haptics.light();
@@ -40,10 +42,18 @@ export function NewsCard({ article, onPress }: { article: Article; onPress: () =
         { backgroundColor: theme.background, borderColor: theme.border },
         pressed && { opacity: 0.7 },
       ]}>
-      {article.imageUrl ? (
-        <Image source={{ uri: article.imageUrl }} style={styles.image} contentFit="cover" transition={150} />
+      {article.imageUrl && !imgFailed ? (
+        <Image
+          source={{ uri: article.imageUrl }}
+          style={styles.image}
+          contentFit="cover"
+          transition={150}
+          onError={() => setImgFailed(true)}
+        />
       ) : (
-        <View style={[styles.image, { backgroundColor: theme.backgroundElement }]} />
+        <View style={[styles.image, styles.imageFallback, { backgroundColor: theme.backgroundElement }]}>
+          <Ionicons name="newspaper-outline" size={26} color={theme.textSecondary} />
+        </View>
       )}
       <View style={styles.body}>
         <ThemedText type="smallBold" numberOfLines={3} style={styles.title}>
@@ -89,6 +99,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   image: { width: 96, height: 96, borderRadius: 10 },
+  imageFallback: { alignItems: 'center', justifyContent: 'center' },
   body: { flex: 1, gap: Spacing.one, justifyContent: 'center' },
   title: { fontSize: 15, lineHeight: 20 },
   metaRow: {
