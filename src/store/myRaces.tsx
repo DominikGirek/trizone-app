@@ -30,6 +30,8 @@ interface MyRacesValue {
   toggle: (race: MyRace) => boolean;
   /** Choose the main event, or clear it if the same id is passed again. */
   setMain: (id: string) => void;
+  /** Add the race (if missing) AND make it the main race — in a single update. */
+  setAsMain: (race: MyRace) => void;
   remove: (id: string) => void;
   /** Main race (if set & upcoming), else the soonest upcoming race. */
   next: MyRace | null;
@@ -75,6 +77,11 @@ export function MyRacesProvider({ children }: { children: ReactNode }) {
         return !has;
       },
       setMain: (id) => persist({ races, mainId: mainId === id ? null : id }),
+      setAsMain: (race) =>
+        persist({
+          races: races.some((r) => r.id === race.id) ? races : [...races, race],
+          mainId: race.id,
+        }),
       remove: (id) => persist({ races: races.filter((r) => r.id !== id), mainId: mainId === id ? null : mainId }),
       next: mainFuture ?? upcoming[0] ?? null,
     };

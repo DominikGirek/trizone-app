@@ -29,7 +29,7 @@ export default function PickRaceScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const { coords } = useLocation();
-  const { isRacing, isMain, toggle, setMain } = useMyRaces();
+  const { setAsMain } = useMyRaces();
   const [query, setQuery] = useState('');
 
   const { data: feed } = useQuery({
@@ -66,8 +66,7 @@ export default function PickRaceScreen() {
       location: placeOf(i),
       country: ctryOf(i),
     };
-    if (!isRacing(i.id)) toggle(race);
-    if (!isMain(i.id)) setMain(i.id);
+    setAsMain(race);
     haptics.success();
     router.back();
   };
