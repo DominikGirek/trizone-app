@@ -1,0 +1,44 @@
+name: Ingest events index
+
+# Daily data-pipeline job: re-scans the DTU calendar for finished local events of
+# the last 12 months and refreshes the bundled src/data/eventIndex.json that the
+# app reads (the "Vergangene" tab). Forward-accumulating — see scripts/ingest-events.mjs.
+# This is the GitHub-Actions alternative to a Raspberry Pi: zero hardware, commits
+# straight back into the repo. Other ingests (teams, athlete starts) can copy this.
+
+on:
+  schedule:
+    # ~03:17 UTC daily. Off-peak + non-round on purpose (GitHub delays/queues
+    # popular cron times). Adjust freely.
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+    inputs:
+      window:
+        description: "How many DTU ids to scan back (deeper = more backfill)"
+        required: false
+        default: "600"
+
+# Allow the job to push the refreshed JSON back to the repo.
+permissions:
+  contents: write
+
+concurrency:
+  group: ingest-events
+  cancel-in-progress: false
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      # The ingest script uses only Node built-ins (no deps) → no install step.
+      - name: Refresh event index (DTU)
+        run: node scripts/ingest-events.mjs --window=${{ github.event.inputs.window || '600' }} --months=12
+
+      - name: Commit if event data changed
+        run: node scripts/ci-commit-data.mjs src/data/eventIndex.json "chore(data): refresh event index"
