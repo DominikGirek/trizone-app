@@ -9,7 +9,7 @@ export type RaceFormat =
   | 'long' // full distance
   | 'mixed_relay';
 
-export type SeriesId = 'wtcs' | 'ironman' | 'ironman703' | 'pto' | 't100' | 'other';
+export type SeriesId = 'wtcs' | 'ironman' | 'ironman703' | 'challenge' | 'pto' | 't100' | 'other';
 
 export type Gender = 'men' | 'women';
 

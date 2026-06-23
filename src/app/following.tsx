@@ -16,11 +16,12 @@ import { athletes as ALL_ATHLETES } from '@/mocks/athletes';
 import { useFavorites } from '@/store/favorites';
 import type { FavoriteKind, SeriesId } from '@/types';
 
-const SERIES: SeriesId[] = ['wtcs', 'ironman', 'ironman703', 't100', 'pto'];
+const SERIES: SeriesId[] = ['wtcs', 'ironman', 'ironman703', 'challenge', 't100', 'pto'];
 const SERIES_EMOJI: Record<string, string> = {
   wtcs: '🌍',
   ironman: '🔴',
   ironman703: '🔴',
+  challenge: '🟡',
   t100: '💯',
   pto: '🏆',
   other: '🏁',

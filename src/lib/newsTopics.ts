@@ -38,6 +38,7 @@ const SERIES_KEYWORDS: Record<string, RegExp> = {
   wtcs: /\b(wtcs|world triathlon|world cup|weltcup|olympi|super ?tri)\b/i,
   ironman: /\b(ironman|kona|hawaii)\b/i,
   ironman703: /\b(70\.?3|ironman 70)\b/i,
+  challenge: /\b(datev )?challenge (roth|family|championship|davos|salou|gran ?canaria|sanremo|riccione|sam[oó]rin|walchsee|st[. ]*p[öo]lten|prague|turku|almere|kaiserwinkl|gdynia|geraardsbergen|fortaleza)\b/i,
   t100: /\b(t100|pto)\b/i,
   pto: /\b(pto|t100)\b/i,
 };
@@ -94,7 +95,7 @@ export function affinityTopics(opts: {
   if (opts.athleteNames.length) s.add('pro');
   for (const id of opts.seriesIds) {
     if (id === 'wtcs') s.add('pro');
-    if (id === 'ironman' || id === 'ironman703' || id === 't100' || id === 'pto') s.add('long');
+    if (id === 'ironman' || id === 'ironman703' || id === 'challenge' || id === 't100' || id === 'pto') s.add('long');
   }
   if ((opts.brandIds ?? []).length) s.add('gear');
   return s;

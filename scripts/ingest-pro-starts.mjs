@@ -54,7 +54,7 @@ function parseDate(s) {
 const titleCase = (slug) =>
   slug.split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 // brand-* class → our SeriesId (Challenge has no series enum → none)
-const SERIES_BY_BRAND = { t100: 't100', im: 'ironman', im703: 'ironman703', '703': 'ironman703', pto: 'pto' };
+const SERIES_BY_BRAND = { t100: 't100', im: 'ironman', im703: 'ironman703', '703': 'ironman703', challenge: 'challenge', pto: 'pto' };
 
 // --- Country map from the world rankings (slug → ISO-2) -----------------------
 async function buildCountryMap() {

@@ -86,8 +86,9 @@ function extractRaceDate(text, now) {
 function seriesFromSlug(s) {
   if (/70-?3/.test(s)) return 'ironman703';
   if (/t100/.test(s)) return 't100';
+  if (/challenge/.test(s)) return 'challenge';
   if (/ironman|im-/.test(s)) return 'ironman';
-  return undefined; // Challenge etc. → no series enum
+  return undefined;
 }
 function eventFromSlug(s) {
   const words = s

@@ -17,7 +17,7 @@ import type { Favorite, SeriesId } from '@/types';
 import { useFavorites } from '@/store/favorites';
 import { useSettings } from '@/store/settings';
 
-const SERIES: SeriesId[] = ['wtcs', 'ironman', 'ironman703', 'pto', 't100'];
+const SERIES: SeriesId[] = ['wtcs', 'ironman', 'ironman703', 'challenge', 't100', 'pto'];
 
 export default function OnboardingScreen() {
   const { t } = useTranslation();
