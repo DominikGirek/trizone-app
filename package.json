@@ -56,7 +56,8 @@
     "ingest:teams": "node scripts/ingest-teams.mjs",
     "ingest:codes": "node scripts/ingest-codes.mjs",
     "ingest:pro": "node scripts/ingest-pro-athletes.mjs",
-    "ingest:pro-starts": "node scripts/ingest-pro-starts.mjs"
+    "ingest:pro-starts": "node scripts/ingest-pro-starts.mjs",
+    "ingest:pro-media": "node scripts/ingest-pro-starts-media.mjs"
   },
   "private": true
 }

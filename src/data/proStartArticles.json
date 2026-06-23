@@ -1,0 +1,13 @@
+{
+  "note": "Media pro start-list articles (triathlon.de, tri-mag.de, …). The robot (scripts/ingest-pro-starts-media.mjs) fetches each, matches the article text against our athlete roster (no LLM, full-name match → no false positives), and adds CONFIRMED upcoming starts. These are often EARLIER than the official PTO list (e.g. IRONMAN/Challenge). ADD A SOURCE = one entry: url + event + date (race date, ISO) + optional series/location/confidence (default confirmed).",
+  "articles": [
+    {
+      "url": "https://triathlon.de/blogs/journal/profi-startliste-ironman-frankfurt-2026",
+      "event": "IRONMAN Frankfurt",
+      "date": "2026-06-28",
+      "series": "ironman",
+      "location": "Frankfurt, Deutschland",
+      "confidence": "confirmed"
+    }
+  ]
+}

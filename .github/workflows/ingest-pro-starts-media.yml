@@ -1,0 +1,38 @@
+name: Ingest pro start lists (media articles)
+
+# Weekly: reads the media "Profi-Startliste" articles in src/data/proStartArticles.json
+# (triathlon.de, tri-mag.de, …), matches each article's text against our athlete
+# roster (no LLM) and writes CONFIRMED upcoming starts to src/data/proStartsMedia.json.
+# These are often EARLIER than the official PTO/IRONMAN lists (e.g. IRONMAN Frankfurt).
+# Pure Node built-ins.
+
+on:
+  schedule:
+    # Weekly, Thursdays ~05:07 UTC.
+    - cron: "7 5 * * 4"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ingest-pro-starts-media
+  cancel-in-progress: false
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Harvest media start lists
+        run: node scripts/ingest-pro-starts-media.mjs
+
+      - name: Commit if starts changed
+        run: >-
+          node scripts/ci-commit-data.mjs src/data/proStartsMedia.json
+          "chore(data): refresh media pro start lists"
