@@ -2,6 +2,7 @@
   "note": "URLs the LLM start-list robot has already processed — so each article is sent to the model only ONCE (cost guard). Auto-maintained; do not hand-edit.",
   "seen": [
     "https://triathlon.de/blogs/journal/profi-startliste-ironman-frankfurt-2026",
-    "https://triathlon.de/blogs/journal/showdown-ironman-texas-patrick-langes-saisonstart-im-schlagabtausch-gegen-die-weltelite"
+    "https://triathlon.de/blogs/journal/showdown-ironman-texas-patrick-langes-saisonstart-im-schlagabtausch-gegen-die-weltelite",
+    "https://www.tri2b.com/ironman-frankfurt-profistartliste-veroeffentlicht-stornes-iden-und-ditlev-die-topstars/"
   ]
 }
