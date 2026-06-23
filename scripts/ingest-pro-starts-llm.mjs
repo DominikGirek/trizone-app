@@ -27,14 +27,15 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const FEEDS = resolve(ROOT, 'src/data/proStartFeeds.json');
 const SEEN = resolve(ROOT, 'src/data/llmSeenArticles.json');
 const OUT = resolve(ROOT, 'src/data/proStartsLLM.json');
-const UA = 'Mozilla/5.0 (TriZone-ProRadar; +https://trizone.app)';
+// Realistic browser UA — several magazines (Cloudflare/WordPress) 403 bot UAs.
+const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36';
 
 const KEY = process.env.ANTHROPIC_API_KEY;
 const MODEL = process.env.TRIZONE_LLM_MODEL || 'claude-haiku-4-5-20251001';
 const MAX_LLM_CALLS = Number(process.env.TRIZONE_LLM_MAX_CALLS || 12); // hard cost ceiling / run
 const MAX_ITEMS_PER_FEED = 25;
 const norm = (s) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
-const TITLE_RE = /startliste|start[\s-]?list|startlist|lista de salida|liste de d[ée]part|profi.?(feld|liste|start)|elite (field|start)|starterfeld/i;
+const TITLE_RE = /startliste|start[\s-]?list|startlist|starterfeld|profi.?(feld|liste|start)|elite (field|start|wave)|pro (field|start ?list)|lista de (salida|inscritos)|liste des? (d[ée]part|engag[ée]s)|engag[ée]s|lista di partenza|start ?list/i;
 
 async function get(url, opts = {}) {
   const ctrl = new AbortController();

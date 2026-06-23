@@ -1,6 +1,13 @@
 {
-  "note": "Magazine RSS/Atom feeds the LLM start-list robot (scripts/ingest-pro-starts-llm.mjs) scans for 'start list' articles in ANY language. Direct article URLs (no Google-redirect). ADD A SOURCE = one entry (name + rss + lang). The robot only LLM-processes items whose title looks like a start list and that pass a free pre-filter; extracted athletes are kept only if they match our known pro set (no hallucinated athletes). Needs ANTHROPIC_API_KEY (else the robot no-ops).",
+  "note": "Magazine RSS/Atom feeds the LLM start-list robot (scripts/ingest-pro-starts-llm.mjs) scans for 'start list' articles in ANY language. Direct article URLs (no Google-redirect). ADD A SOURCE = one entry (name + rss + lang). The robot only LLM-processes items whose title looks like a start list and that pass a free pre-filter; extracted athletes are kept only if they match our known pro set (no hallucinated athletes). Needs ANTHROPIC_API_KEY (else the robot no-ops). NOTE: triathlon.de is intentionally NOT here — its start-list tables are parsed for free by ingest-pro-starts-media.mjs. tri247.com blocks bots (403); trimax-magazine.fr / mundotriatlon unreachable — revisit later.",
   "feeds": [
-    { "name": "tri-mag.de", "rss": "https://tri-mag.de/feed/", "lang": "de" }
+    { "name": "tri-mag.de", "rss": "https://tri-mag.de/feed/", "lang": "de" },
+    { "name": "tri2b.com", "rss": "https://www.tri2b.com/feed", "lang": "de" },
+    { "name": "Triathlete", "rss": "https://www.triathlete.com/feed/", "lang": "en" },
+    { "name": "Slowtwitch", "rss": "https://www.slowtwitch.com/feed/", "lang": "en" },
+    { "name": "220 Triathlon", "rss": "https://www.220triathlon.com/feed", "lang": "en" },
+    { "name": "Triathlon Magazine Canada", "rss": "https://triathlonmagazine.ca/feed/", "lang": "en" },
+    { "name": "Triatlón Noticias", "rss": "https://www.triatlonnoticias.com/feed/", "lang": "es" },
+    { "name": "TRIMES", "rss": "https://www.trimes.org/feed/", "lang": "fr" }
   ]
 }
