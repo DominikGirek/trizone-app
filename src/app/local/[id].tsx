@@ -96,7 +96,7 @@ export default function LocalEventScreen() {
     enabled: !!raceQ,
     staleTime: 30 * 60 * 1000,
   });
-  const startKey = event ? raceKey(event.name) : '';
+  const startKey = event ? raceKey(event.name, event.date) : '';
   const { data: startList } = useQuery({
     queryKey: ['startlist', startKey],
     queryFn: () => getRaceStartList(startKey),

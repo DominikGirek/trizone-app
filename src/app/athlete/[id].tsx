@@ -127,7 +127,7 @@ export default function AthleteScreen() {
             {starts.map((s, i) => (
               <Pressable
                 key={i}
-                onPress={() => router.push(`/startlist/${raceKey(s.event)}`)}
+                onPress={() => router.push(`/startlist/${raceKey(s.event, s.date)}`)}
                 style={({ pressed }) => [
                   styles.resultRow,
                   { borderColor: theme.border },
