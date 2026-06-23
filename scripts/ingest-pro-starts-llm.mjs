@@ -1,21 +1,24 @@
 /**
  * Pro start lists ingest — Stage 4 (multi-magazine, multi-language, via LLM).
  *
- * The scalable layer: instead of a parser per magazine, we scan magazine RSS/Atom
- * feeds (proStartFeeds.json, any language) for "start list" articles and let a
- * small LLM (Claude Haiku) extract the field from ANY format/language. Reliability
- * guards so it can't drift or explode:
- *   - NO KEY → no-op (the whole layer is optional).
- *   - Only items whose TITLE looks like a start list, that pass a free pre-filter,
- *     and that we haven't processed before (seen-cache) reach the model.
- *   - Hard ceiling MAX_LLM_CALLS per run; tiny trimmed input; Haiku (cheapest).
- *   - Extracted athletes are kept ONLY if they match an athlete we already have
- *     (curated + WTCS + PTO + media) → no hallucinated/new athletes. This layer
- *     CONFIRMS known pros' starts from foreign-language media earlier; roster
- *     growth stays with the structured robots.
- *   - The race date must be a plausible future date.
- * Cost: a handful of Haiku calls/week → cents. Set a hard spend cap in the
- * Anthropic console as the absolute backstop.
+ * The scalable layer. Two discovery modes feed one extractor:
+ *   A) PER-RACE SEARCH (autonomous): for each upcoming race in the PTO pro-race
+ *      calendar (real name + date), search the open web (DuckDuckGo HTML, direct
+ *      URLs, any language) for its start-list / pro-field article → so the field
+ *      is found even when it's prose, an odd slug, or on a site we don't follow
+ *      (e.g. Challenge Roth's field on triathlon.de/tri-mag/challenge-roth.com).
+ *   B) FEED SCAN: magazine RSS/Atom feeds (proStartFeeds.json) for start-list
+ *      titles.
+ * A small LLM (Claude Haiku) extracts the field from ANY format/language.
+ *
+ * Reliability + cost guards so it can't drift or explode:
+ *   - NO KEY → no-op (optional layer).
+ *   - Only NEW articles (seen-cache) that pass a free pre-filter reach the model;
+ *     hard MAX_LLM_CALLS ceiling/run; trimmed input; Haiku (cheapest).
+ *   - Race + DATE come from the catalog (per-race mode) → never invented.
+ *   - Extracted athletes kept ONLY if already in our roster → no hallucinated/new
+ *     athletes (this layer CONFIRMS known pros' starts early; structured robots
+ *     grow the roster). Set a hard spend cap in the Anthropic console as backstop.
  *
  * Writes src/data/proStartsLLM.json (starts only) + updates llmSeenArticles.json.
  */
@@ -32,10 +35,11 @@ const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (
 
 const KEY = process.env.ANTHROPIC_API_KEY;
 const MODEL = process.env.TRIZONE_LLM_MODEL || 'claude-haiku-4-5-20251001';
-const MAX_LLM_CALLS = Number(process.env.TRIZONE_LLM_MAX_CALLS || 12); // hard cost ceiling / run
-const MAX_ITEMS_PER_FEED = 25;
+const MAX_LLM_CALLS = Number(process.env.TRIZONE_LLM_MAX_CALLS || 16); // hard cost ceiling / run
+const RACE_WINDOW_DAYS = 75; // only search races this close (fields are published near the race)
 const norm = (s) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 const TITLE_RE = /startliste|start[\s-]?list|startlist|starterfeld|profi.?(feld|liste|start)|elite (field|start|wave)|pro (field|start ?list)|lista de (salida|inscritos)|liste des? (d[ée]part|engag[ée]s)|engag[ée]s|lista di partenza|start ?list/i;
+const TRI_DOMAIN = /triathlon|tri-mag|tri2b|challenge-roth|triathlete|slowtwitch|220triathlon|triatlonnoticias|trimes|tri-today|thetriathlete|trimax|ironman/i;
 
 async function get(url, opts = {}) {
   const ctrl = new AbortController();
@@ -62,23 +66,48 @@ async function knownRoster() {
   return map;
 }
 
+// --- Discovery A: upcoming races from the PTO calendar + open-web search --------
+const MONTH = { january: 1, february: 2, march: 3, april: 4, may: 5, june: 6, july: 7, august: 8, september: 9, october: 10, november: 11, december: 12 };
+const SERIES_BY_BRAND = { t100: 't100', im: 'ironman', im703: 'ironman703', '703': 'ironman703', challenge: 'challenge', pto: 'pto' };
+function parseEnDate(s) {
+  const m = s.match(/(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})/);
+  if (!m || !MONTH[m[2].toLowerCase()]) return null;
+  return `${m[3]}-${String(MONTH[m[2].toLowerCase()]).padStart(2, '0')}-${String(+m[1]).padStart(2, '0')}`;
+}
+async function upcomingRaces(now, until) {
+  const html = (await get('https://stats.protriathletes.org/pro-race-calendar')) || '';
+  const races = [];
+  for (const b of html.split(/class="event sortable-item/).slice(1)) {
+    const link = b.match(/href="\/race\/([a-z0-9-]+)\/(\d{4})(?:\/[a-z]+)?">([^<]+)</);
+    const date = parseEnDate((b.match(/col-date[^>]*>([^<]+)</) || [])[1] || '');
+    if (!link || !date) continue;
+    const t = +new Date(date);
+    if (t < now || t > until) continue;
+    races.push({ name: link[3].trim(), year: link[2], date, series: SERIES_BY_BRAND[(b.match(/brand-([a-z0-9]+)/) || [])[1]] });
+  }
+  return races;
+}
+async function ddgUrls(query) {
+  const h = (await get('https://html.duckduckgo.com/html/?q=' + encodeURIComponent(query))) || '';
+  return [...new Set([...h.matchAll(/uddg=([^&"]+)/g)].map((m) => { try { return decodeURIComponent(m[1]); } catch { return ''; } }))]
+    .filter((u) => u && TRI_DOMAIN.test(u) && !/protriathletes|facebook|instagram|youtube/i.test(u));
+}
+
+// --- Feed parsing (Discovery B) ----------------------------------------------
 function feedItems(xml) {
-  const blocks = xml.split(/<(?:item|entry)\b/i).slice(1);
-  return blocks.map((b) => {
-    const title = (b.match(/<title[^>]*>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/title>/i) || [])[1]?.trim() || '';
-    const link =
-      (b.match(/<link[^>]*href="([^"]+)"/i) || [])[1] ||
-      (b.match(/<link>([^<]+)<\/link>/i) || [])[1] || '';
-    return { title, link };
-  });
+  return xml.split(/<(?:item|entry)\b/i).slice(1).map((b) => ({
+    title: (b.match(/<title[^>]*>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/title>/i) || [])[1]?.trim() || '',
+    link: (b.match(/<link[^>]*href="([^"]+)"/i) || [])[1] || (b.match(/<link>([^<]+)<\/link>/i) || [])[1] || '',
+  }));
 }
 
 const stripDate = (raw) => { try { const o = JSON.parse(raw); delete o.generatedAt; return JSON.stringify(o); } catch { return raw; } };
 
-async function extractWithHaiku(text, feedName) {
-  const prompt = `You are given the text of a triathlon article from ${feedName}. If it is a PROFESSIONAL/ELITE start list (a list of pro athletes entered for a specific race), return STRICT JSON:
+async function extractWithHaiku(text, ctx) {
+  const target = ctx ? `This article should cover the race "${ctx.name}" on ${ctx.date}. Extract THAT race's pro start list. ` : '';
+  const prompt = `${target}If the text below is a PROFESSIONAL/ELITE triathlon start list (pros entered for a specific race), return STRICT JSON:
 {"isStartList":true,"race":"<race name>","date":"YYYY-MM-DD or null","series":"ironman|ironman703|challenge|t100|wtcs|null","athletes":[{"name":"First Last","country":"ISO-2 or null","gender":"men|women|null"}]}
-Rules: ELITE/PRO only, never age groupers. Use ONLY names that literally appear in the article — never invent. If it is NOT a pro start list, return {"isStartList":false}. Output JSON only, no prose.
+Rules: ELITE/PRO only, never age groupers. Use ONLY names literally in the text — never invent. If it is NOT a pro start list, return {"isStartList":false}. JSON only.
 
 ARTICLE:
 ${text.slice(0, 8000)}`;
@@ -88,72 +117,77 @@ ${text.slice(0, 8000)}`;
     body: JSON.stringify({ model: MODEL, max_tokens: 1500, messages: [{ role: 'user', content: prompt }] }),
   });
   if (!res.ok) { console.log(`   LLM HTTP ${res.status}`); return null; }
-  const j = await res.json();
-  const raw = (j.content?.[0]?.text || '').replace(/```json|```/g, '').trim();
+  const raw = ((await res.json()).content?.[0]?.text || '').replace(/```json|```/g, '').trim();
   try { return JSON.parse(raw); } catch { return null; }
 }
 
 async function main() {
-  if (!KEY) {
-    console.log('ANTHROPIC_API_KEY not set → LLM start-list layer skipped (optional).');
-    return;
-  }
+  if (!KEY) { console.log('ANTHROPIC_API_KEY not set → LLM start-list layer skipped (optional).'); return; }
   const now = Date.now() - 864e5;
   const until = now + 400 * 864e5;
   const todayISO = new Date(now).toISOString().slice(0, 10);
 
   const roster = await knownRoster();
-  const { feeds } = JSON.parse(await readFile(FEEDS, 'utf8'));
   const seenObj = JSON.parse(await readFile(SEEN, 'utf8').catch(() => '{"seen":[]}'));
   const seen = new Set(seenObj.seen || []);
 
+  // Build the job list: per-race search first (most valuable), then feed scan.
+  const jobs = [];
+  const races = await upcomingRaces(now, now + RACE_WINDOW_DAYS * 864e5);
+  races.sort((a, b) => a.date.localeCompare(b.date));
+  console.log(`Per-race search: ${races.length} races in the next ${RACE_WINDOW_DAYS} days`);
+  for (const race of races) {
+    const urls = await ddgUrls(`${race.name} ${race.year} Startliste start list Profis lista de salida liste de départ`);
+    for (const url of urls.slice(0, 2)) jobs.push({ url: url.split('?')[0], ctx: race });
+  }
+  try {
+    const { feeds } = JSON.parse(await readFile(FEEDS, 'utf8'));
+    for (const feed of feeds) {
+      const xml = await get(feed.rss);
+      if (!xml) continue;
+      for (const it of feedItems(xml).filter((i) => i.link && TITLE_RE.test(i.title)).slice(0, 25)) {
+        jobs.push({ url: it.link.split('?')[0], ctx: null });
+      }
+    }
+  } catch { /* */ }
+
   const starts = {};
   let calls = 0;
-  for (const feed of feeds) {
-    const xml = await get(feed.rss);
-    if (!xml) { console.log(`· ${feed.name}: feed fetch failed`); continue; }
-    const items = feedItems(xml).filter((it) => it.link && TITLE_RE.test(it.title)).slice(0, MAX_ITEMS_PER_FEED);
-    for (const it of items) {
-      const url = it.link.split('?')[0];
-      if (seen.has(url)) continue;
-      if (calls >= MAX_LLM_CALLS) { console.log('· reached MAX_LLM_CALLS, stopping'); break; }
-      const html = await get(url);
-      seen.add(url); // processed once, regardless of outcome
-      if (!html) continue;
-      const text = html.replace(/<script[\s\S]*?<\/script>/gi, ' ').replace(/<style[\s\S]*?<\/style>/gi, ' ').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
-      // free pre-filter: needs a start-list keyword + enough nation codes / names
-      const nocs = (text.match(/\b[A-Z]{3}\b/g) || []).length;
-      if (!TITLE_RE.test(text) && nocs < 12) continue;
+  const processed = new Set();
+  for (const job of jobs) {
+    if (calls >= MAX_LLM_CALLS) { console.log('· reached MAX_LLM_CALLS, stopping'); break; }
+    if (seen.has(job.url) || processed.has(job.url)) continue;
+    processed.add(job.url);
+    const html = await get(job.url);
+    seen.add(job.url); // processed once, regardless of outcome
+    if (!html) continue;
+    const text = html.replace(/<script[\s\S]*?<\/script>/gi, ' ').replace(/<style[\s\S]*?<\/style>/gi, ' ').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+    const nocs = (text.match(/\b[A-Z]{3}\b/g) || []).length;
+    if (!TITLE_RE.test(text) && nocs < 12) continue; // free pre-filter
 
-      calls++;
-      const data = await extractWithHaiku(text, feed.name);
-      if (!data?.isStartList || !Array.isArray(data.athletes)) { console.log(`· ${it.title.slice(0, 50)}: not a start list`); continue; }
-      if (!data.date || data.date < todayISO || +new Date(data.date) > until) { console.log(`· ${data.race}: no plausible future date → skip`); continue; }
-      let kept = 0;
-      for (const a of data.athletes) {
-        const id = roster.get(norm(a.name || ''));
-        if (!id) continue; // only known pros → no hallucinated athletes
-        const list = (starts[id] ??= []);
-        if (list.some((s) => s.event === data.race)) continue;
-        list.push({
-          date: data.date,
-          event: data.race,
-          ...(data.series && data.series !== 'null' ? { series: data.series } : {}),
-          url,
-          confidence: 'confirmed',
-        });
-        kept++;
-      }
-      console.log(`· ${data.race} (${data.date}): ${data.athletes.length} parsed, ${kept} known pros [${feed.name}]`);
+    calls++;
+    const data = await extractWithHaiku(text, job.ctx);
+    if (!data?.isStartList || !Array.isArray(data.athletes)) { console.log(`· ${job.url.slice(0, 55)}: not a start list`); continue; }
+    // catalog date wins in per-race mode (reliable); else the LLM's, validated future
+    const date = job.ctx?.date || data.date;
+    if (!date || date < todayISO || +new Date(date) > until) { console.log(`· ${data.race || job.ctx?.name}: no plausible future date → skip`); continue; }
+    const series = job.ctx?.series || (data.series && data.series !== 'null' ? data.series : undefined);
+    const event = job.ctx?.name || data.race;
+    let kept = 0;
+    for (const a of data.athletes) {
+      const id = roster.get(norm(a.name || ''));
+      if (!id) continue; // only known pros → no hallucinated athletes
+      const list = (starts[id] ??= []);
+      if (list.some((s) => s.date === date)) continue; // one race per athlete per day
+      list.push({ date, event, ...(series ? { series } : {}), url: job.url, confidence: 'confirmed' });
+      kept++;
     }
+    console.log(`· ${event} (${date}): ${data.athletes.length} parsed, ${kept} known pros${job.ctx ? ' [search]' : ' [feed]'}`);
   }
 
-  const out = { generatedAt: new Date().toISOString(), note: 'Pro starts extracted by the LLM robot from multi-language media start-list articles (only athletes already in our roster → no new/hallucinated athletes). confidence confirmed. Merged on top of curated + WTCS + PTO + media.', starts };
-  // write only if content (excluding generatedAt) changed → no noisy commits
+  const out = { generatedAt: new Date().toISOString(), note: 'Pro starts extracted by the LLM robot from per-race web search + multi-language media feeds (only athletes already in our roster → no new/hallucinated athletes). confidence confirmed. Merged on top of curated + WTCS + PTO + media.', starts };
   const prev = await readFile(OUT, 'utf8').catch(() => '');
-  if (stripDate(JSON.stringify({ ...out })) !== stripDate(prev)) {
-    await writeFile(OUT, JSON.stringify(out, null, 2) + '\n');
-  }
+  if (stripDate(JSON.stringify(out)) !== stripDate(prev)) await writeFile(OUT, JSON.stringify(out, null, 2) + '\n');
   await writeFile(SEEN, JSON.stringify({ note: seenObj.note, seen: [...seen] }, null, 2) + '\n');
   const total = Object.values(starts).reduce((n, l) => n + l.length, 0);
   console.log(`\nLLM calls: ${calls}/${MAX_LLM_CALLS}. Wrote ${total} starts for ${Object.keys(starts).length} known pros → ${OUT}`);

@@ -73,7 +73,7 @@ function parseCalendar(html, now, until) {
   const blocks = html.split(/class="event sortable-item/).slice(1);
   const races = [];
   for (const b of blocks) {
-    const link = b.match(/href="\/race\/([a-z0-9-]+)\/(\d{4})\/participants">([^<]+)</);
+    const link = b.match(/href="\/race\/([a-z0-9-]+)\/(\d{4})(?:\/[a-z]+)?">([^<]+)</);
     if (!link) continue;
     const dateRaw = (b.match(/col-date[^>]*>([^<]+)</) || [])[1] || '';
     const date = parseDate(dateRaw);
