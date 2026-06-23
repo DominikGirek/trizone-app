@@ -87,6 +87,20 @@ async function upcomingRaces(now, until) {
   }
   return races;
 }
+
+// Every race shown under Events → "Serien" (IRONMAN / 70.3 / Challenge / T100). We
+// drive discovery off THIS list so the user sees a pro field for all of them, not just
+// the few that happen to be on the PTO calendar.
+async function seriesRaces() {
+  const src = await readFile(resolve(ROOT, 'src/mocks/seriesEvents.ts'), 'utf8').catch(() => '');
+  const SMAP = { 'IRONMAN 70.3': 'ironman703', IRONMAN: 'ironman', Challenge: 'challenge', T100: 't100' };
+  const races = [];
+  for (const m of src.matchAll(/name:\s*'([^']+)'[\s\S]*?series:\s*'([^']+)'[\s\S]*?date:\s*'([^']+)'/g)) {
+    const date = m[3].slice(0, 10);
+    races.push({ name: m[1], year: date.slice(0, 4), date, series: SMAP[m[2]] });
+  }
+  return races;
+}
 // --- Discovery A: race field articles from media sitemaps (direct fetch) --------
 // Open-web SERP scraping (DuckDuckGo/Bing) is blocked from CI datacenter IPs, so we
 // read publishers' sitemaps directly — that DOES work from Actions — and match field
@@ -166,10 +180,19 @@ async function main() {
   const seenObj = JSON.parse(await readFile(SEEN, 'utf8').catch(() => '{"seen":[]}'));
   const seen = new Set(seenObj.seen || []);
 
-  // Build the job list: per-race search first (most valuable), then feed scan.
+  // Build the job list. Race universe = EVERY series-tab race (future-dated) ∪ the PTO
+  // calendar window, deduped by city+year (the series entry wins — our canonical name).
+  // The sitemap match itself is free (no LLM), so attempting all series races is cheap;
+  // only races with a published field article incur a Haiku call.
   const jobs = [];
-  const races = await upcomingRaces(now, now + RACE_WINDOW_DAYS * 864e5);
-  races.sort((a, b) => a.date.localeCompare(b.date));
+  const series = (await seriesRaces()).filter((r) => +new Date(r.date) >= now);
+  const pto = await upcomingRaces(now, now + RACE_WINDOW_DAYS * 864e5);
+  const byKey = new Map();
+  for (const r of [...series, ...pto]) {
+    const k = `${cityTokens(r.name).slice().sort().join('-')}|${r.year}`;
+    if (k !== `|${r.year}` && !byKey.has(k)) byKey.set(k, r);
+  }
+  const races = [...byKey.values()].sort((a, b) => a.date.localeCompare(b.date));
   const articles = await fieldArticles();
   console.log(`Per-race discovery: ${races.length} races · ${articles.length} field-article candidates in sitemaps`);
   for (const race of races) {
