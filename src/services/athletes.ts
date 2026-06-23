@@ -8,53 +8,102 @@ import { athletes, athletesById } from '@/mocks/athletes';
 import { fetchWtAthlete } from '@/services/worldTriathlon';
 import type { Athlete, AthleteLinks, AthleteStart } from '@/types';
 
-const delay = <T>(value: T, ms = 100) =>
-  new Promise<T>((resolve) => setTimeout(() => resolve(value), ms));
-
-// Curated, kept in separate JSONs so the data pipeline (Raspberry Pi) can
-// regenerate them without touching code. Merged onto athletes on read.
-const LINKS = (athleteLinksData as { links: Record<string, AthleteLinks> }).links;
-const STARTS = (athleteStartsData as { starts: Record<string, AthleteStart[]> }).starts;
-
-// Pro athletes auto-ingested from real start lists (WTCS via World Triathlon API,
-// IRONMAN/70.3/Challenge/T100 via protriathletes.org). Merged on TOP of the curated
-// roster — curated ids win, so hand-tuned athletes stay authoritative and new pros
-// appear automatically with full profiles.
 type ProFile = { athletes?: Athlete[]; starts?: Record<string, AthleteStart[]> };
-const PRO_SOURCES = [proAthletesData, proStartsPtoData, proStartsMediaData, proStartsLlmData] as unknown as ProFile[];
+type LinksFile = { links: Record<string, AthleteLinks> };
+type StartsFile = { starts: Record<string, AthleteStart[]> };
 
-// Generated athletes, deduped by id (first source wins; series unioned).
-const genById = new Map<string, Athlete>();
-for (const src of PRO_SOURCES) {
-  for (const a of src.athletes ?? []) {
-    const existing = genById.get(a.id);
-    if (!existing) genById.set(a.id, { ...a });
-    else existing.series = [...new Set([...(existing.series ?? []), ...(a.series ?? [])])];
+// The robots commit fresh data to GitHub; the app fetches those hosted files at runtime
+// so new pro start lists reach already-installed apps WITHOUT a pull or rebuild. Each
+// fetch falls back to the bundled snapshot when offline or on error. Override the host
+// with EXPO_PUBLIC_DATA_URL (e.g. a CDN); defaults to the repo's raw main branch.
+const DATA_BASE =
+  process.env.EXPO_PUBLIC_DATA_URL ||
+  'https://raw.githubusercontent.com/DominikGirek/trizone-app/main/src/data';
+
+async function fetchJson<T>(file: string, fallback: T): Promise<T> {
+  try {
+    const res = await fetch(`${DATA_BASE}/${file}`);
+    if (!res.ok) throw new Error(`${file} ${res.status}`);
+    return (await res.json()) as T;
+  } catch {
+    return fallback; // bundled snapshot
   }
 }
-// Generated upcoming starts, concatenated across sources per athlete.
-const PRO_STARTS: Record<string, AthleteStart[]> = {};
-for (const src of PRO_SOURCES) {
-  for (const [id, list] of Object.entries(src.starts ?? {})) {
-    PRO_STARTS[id] = [...(PRO_STARTS[id] ?? []), ...list];
-  }
+
+interface Merged {
+  allAthletes: Athlete[];
+  allById: Record<string, Athlete>;
+  LINKS: Record<string, AthleteLinks>;
+  STARTS: Record<string, AthleteStart[]>;
+  PRO_STARTS: Record<string, AthleteStart[]>;
 }
 
-const generatedPros = [...genById.values()].filter((p) => !athletesById[p.id]);
-const allAthletes: Athlete[] = [...athletes, ...generatedPros];
-const allById: Record<string, Athlete> = {
-  ...Object.fromEntries(generatedPros.map((a) => [a.id, a])),
-  ...athletesById, // curated wins on id collision
-};
+function build(
+  links: LinksFile,
+  hand: StartsFile,
+  proSources: ProFile[],
+): Merged {
+  // Generated athletes, deduped by id (first source wins; series unioned).
+  const genById = new Map<string, Athlete>();
+  for (const src of proSources) {
+    for (const a of src.athletes ?? []) {
+      const existing = genById.get(a.id);
+      if (!existing) genById.set(a.id, { ...a });
+      else existing.series = [...new Set([...(existing.series ?? []), ...(a.series ?? [])])];
+    }
+  }
+  // Generated upcoming starts, concatenated across sources per athlete.
+  const PRO_STARTS: Record<string, AthleteStart[]> = {};
+  for (const src of proSources) {
+    for (const [id, list] of Object.entries(src.starts ?? {})) {
+      PRO_STARTS[id] = [...(PRO_STARTS[id] ?? []), ...list];
+    }
+  }
+  const generatedPros = [...genById.values()].filter((p) => !athletesById[p.id]);
+  return {
+    allAthletes: [...athletes, ...generatedPros],
+    allById: {
+      ...Object.fromEntries(generatedPros.map((a) => [a.id, a])),
+      ...athletesById, // curated wins on id collision
+    },
+    LINKS: links.links,
+    STARTS: hand.starts,
+    PRO_STARTS,
+  };
+}
 
-function withLinks(athlete: Athlete): Athlete {
-  const links = LINKS[athlete.id];
-  // Merge hand-curated + all generated starts, deduped by DATE — an athlete can't
-  // start two races on the same day, so same date = same race (handles different
-  // event names across sources, e.g. "IRONMAN Frankfurt" vs the official long name).
-  // Priority: hand-curated, then WTCS, PTO, media, LLM (PRO_SOURCES order).
-  const hand = STARTS[athlete.id] ?? [];
-  const gen = PRO_STARTS[athlete.id] ?? [];
+// Instant bundled snapshot (used until the hosted data arrives, and as offline fallback).
+const bundled = build(
+  athleteLinksData as LinksFile,
+  athleteStartsData as StartsFile,
+  [proAthletesData, proStartsPtoData, proStartsMediaData, proStartsLlmData] as unknown as ProFile[],
+);
+
+// Cached merge of the HOSTED data (refreshed hourly).
+let cache: { at: number; data: Merged } | null = null;
+const TTL = 60 * 60 * 1000;
+async function loadMerged(): Promise<Merged> {
+  if (cache && Date.now() - cache.at < TTL) return cache.data;
+  const [links, hand, pro, ptoStarts, mediaStarts, llmStarts] = await Promise.all([
+    fetchJson('athleteLinks.json', athleteLinksData as unknown as LinksFile),
+    fetchJson('athleteStarts.json', athleteStartsData as unknown as StartsFile),
+    fetchJson('proAthletes.json', proAthletesData as unknown as ProFile),
+    fetchJson('proStartsPTO.json', proStartsPtoData as unknown as ProFile),
+    fetchJson('proStartsMedia.json', proStartsMediaData as unknown as ProFile),
+    fetchJson('proStartsLLM.json', proStartsLlmData as unknown as ProFile),
+  ]);
+  const data = build(links, hand, [pro, ptoStarts, mediaStarts, llmStarts]);
+  cache = { at: Date.now(), data };
+  return data;
+}
+
+function withLinks(athlete: Athlete, m: Merged): Athlete {
+  const links = m.LINKS[athlete.id];
+  // Merge hand-curated + all generated starts, deduped by DATE — an athlete can't start
+  // two races on the same day, so same date = same race (handles different event names
+  // across sources). Priority: hand-curated, then WTCS, PTO, media, LLM.
+  const hand = m.STARTS[athlete.id] ?? [];
+  const gen = m.PRO_STARTS[athlete.id] ?? [];
   let starts: AthleteStart[] | undefined;
   if (hand.length || gen.length) {
     const byDate = new Map<string, AthleteStart>();
@@ -69,13 +118,15 @@ function withLinks(athlete: Athlete): Athlete {
   };
 }
 
-export function getAthletes(): Promise<Athlete[]> {
-  return delay(allAthletes.map(withLinks));
+export async function getAthletes(): Promise<Athlete[]> {
+  const m = await loadMerged();
+  return m.allAthletes.map((a) => withLinks(a, m));
 }
 
 export async function getAthleteById(id: string): Promise<Athlete | undefined> {
   // App ids are name slugs (e.g. "patrick-lange"); real World Triathlon ids are numeric.
-  if (allById[id]) return withLinks(allById[id]);
+  const m = await loadMerged();
+  if (m.allById[id]) return withLinks(m.allById[id], m);
   try {
     return await fetchWtAthlete(id);
   } catch {
@@ -83,11 +134,15 @@ export async function getAthleteById(id: string): Promise<Athlete | undefined> {
   }
 }
 
-export function getAthletesByIds(ids: string[]): Promise<Athlete[]> {
-  return delay(
-    ids
-      .map((id) => allById[id])
-      .filter(Boolean)
-      .map((a) => withLinks(a as Athlete)),
-  );
+export async function getAthletesByIds(ids: string[]): Promise<Athlete[]> {
+  const m = await loadMerged();
+  return ids
+    .map((id) => m.allById[id])
+    .filter(Boolean)
+    .map((a) => withLinks(a as Athlete, m));
+}
+
+/** Synchronous bundled snapshot — for placeholderData so lists render instantly. */
+export function bundledAthletes(): Athlete[] {
+  return bundled.allAthletes.map((a) => withLinks(a, bundled));
 }
