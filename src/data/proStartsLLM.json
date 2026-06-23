@@ -1,5 +1,123 @@
 {
-  "generatedAt": "2026-06-23T12:25:23.990Z",
-  "note": "Pro starts extracted by the LLM robot from multi-language media start-list articles (only athletes already in our roster → no new/hallucinated athletes). confidence confirmed. Merged on top of curated + WTCS + PTO + media.",
-  "starts": {}
+  "generatedAt": "2026-06-23T12:57:01.107Z",
+  "note": "Pro starts extracted by the LLM robot from per-race web search + multi-language media feeds (only athletes already in our roster → no new/hallucinated athletes). confidence confirmed. Merged on top of curated + WTCS + PTO + media.",
+  "starts": {
+    "cameron-wurf": [
+      {
+        "date": "2026-06-28",
+        "event": "Ironman Frankfurt",
+        "series": "ironman",
+        "url": "https://www.ironman.com/proseries/races/im-frankfurt/starters-men",
+        "confidence": "confirmed"
+      }
+    ],
+    "gustav-iden": [
+      {
+        "date": "2026-06-28",
+        "event": "Ironman Frankfurt",
+        "series": "ironman",
+        "url": "https://www.ironman.com/proseries/races/im-frankfurt/starters-men",
+        "confidence": "confirmed"
+      }
+    ],
+    "henrik-goesch": [
+      {
+        "date": "2026-06-28",
+        "event": "Ironman Frankfurt",
+        "series": "ironman",
+        "url": "https://www.ironman.com/proseries/races/im-frankfurt/starters-men",
+        "confidence": "confirmed"
+      }
+    ],
+    "jamie-riddle": [
+      {
+        "date": "2026-06-28",
+        "event": "Ironman Frankfurt",
+        "series": "ironman",
+        "url": "https://www.ironman.com/proseries/races/im-frankfurt/starters-men",
+        "confidence": "confirmed"
+      }
+    ],
+    "jan-stratmann": [
+      {
+        "date": "2026-06-28",
+        "event": "Ironman Frankfurt",
+        "series": "ironman",
+        "url": "https://www.ironman.com/proseries/races/im-frankfurt/starters-men",
+        "confidence": "confirmed"
+      }
+    ],
+    "jonas-hoffmann": [
+      {
+        "date": "2026-06-28",
+        "event": "Ironman Frankfurt",
+        "series": "ironman",
+        "url": "https://www.ironman.com/proseries/races/im-frankfurt/starters-men",
+        "confidence": "confirmed"
+      }
+    ],
+    "kacper-stepniak": [
+      {
+        "date": "2026-06-28",
+        "event": "Ironman Frankfurt",
+        "series": "ironman",
+        "url": "https://www.ironman.com/proseries/races/im-frankfurt/starters-men",
+        "confidence": "confirmed"
+      }
+    ],
+    "kieran-lindars": [
+      {
+        "date": "2026-06-28",
+        "event": "Ironman Frankfurt",
+        "series": "ironman",
+        "url": "https://www.ironman.com/proseries/races/im-frankfurt/starters-men",
+        "confidence": "confirmed"
+      }
+    ],
+    "leon-chevalier": [
+      {
+        "date": "2026-06-28",
+        "event": "Ironman Frankfurt",
+        "series": "ironman",
+        "url": "https://www.ironman.com/proseries/races/im-frankfurt/starters-men",
+        "confidence": "confirmed"
+      }
+    ],
+    "mathias-lyngs-petersen": [
+      {
+        "date": "2026-06-28",
+        "event": "Ironman Frankfurt",
+        "series": "ironman",
+        "url": "https://www.ironman.com/proseries/races/im-frankfurt/starters-men",
+        "confidence": "confirmed"
+      }
+    ],
+    "maximilian-sperl": [
+      {
+        "date": "2026-06-28",
+        "event": "Ironman Frankfurt",
+        "series": "ironman",
+        "url": "https://www.ironman.com/proseries/races/im-frankfurt/starters-men",
+        "confidence": "confirmed"
+      }
+    ],
+    "michele-bortolamedi": [
+      {
+        "date": "2026-06-28",
+        "event": "Ironman Frankfurt",
+        "series": "ironman",
+        "url": "https://www.ironman.com/proseries/races/im-frankfurt/starters-men",
+        "confidence": "confirmed"
+      }
+    ],
+    "mikel-txopitea": [
+      {
+        "date": "2026-06-28",
+        "event": "Ironman Frankfurt",
+        "series": "ironman",
+        "url": "https://www.ironman.com/proseries/races/im-frankfurt/starters-men",
+        "confidence": "confirmed"
+      }
+    ]
+  }
 }
