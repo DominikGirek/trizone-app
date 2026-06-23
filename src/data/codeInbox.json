@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-23T09:44:45.574Z",
+  "generatedAt": "2026-06-23T09:48:50.612Z",
   "note": "Code candidates found by the Code-Radar robot. Review and move good ones into src/lib/discountCodes.ts. NOT shown in the app.",
   "candidates": [
     {
@@ -79,6 +79,17 @@
       "date": "2026-06-22",
       "url": "https://radio-rtw.blogs.audiorella.com/71-new-episode",
       "snippet": "W Hörer:in bekommst du 10% Rabatt auf deine Police! Nutze einfach den Code RTW26 beim Checkout. Heutiger Werbepartner ist NordVPN 🌏 Verbessere d",
+      "status": "pending"
+    },
+    {
+      "id": "cand-richie-tobi-inr1saa",
+      "code": "INR1SAA",
+      "source": "Richie & Tobi",
+      "sourceType": "youtube",
+      "episode": "Über 1200€ Ersparnis! | Wir haben ein gebrauchtes Rennrad für unseren Kameramann gekauft",
+      "date": "2026-06-21",
+      "url": "https://youtu.be/d1XUImP-h4A",
+      "snippet": "0 🎥 https://www.insta360.com/sal/x5?utm_term=INR1SAA Unser Affiliate-Code: INR1SAA ⛑️🔒 @Abusgroup ⛑️🔒 Unsere Helme und Fahrradschlösser https://",
       "status": "pending"
     },
     {
@@ -373,6 +384,20 @@
       "date": "2026-05-22",
       "url": "https://enjoyyourbike.podigee.io/200-199-enve-mog-von-andre-und-enve-g-ses-4-5-test-mai-schnee-in-den-alpen",
       "snippet": "jeden Fahrstil und frei von allem, was nicht wesentlich ist. Mit dem CODE ENJOYYOURBIKE-20 spart Ihr 20% auf www.gonso.de ! ## LINKS ZU PRODUKTEN & THEMEN",
+      "status": "pending"
+    },
+    {
+      "id": "cand-santara-tech-tnms4",
+      "code": "TNMS4",
+      "brand": "Maurten",
+      "brandId": "maurten",
+      "percent": 15,
+      "source": "Santara Tech",
+      "sourceType": "youtube",
+      "episode": "TNMP S4 E7 - Olav - Kristian’s VO2Max Testing",
+      "date": "2026-05-09",
+      "url": "https://youtu.be/Ju3sUIs_KwY",
+      "snippet": "e and get 15% off your next purchase on Maurten.com, simply enter the code “TNMS4” at checkout. The code is applicable once per customer, on all",
       "status": "pending"
     },
     {

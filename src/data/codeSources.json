@@ -70,6 +70,10 @@
     { "name": "Sebastian Kienle (YouTube)", "type": "youtube", "youtube": "https://www.youtube.com/@SebastianKienleTriathlete", "athleteId": "sebastian-kienle" },
     { "name": "Daniela Ryf (YouTube)", "type": "youtube", "youtube": "https://www.youtube.com/@danielaryf", "athleteId": "daniela-ryf" },
     { "name": "Global Triathlon Network", "type": "youtube", "youtube": "https://www.youtube.com/@gtn" },
-    { "name": "Global Cycling Network", "type": "youtube", "youtube": "https://www.youtube.com/@gcn" }
+    { "name": "Global Cycling Network", "type": "youtube", "youtube": "https://www.youtube.com/@gcn" },
+    { "name": "Laura Philipp (YouTube)", "type": "youtube", "youtube": "https://www.youtube.com/channel/UCkJ1Sgtqj909kXj_kApY3rA", "athleteId": "laura-philipp" },
+    { "name": "Sam Laidlow (YouTube)", "type": "youtube", "youtube": "https://www.youtube.com/channel/UCP6EsU9T2RykT1quNR5moeg", "athleteId": "sam-laidlow" },
+    { "name": "Richie & Tobi", "type": "youtube", "youtube": "https://www.youtube.com/@RichieTobi" },
+    { "name": "Santara Tech", "type": "youtube", "youtube": "https://www.youtube.com/@SantaraTechnology" }
   ]
 }
