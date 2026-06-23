@@ -1,6 +1,7 @@
 import athleteLinksData from '@/data/athleteLinks.json';
 import athleteStartsData from '@/data/athleteStarts.json';
 import proAthletesData from '@/data/proAthletes.json';
+import proStartsLlmData from '@/data/proStartsLLM.json';
 import proStartsMediaData from '@/data/proStartsMedia.json';
 import proStartsPtoData from '@/data/proStartsPTO.json';
 import { athletes, athletesById } from '@/mocks/athletes';
@@ -20,7 +21,7 @@ const STARTS = (athleteStartsData as { starts: Record<string, AthleteStart[]> })
 // roster — curated ids win, so hand-tuned athletes stay authoritative and new pros
 // appear automatically with full profiles.
 type ProFile = { athletes?: Athlete[]; starts?: Record<string, AthleteStart[]> };
-const PRO_SOURCES = [proAthletesData, proStartsPtoData, proStartsMediaData] as unknown as ProFile[];
+const PRO_SOURCES = [proAthletesData, proStartsPtoData, proStartsMediaData, proStartsLlmData] as unknown as ProFile[];
 
 // Generated athletes, deduped by id (first source wins; series unioned).
 const genById = new Map<string, Athlete>();

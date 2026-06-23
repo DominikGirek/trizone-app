@@ -1,0 +1,47 @@
+name: Ingest pro start lists (LLM, multi-language)
+
+# Weekly: scans magazine RSS/Atom feeds (proStartFeeds.json, any language) for
+# "start list" articles and uses Claude Haiku to extract the pro field from any
+# format/language. Keeps only athletes already in our roster (no hallucinated
+# athletes), confirmed starts. Cost-guarded: only NEW articles that pass a free
+# pre-filter reach the model, hard ceiling per run, Haiku (cheapest). Needs the
+# ANTHROPIC_API_KEY secret — without it the robot no-ops. Set a hard spend cap in
+# the Anthropic console as the absolute backstop.
+
+on:
+  schedule:
+    # Weekly, Fridays ~05:31 UTC.
+    - cron: "31 5 * * 5"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ingest-pro-starts-llm
+  cancel-in-progress: false
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Extract start lists (LLM)
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: node scripts/ingest-pro-starts-llm.mjs
+
+      - name: Commit starts if changed
+        run: >-
+          node scripts/ci-commit-data.mjs src/data/proStartsLLM.json
+          "chore(data): refresh LLM pro start lists"
+
+      - name: Commit processed-URL cache if changed
+        run: >-
+          node scripts/ci-commit-data.mjs src/data/llmSeenArticles.json
+          "chore(data): update LLM seen-articles cache"

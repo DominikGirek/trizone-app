@@ -1,0 +1,4 @@
+{
+  "note": "URLs the LLM start-list robot has already processed — so each article is sent to the model only ONCE (cost guard). Auto-maintained; do not hand-edit.",
+  "seen": []
+}
