@@ -21,6 +21,7 @@ import { mergeRaceNews, newsForRace, raceSearchQuery } from '@/lib/newsTopics';
 import { fetchNews } from '@/services/news';
 import { fetchRaceNews } from '@/services/raceNews';
 import { getLocalEventById, providerLabel } from '@/services/localEvents';
+import { getRaceStartList, raceKey } from '@/services/races';
 import { useMyRaces } from '@/store/myRaces';
 import { useReminders } from '@/store/reminders';
 import type { DistanceOption, LocalEvent } from '@/types';
@@ -95,6 +96,13 @@ export default function LocalEventScreen() {
     enabled: !!raceQ,
     staleTime: 30 * 60 * 1000,
   });
+  const startKey = event ? raceKey(event.name) : '';
+  const { data: startList } = useQuery({
+    queryKey: ['startlist', startKey],
+    queryFn: () => getRaceStartList(startKey),
+    enabled: !!startKey,
+  });
+  const hasStartList = !!startList?.entries.length;
 
   if (isLoading) return <LoadingState />;
   if (!event) return <EmptyState message={t('local.empty')} />;
@@ -231,6 +239,13 @@ export default function LocalEventScreen() {
 
         {/* Secondary actions */}
         <View style={styles.actions}>
+          {hasStartList && (
+            <ActionChip
+              icon="people-outline"
+              label={t('startlist.open')}
+              onPress={() => router.push(`/startlist/${startKey}`)}
+            />
+          )}
           {primary?.label !== t('local.registration') && (event.registrationUrl || event.websiteUrl) && (
             <ActionChip
               icon="create-outline"

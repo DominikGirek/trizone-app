@@ -9,7 +9,6 @@ import { FlatList, Pressable, ScrollView, StyleSheet, View } from 'react-native'
 import { LocalEventCard } from '@/components/LocalEventCard';
 import { RaceCard } from '@/components/RaceCard';
 import { ReportNotFound } from '@/components/ReportNotFound';
-import { SeriesTag } from '@/components/SeriesTag';
 import { ListSkeleton } from '@/components/Skeleton';
 import { EmptyState } from '@/components/States';
 import { ThemedText } from '@/components/themed-text';
@@ -19,9 +18,8 @@ import { Spacing } from '@/constants/theme';
 import { useLocation } from '@/hooks/use-location';
 import { useTheme } from '@/hooks/use-theme';
 import type { AppLanguage } from '@/i18n';
-import { continentOf, countryFlag, formatDate, monthShort, type ContinentCode } from '@/lib/format';
+import { continentOf, countryFlag, monthShort, type ContinentCode } from '@/lib/format';
 import { getAllEvents, type FeedItem } from '@/services/events';
-import { getStartListIndex } from '@/services/races';
 
 type Filter = 'all' | 'near' | 'past' | 'series' | 'pro';
 
@@ -89,10 +87,6 @@ export default function EventsScreen() {
   const { data: items, isLoading } = useQuery({
     queryKey: ['allEvents', coords?.lat, coords?.lon],
     queryFn: () => getAllEvents(coords),
-  });
-  const { data: startLists = [] } = useQuery({
-    queryKey: ['startlist-index'],
-    queryFn: () => getStartListIndex(),
   });
 
   const setKindReset = (k: Filter) => {
@@ -167,40 +161,6 @@ export default function EventsScreen() {
       </View>
     ) : null;
 
-  const listHeader = (
-    <>
-      {(kind === 'all' || kind === 'pro') && startLists.length > 0 && (
-        <View style={styles.finders}>
-          <ThemedText type="smallBold" themeColor="textSecondary" style={styles.startlistTitle}>
-            {t('startlist.title').toUpperCase()}
-          </ThemedText>
-          {startLists.map((r) => (
-            <Pressable
-              key={r.key}
-              onPress={() => router.push(`/startlist/${r.key}`)}
-              style={({ pressed }) => [
-                styles.finder,
-                { borderColor: theme.border },
-                pressed && { backgroundColor: theme.backgroundElement },
-              ]}>
-              <View style={{ flex: 1 }}>
-                <ThemedText type="smallBold" numberOfLines={1}>
-                  {r.name}
-                </ThemedText>
-                <ThemedText type="small" themeColor="textSecondary" style={{ fontSize: 11 }}>
-                  {formatDate(r.date, lang)} · {t('startlist.count', { count: r.count })}
-                </ThemedText>
-              </View>
-              {r.series && <SeriesTag series={r.series} />}
-              <Ionicons name="chevron-forward" size={18} color={theme.primary} />
-            </Pressable>
-          ))}
-        </View>
-      )}
-      {finderHeader}
-    </>
-  );
-
   return (
     <ThemedView style={styles.container}>
       <TopBar title={t('tabs.events')} />
@@ -244,7 +204,7 @@ export default function EventsScreen() {
         <FlatList
           data={list}
           keyExtractor={(item) => `${item.kind}-${item.id}`}
-          ListHeaderComponent={listHeader}
+          ListHeaderComponent={finderHeader}
           renderItem={({ item }) =>
             item.kind === 'pro' ? (
               <RaceCard race={item.race} onPress={() => open(item)} />
@@ -274,7 +234,6 @@ const styles = StyleSheet.create({
   facetRow: { gap: Spacing.two, paddingHorizontal: Spacing.three, alignItems: 'center' },
   chip: { paddingHorizontal: Spacing.three, paddingVertical: Spacing.one + 2, borderRadius: 999 },
   finders: { paddingHorizontal: Spacing.three, paddingTop: Spacing.two, gap: Spacing.two },
-  startlistTitle: { letterSpacing: 0.4, marginTop: Spacing.one },
   finder: {
     flexDirection: 'row',
     alignItems: 'center',
