@@ -132,8 +132,15 @@ function feedItems(xml) {
 const stripDate = (raw) => { try { const o = JSON.parse(raw); delete o.generatedAt; return JSON.stringify(o); } catch { return raw; } };
 
 async function extractWithHaiku(text, ctx) {
-  const target = ctx ? `This article should cover the race "${ctx.name}" on ${ctx.date}. Extract THAT race's pro start list. ` : '';
-  const prompt = `${target}If the text below is a PROFESSIONAL/ELITE triathlon start list (pros entered for a specific race), return STRICT JSON:
+  const prompt = ctx
+    ? `This article is about the PROFESSIONAL field for the triathlon race "${ctx.name}" (${ctx.date}). It may be a formal start list OR a preview/field announcement that names the pros.
+List EVERY professional/elite athlete the article names as racing / starting / entered / confirmed for THIS race. Return STRICT JSON:
+{"isStartList":true,"race":"${ctx.name}","date":"${ctx.date}","series":"ironman|ironman703|challenge|t100|wtcs|null","athletes":[{"name":"First Last","country":"ISO-2 or null","gender":"men|women|null"}]}
+Rules: ELITE/PRO only, never age groupers. Use ONLY full names literally in the text — never invent. INCLUDE someone only if the text says they ARE racing this event; EXCLUDE anyone described as absent, withdrawn, skipping, injured, or named only as a PAST winner. If the article names no pro starters for this race, return {"isStartList":false}. JSON only.
+
+ARTICLE:
+${text.slice(0, 9000)}`
+    : `If the text below is a PROFESSIONAL/ELITE triathlon start list (pros entered for a specific race), return STRICT JSON:
 {"isStartList":true,"race":"<race name>","date":"YYYY-MM-DD or null","series":"ironman|ironman703|challenge|t100|wtcs|null","athletes":[{"name":"First Last","country":"ISO-2 or null","gender":"men|women|null"}]}
 Rules: ELITE/PRO only, never age groupers. Use ONLY names literally in the text — never invent. If it is NOT a pro start list, return {"isStartList":false}. JSON only.
 
@@ -188,7 +195,9 @@ async function main() {
   const processed = new Set();
   for (const job of jobs) {
     if (calls >= MAX_LLM_CALLS) { console.log('· reached MAX_LLM_CALLS, stopping'); break; }
-    if (seen.has(job.url) || processed.has(job.url)) continue;
+    // Feed articles are read once (seen-cache); per-race field articles are re-read
+    // every run so growing fields stay fresh.
+    if (processed.has(job.url) || (seen.has(job.url) && !job.ctx)) continue;
     processed.add(job.url);
     const html = await get(job.url);
     seen.add(job.url); // processed once, regardless of outcome
