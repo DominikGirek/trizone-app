@@ -41,4 +41,6 @@ jobs:
         run: node scripts/ingest-events.mjs --window=${{ github.event.inputs.window || '600' }} --months=12
 
       - name: Commit if event data changed
-        run: node scripts/ci-commit-data.mjs src/data/eventIndex.json "chore(data): refresh event index"
+        run: >-
+          node scripts/ci-commit-data.mjs src/data/eventIndex.json
+          "chore(data): refresh event index"
