@@ -1,0 +1,39 @@
+name: Code-Radar (podcasts)
+
+# Weekly data-pipeline job: scans the podcast watchlist (src/data/codeSources.json)
+# for new discount codes in the latest episodes' shownotes and writes CANDIDATES
+# to a review inbox (src/data/codeInbox.json). It NEVER publishes codes — a human
+# approves good ones into src/lib/discountCodes.ts (a dead code burns trust).
+# Same proven pattern as ingest-events.yml. Add a source = one line in the JSON.
+
+on:
+  schedule:
+    # Weekly, Sundays ~05:23 UTC — new episodes typically drop over the weekend.
+    - cron: "23 5 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ingest-codes
+  cancel-in-progress: false
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      # Pure Node built-ins → no install step.
+      - name: Scan podcasts for new codes
+        run: node scripts/ingest-codes.mjs
+
+      - name: Commit if candidates changed
+        run: >-
+          node scripts/ci-commit-data.mjs src/data/codeInbox.json
+          "chore(data): refresh code-radar inbox"

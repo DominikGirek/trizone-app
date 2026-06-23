@@ -1,0 +1,15 @@
+{
+  "note": "Watchlist for the Code-Radar robot (scripts/ingest-codes.mjs). ADD A SOURCE = ADD ONE ENTRY here. For podcasts you only need `name` (+ optional `athleteId` if it's a pro's own show); the robot auto-resolves the RSS feed via the iTunes lookup. Set `rss` to pin an exact feed, or `country` (default DE) to disambiguate. `type` 'youtube' / 'affiliate' handlers come in later stages — same file, just new entries.",
+  "sources": [
+    { "name": "Pushing Limits Podcast", "type": "podcast" },
+    { "name": "Achilles Running", "type": "podcast" },
+    { "name": "Einer rennt, einer hinterher", "type": "podcast" },
+    { "name": "PACE - der Ausdauerpodcast", "type": "podcast" },
+    { "name": "Schnellerwerden", "type": "podcast" },
+    { "name": "That Triathlon Show", "type": "podcast", "country": "US" },
+    { "name": "The Triathlon Hour", "type": "podcast", "country": "GB" },
+    { "name": "Frodeno Going Mental", "type": "podcast", "athleteId": "jan-frodeno" },
+    { "name": "Laufen ist einfach", "type": "podcast" },
+    { "name": "Auslaufen", "type": "podcast" }
+  ]
+}

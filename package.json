@@ -53,7 +53,8 @@
     "web": "expo start --web",
     "lint": "expo lint",
     "ingest:events": "node scripts/ingest-events.mjs",
-    "ingest:teams": "node scripts/ingest-teams.mjs"
+    "ingest:teams": "node scripts/ingest-teams.mjs",
+    "ingest:codes": "node scripts/ingest-codes.mjs"
   },
   "private": true
 }
