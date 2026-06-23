@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-23T15:58:12.709Z",
+  "generatedAt": "2026-06-23T16:15:47.811Z",
   "note": "Pro starts extracted by the LLM robot from per-race web search + multi-language media feeds (only athletes already in our roster → no new/hallucinated athletes). confidence confirmed. Merged on top of curated + WTCS + PTO + media.",
   "starts": {
     "casper-stornes": [
@@ -243,6 +243,13 @@
         "series": "challenge",
         "url": "https://triathlon.de/blogs/journal/challenge-roth-2026-das-staerkste-profi-feld-aller-zeiten",
         "confidence": "confirmed"
+      },
+      {
+        "date": "2026-10-17",
+        "event": "Challenge Peguera-Mallorca",
+        "series": "challenge",
+        "url": "https://triathlon.de/blogs/journal/challenge-peguera-starterfeld",
+        "confidence": "confirmed"
       }
     ],
     "jasmine-brown": [
@@ -260,6 +267,69 @@
         "event": "DATEV Challenge Roth",
         "series": "challenge",
         "url": "https://triathlon.de/blogs/journal/challenge-roth-2026-das-staerkste-profi-feld-aller-zeiten",
+        "confidence": "confirmed"
+      }
+    ],
+    "niek-heldoorn": [
+      {
+        "date": "2026-10-17",
+        "event": "Challenge Peguera-Mallorca",
+        "series": "challenge",
+        "url": "https://triathlon.de/blogs/journal/challenge-peguera-starterfeld",
+        "confidence": "confirmed"
+      }
+    ],
+    "sam-long": [
+      {
+        "date": "2026-10-17",
+        "event": "Challenge Peguera-Mallorca",
+        "series": "challenge",
+        "url": "https://triathlon.de/blogs/journal/challenge-peguera-starterfeld",
+        "confidence": "confirmed"
+      }
+    ],
+    "william-mennesson": [
+      {
+        "date": "2026-10-17",
+        "event": "Challenge Peguera-Mallorca",
+        "series": "challenge",
+        "url": "https://triathlon.de/blogs/journal/challenge-peguera-starterfeld",
+        "confidence": "confirmed"
+      }
+    ],
+    "imogen-simmonds": [
+      {
+        "date": "2026-10-17",
+        "event": "Challenge Peguera-Mallorca",
+        "series": "challenge",
+        "url": "https://triathlon.de/blogs/journal/challenge-peguera-starterfeld",
+        "confidence": "confirmed"
+      }
+    ],
+    "nicola-spirig": [
+      {
+        "date": "2026-10-17",
+        "event": "Challenge Peguera-Mallorca",
+        "series": "challenge",
+        "url": "https://triathlon.de/blogs/journal/challenge-peguera-starterfeld",
+        "confidence": "confirmed"
+      }
+    ],
+    "sara-perez-sala": [
+      {
+        "date": "2026-10-17",
+        "event": "Challenge Peguera-Mallorca",
+        "series": "challenge",
+        "url": "https://triathlon.de/blogs/journal/challenge-peguera-starterfeld",
+        "confidence": "confirmed"
+      }
+    ],
+    "lucy-byram": [
+      {
+        "date": "2026-10-17",
+        "event": "Challenge Peguera-Mallorca",
+        "series": "challenge",
+        "url": "https://triathlon.de/blogs/journal/challenge-peguera-starterfeld",
         "confidence": "confirmed"
       }
     ]
