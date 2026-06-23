@@ -1,0 +1,44 @@
+name: Ingest pro athletes (WTCS)
+
+# Weekly: reads upcoming WTCS ELITE start lists from the World Triathlon API and
+# refreshes src/data/proAthletes.json — pro athletes (never age groupers) + their
+# upcoming starts, each linking to the official start list. The app merges this on
+# top of the curated roster, so every starter gets a full profile automatically.
+# Other circuits (IRONMAN/70.3/T100/PTO) have JS-rendered start lists → a separate
+# headless-browser robot. Pure Node built-ins → no install step.
+
+on:
+  schedule:
+    # Weekly, Tuesdays ~04:13 UTC (start lists firm up midweek before weekend races).
+    - cron: "13 4 * * 2"
+  workflow_dispatch:
+    inputs:
+      days:
+        description: "How many days ahead to scan for WTCS events"
+        required: false
+        default: "150"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ingest-pro-athletes
+  cancel-in-progress: false
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Refresh pro athlete roster (WTCS)
+        run: node scripts/ingest-pro-athletes.mjs --days=${{ github.event.inputs.days || '150' }}
+
+      - name: Commit if roster changed
+        run: >-
+          node scripts/ci-commit-data.mjs src/data/proAthletes.json
+          "chore(data): refresh pro athlete roster (WTCS)"

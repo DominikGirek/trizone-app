@@ -54,7 +54,8 @@
     "lint": "expo lint",
     "ingest:events": "node scripts/ingest-events.mjs",
     "ingest:teams": "node scripts/ingest-teams.mjs",
-    "ingest:codes": "node scripts/ingest-codes.mjs"
+    "ingest:codes": "node scripts/ingest-codes.mjs",
+    "ingest:pro": "node scripts/ingest-pro-athletes.mjs"
   },
   "private": true
 }
