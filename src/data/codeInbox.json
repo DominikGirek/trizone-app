@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-23T09:03:12.203Z",
+  "generatedAt": "2026-06-23T09:12:04.879Z",
   "note": "Code candidates found by the Code-Radar robot. Review and move good ones into src/lib/discountCodes.ts. NOT shown in the app.",
   "candidates": [
     {
@@ -134,106 +134,6 @@
       "date": "2026-06-08",
       "url": "6605f1aa-60f9-11f1-bbe6-ffabc90751bb",
       "snippet": "combining technical innovation with a clean, timeless design. Use the code “IRONMAN10” to save 10% at Ryzon (valid until July 31, 2026). https://ryzo",
-      "status": "pending"
-    },
-    {
-      "id": "cand-auslaufen-auslaufen15",
-      "code": "AUSLAUFEN15",
-      "brand": "MNSTRY",
-      "brandId": "mnstry",
-      "percent": 15,
-      "podcast": "Auslaufen",
-      "episode": "Mo Abdilaahi 5000m in 12:57 – Recap Rehlingen & Brüssel & Vorschau auf das Wochenende",
-      "date": "2026-05-27",
-      "url": "https://podcasters.spotify.com/pod/show/felix-hentschel/episodes/Mo-Abdilaahi-5000m-in-1257--Recap-Rehlingen--Brssel--Vorschau-auf-das-Wochenende-e3jtjf5",
-      "snippet": "aufen⁠ 👉 Teste die Mnstry Produkte mit dem Running Bundle – Nutz den Code \"AUSLAUFEN15\" beim Checkout und spare 15%: mnstry.com Mo Abdilaahi wird Zwei",
-      "status": "pending"
-    },
-    {
-      "id": "cand-auslaufen-stimmungsblock-dae83j",
-      "code": "STIMMUNGSBLOCK-DAE83J",
-      "brand": "MNSTRY",
-      "brandId": "mnstry",
-      "podcast": "Auslaufen",
-      "episode": "Mo Abdilaahi 5000m in 12:57 – Recap Rehlingen & Brüssel & Vorschau auf das Wochenende",
-      "date": "2026-05-27",
-      "url": "https://podcasters.spotify.com/pod/show/felix-hentschel/episodes/Mo-Abdilaahi-5000m-in-1257--Recap-Rehlingen--Brssel--Vorschau-auf-das-Wochenende-e3jtjf5",
-      "snippet": "esden – live im ZDF. Außerdem: Stimmungsblock DM Bochum-Wattenscheid (Code: STIMMUNGSBLOCK-DAE83J), U20 WM-Normen in der deutschen Leichtathletik und ein kurzer",
-      "status": "pending"
-    },
-    {
-      "id": "cand-laufen-ist-einfach-loyal30",
-      "code": "LOYAL30",
-      "brand": "feels.like",
-      "brandId": "feelslike",
-      "percent": 30,
-      "podcast": "Laufen ist einfach",
-      "episode": "Ambitionierter Masters-Freizeitsport. Voll im Beruf und zusätzlich Trainerin, Lauf-Organisatorin und Laufschuhverkäuferin. Tanja Lischewski. #297",
-      "date": "2026-05-23",
-      "url": "https://podcasters.spotify.com/pod/show/laufenisteinfach/episodes/Ambitionierter-Masters-Freizeitsport--Voll-im-Beruf-und-zustzlich-Trainerin--Lauf-Organisatorin-und-Laufschuhverkuferin--Tanja-Lischewski--297-e3jncrb",
-      "snippet": "bis zum 24.5. bekommt ihr 30% auf das Night Complex von feels.like . Code LOYAL30. https://feelslike.sport/jan Hier gibt's tatsächlich 100 Tage Rü",
-      "status": "pending"
-    },
-    {
-      "id": "cand-frodeno-going-mental-janfrodeno",
-      "code": "JANFRODENO",
-      "athleteId": "jan-frodeno",
-      "podcast": "Frodeno Going Mental",
-      "episode": "The Norwegian Method: Science vs. Soul – Kristian Blummenfelt",
-      "date": "2026-05-11",
-      "url": "a1d397ca-4af4-11f1-9ff6-f323c74f9bd2",
-      "snippet": "rsonalized temperature regulation, the secret to your deep sleep. Use code JANFRODENO at https://www.eightsleep.com/de/janfrodeno/ to save up to €350",
-      "status": "pending"
-    },
-    {
-      "id": "cand-pushing-limits-podcast-pl15cramp",
-      "code": "PL15CRAMP",
-      "brand": "MNSTRY",
-      "brandId": "mnstry",
-      "percent": 10,
-      "podcast": "Pushing Limits Podcast",
-      "episode": "#184 Triathlon Chat: Top 100 auf Malle: Nicks großes Mallorca 312-Recap",
-      "date": "2026-05-08",
-      "url": "https://podcasters.spotify.com/pod/show/pushinglimits/episodes/184-Triathlon-Chat-Top-100-auf-Malle-Nicks-groes-Mallorca-312-Recap-e3j32jj",
-      "snippet": "mits Code für 10% Rabatt: PUSHINGLIMITS10 WERBUNG: MNSTRY.COM Mit dem Code PL15CRAMP erhalten deine Hörer:innen bis zum 7. Juni 2026 15 % Rabatt auf",
-      "status": "pending"
-    },
-    {
-      "id": "cand-auslaufen-cramp15auslaufen",
-      "code": "CRAMP15AUSLAUFEN",
-      "brand": "MNSTRY",
-      "brandId": "mnstry",
-      "percent": 15,
-      "podcast": "Auslaufen",
-      "episode": "Felix' Trail-Survival-Mode in Innsbruck — Blanka Dörfel schockt alle in Celle | Auslaufen Podcast",
-      "date": "2026-05-06",
-      "url": "https://podcasters.spotify.com/pod/show/felix-hentschel/episodes/Felix-Trail-Survival-Mode-in-Innsbruck--Blanka-Drfel-schockt-alle-in-Celle--Auslaufen-Podcast-e3itm5u",
-      "snippet": "te Felix in Innsbruck schon ausprobieren. Auf den bekommt ihr mit dem Code: CRAMP15AUSLAUFEN 15% bis zum 5.Juni 2026. 👉 Anti-Cramp Shot ausprobieren ------",
-      "status": "pending"
-    },
-    {
-      "id": "cand-laufen-ist-einfach-laufen.ist.einfach",
-      "code": "LAUFEN.IST.EINFACH",
-      "brand": "Trek",
-      "brandId": "trek",
-      "podcast": "Laufen ist einfach",
-      "episode": "Laufband pro und contra mit Hendrik Pfeiffer. #293",
-      "date": "2026-05-02",
-      "url": "https://podcasters.spotify.com/pod/show/laufenisteinfach/episodes/Laufband-pro-und-contra-mit-Hendrik-Pfeiffer--293-e3inav6",
-      "snippet": "Navi läufst, dann nimm lieber die Pace Pro. https://dada.link/SrM1uq Code LAUFEN.IST.EINFACH *Beim Kauf einer Uhr/DURA gibt es ein Uhrband/Lifestyle-Accessoi",
-      "status": "pending"
-    },
-    {
-      "id": "cand-pace-der-ausdauerpodcast-pacecherry15",
-      "code": "PACECHERRY15",
-      "brand": "MNSTRY",
-      "brandId": "mnstry",
-      "percent": 15,
-      "podcast": "PACE - der Ausdauerpodcast",
-      "episode": "Ruhepuls: Was er uns verrät + Stoffwechsel & Bewährte Triathlon-Trainingsmethoden | #182",
-      "date": "2026-04-24",
-      "url": "https://podcasters.spotify.com/pod/show/marvin-neumann7/episodes/Ruhepuls-Was-er-uns-verrt--Stoffwechsel--Bewhrte-Triathlon-Trainingsmethoden--182-e3ic7b7",
-      "snippet": "(Code: PACE10) (werbung)⁠⁠ 🎁 ⁠MNSTRY CherryShot, 15% Rabatt mit dem Code: PACECHERRY15 (werbung)⁠ 🏋 ⁠⁠⁠⁠⁠⁠⁠⁠⁠⁠⁠⁠⁠⁠Unsere Trainingspläne ⁠⁠⁠⁠⁠⁠⁠⁠⁠⁠⁠⁠⁠",
       "status": "pending"
     }
   ]

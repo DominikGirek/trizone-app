@@ -5,6 +5,11 @@ bekannten Podcasts nach neuen Rabattcodes und legt sie in eine **Prüf-Liste**.
 Veröffentlicht wird **nie automatisch** — ein toter Code an der Kasse kostet
 Vertrauen. Du bestätigst gute Codes von Hand (~2 Min/Woche).
 
+Für maximale Aktualität schaut er nur die **4 neuesten Folgen** je Podcast an und
+erkennt **Ablaufdaten** in den Shownotes („gültig bis 31.12.2026", „bis 15. August"
+…): bereits abgelaufene Codes werden gar nicht erst gemeldet, und ein erkanntes
+Datum wandert als `validUntil` in den Code → die App blendet ihn nach Ablauf aus.
+
 ```
 Podcasts (RSS)  →  scripts/ingest-codes.mjs  →  src/data/codeInbox.json  →  du prüfst  →  src/lib/discountCodes.ts (live)
 ```
@@ -33,9 +38,13 @@ Beim nächsten Lauf ist die Quelle dabei. Fertig.
 
 ```jsonc
 { "code": "PACETRI20", "brand": "PILLAR Performance", "percent": 20,
-  "podcast": "PACE – der Ausdauerpodcast", "snippet": "…mit dem Code PACETRI20 …",
+  "validUntil": "2026-12-31", "podcast": "PACE – der Ausdauerpodcast",
+  "snippet": "…mit dem Code PACETRI20 gültig bis 31.12.2026 …",
   "url": "…", "status": "pending" }
 ```
+
+`validUntil` ist nur gesetzt, wenn in den Shownotes ein Ablaufdatum stand —
+übernimm es 1:1 in den Code-Eintrag (die App versteckt abgelaufene automatisch).
 
 Guten Code prüfen → als Eintrag in `src/lib/discountCodes.ts` übernehmen
 (Format dort). Erst dann ist er in der App sichtbar. Den `snippet` nutzt du als
@@ -47,8 +56,8 @@ Fehltreffer einfach ignorieren.
 ## Manuell starten / lokal testen
 
 ```bash
-npm run ingest:codes                 # newest 10 episodes/feed, last 180 days
-node scripts/ingest-codes.mjs --max=15 --days=120
+npm run ingest:codes                 # newest 4 episodes/feed, last 180 days
+node scripts/ingest-codes.mjs --max=8 --days=120
 ```
 
 Oder auf GitHub: **Actions → „Code-Radar (podcasts)" → Run workflow**.

@@ -14,8 +14,8 @@
  *  - Recall over precision: catch loosely, let the human filter in the inbox.
  *
  * Usage:
- *   node scripts/ingest-codes.mjs            # newest 10 episodes / feed, last 180 days
- *   node scripts/ingest-codes.mjs --max=15 --days=120
+ *   node scripts/ingest-codes.mjs            # newest 4 episodes / feed, last 180 days
+ *   node scripts/ingest-codes.mjs --max=8 --days=120
  */
 import { readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
@@ -32,7 +32,7 @@ const argNum = (name, def) => {
   const m = process.argv.find((a) => a.startsWith(`--${name}=`));
   return m ? Number(m.split('=')[1]) : def;
 };
-const MAX_ITEMS = argNum('max', 10);
+const MAX_ITEMS = argNum('max', 4); // only the freshest episodes → freshest codes
 const MAX_DAYS = argNum('days', 180);
 
 // --- HTTP --------------------------------------------------------------------
@@ -112,7 +112,41 @@ function codeLike(tok) {
   return hasDigit || upperish || camelBrandish;
 }
 
-function extract(text, ctx) {
+// --- Expiry detection --------------------------------------------------------
+// Finds an expiry date near the code so the app can hide it once it lapses.
+// Handles "gültig bis 31.12.2026", "bis zum 31. Dezember", "valid until 12/31",
+// numeric (DD.MM(.YYYY)) and named-month German/English dates. Year is inferred
+// (this year, or next if the day already passed) when omitted.
+const MONTHS = {
+  januar: 1, februar: 2, märz: 3, maerz: 3, april: 4, mai: 5, juni: 6, juli: 7,
+  august: 8, september: 9, oktober: 10, november: 11, dezember: 12,
+  jan: 1, feb: 2, mär: 3, maer: 3, apr: 4, jun: 6, jul: 7, aug: 8, sep: 9,
+  sept: 9, okt: 10, nov: 11, dez: 12,
+  january: 1, february: 2, march: 3, may: 5, june: 6, july: 7, october: 10, december: 12,
+};
+const EXPIRY_CTX = /(g[üu]ltig|gilt|l[äa]uft|valid|expir|endet|ends|einl[öo]sbar|nur noch|bis)/i;
+
+function findExpiry(win, now) {
+  const hits = [];
+  for (const m of win.matchAll(/(\d{1,2})\.(\d{1,2})\.(\d{2,4})?/g)) {
+    hits.push({ idx: m.index, d: +m[1], mo: +m[2], y: m[3] });
+  }
+  for (const m of win.matchAll(/(\d{1,2})\.?\s+([A-Za-zäöüÄÖÜ]+)\.?\s*(\d{4})?/g)) {
+    const mo = MONTHS[m[2].toLowerCase()];
+    if (mo) hits.push({ idx: m.index, d: +m[1], mo, y: m[3] });
+  }
+  for (const h of hits.sort((a, b) => a.idx - b.idx)) {
+    if (h.mo < 1 || h.mo > 12 || h.d < 1 || h.d > 31) continue;
+    const before = win.slice(Math.max(0, h.idx - 34), h.idx);
+    if (!EXPIRY_CTX.test(before)) continue; // only dates introduced by an expiry phrase
+    let year = h.y ? (h.y.length === 2 ? 2000 + +h.y : +h.y) : new Date(now).getUTCFullYear();
+    if (!h.y && +new Date(Date.UTC(year, h.mo - 1, h.d)) < now - 2 * 864e5) year += 1;
+    return `${year}-${String(h.mo).padStart(2, '0')}-${String(h.d).padStart(2, '0')}`;
+  }
+  return null;
+}
+
+function extract(text, ctx, now) {
   const found = new Map(); // code(lower) -> candidate
   let m;
   TRIGGER.lastIndex = 0;
@@ -122,11 +156,14 @@ function extract(text, ctx) {
     const at = m.index;
     const snippet = text.slice(Math.max(0, at - 70), Math.min(text.length, at + code.length + 70)).trim();
     const pctNear = snippet.match(/(\d{1,2})\s*(?:%|prozent)/i);
+    // Wider window for an expiry date that belongs to this code.
+    const win = text.slice(Math.max(0, at - 40), Math.min(text.length, at + code.length + 220));
     const key = code.toLowerCase();
     if (!found.has(key)) {
       found.set(key, {
         code,
         percent: pctNear ? Number(pctNear[1]) : undefined,
+        validUntil: findExpiry(win, now) || undefined,
         snippet,
         ...ctx,
       });
@@ -179,7 +216,9 @@ async function main() {
   const { sources } = JSON.parse(await readFile(SOURCES, 'utf8'));
   const brands = await loadBrands();
   const live = await loadLiveCodes();
-  const cutoff = Date.now() - MAX_DAYS * 24 * 60 * 60 * 1000;
+  const now = Date.now();
+  const todayISO = new Date(now).toISOString().slice(0, 10);
+  const cutoff = now - MAX_DAYS * 24 * 60 * 60 * 1000;
 
   const candidates = new Map(); // dedupe key -> candidate
   for (const src of sources) {
@@ -200,8 +239,9 @@ async function main() {
     const items = parseItems(xml, MAX_ITEMS, cutoff);
     let n = 0;
     for (const it of items) {
-      for (const c of extract(it.body, { podcast: src.name, episode: it.title, date: it.date, url: it.link })) {
+      for (const c of extract(it.body, { podcast: src.name, episode: it.title, date: it.date, url: it.link }, now)) {
         if (live.has(c.code.toLowerCase())) continue; // already a live code
+        if (c.validUntil && c.validUntil < todayISO) continue; // already expired → drop
         const brand = matchBrand(`${c.snippet} ${it.body.slice(0, 400)}`, brands);
         const key = `${slug(src.name)}|${c.code.toLowerCase()}`;
         if (candidates.has(key)) continue;
@@ -211,6 +251,7 @@ async function main() {
           brand: brand?.name,
           brandId: brand?.id,
           percent: c.percent,
+          validUntil: c.validUntil,
           athleteId: src.athleteId,
           podcast: c.podcast,
           episode: c.episode,
@@ -233,7 +274,7 @@ async function main() {
   if (list.length) {
     console.log('\nTop candidates:');
     for (const c of list.slice(0, 25)) {
-      console.log(`  [${c.brand || '??'}] ${c.code}${c.percent ? ` (${c.percent}%)` : ''} — ${c.podcast}${c.athleteId ? ` · ${c.athleteId}` : ''}`);
+      console.log(`  [${c.brand || '??'}] ${c.code}${c.percent ? ` (${c.percent}%)` : ''}${c.validUntil ? ` [bis ${c.validUntil}]` : ''} — ${c.podcast}${c.athleteId ? ` · ${c.athleteId}` : ''}`);
     }
   }
 }
