@@ -8,9 +8,10 @@ name: Ingest events index
 
 on:
   schedule:
-    # ~03:17 UTC daily. Off-peak + non-round on purpose (GitHub delays/queues
-    # popular cron times). Adjust freely.
-    - cron: "17 3 * * *"
+    # Weekly, Mondays ~03:17 UTC. The past-events archive barely changes day to
+    # day, so weekly is plenty (no point burning runs). Off-peak + non-round on
+    # purpose (GitHub delays/queues popular cron times). Adjust freely.
+    - cron: "17 3 * * 1"
   workflow_dispatch:
     inputs:
       window:
