@@ -70,7 +70,12 @@ async function main() {
       console.log(`· ${art.event}: fetch failed`);
       continue;
     }
-    const text = norm(html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' '));
+    // Strip <script> (incl. JSON-LD competitor blocks for OTHER events!) and
+    // <style> first, else we'd match athletes that are not on this start list.
+    const body = html
+      .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+      .replace(/<style[\s\S]*?<\/style>/gi, ' ');
+    const text = norm(body.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' '));
     const matched = [...roster].filter(([n]) => text.includes(n)).map(([, id]) => id);
     for (const id of matched) {
       const list = (starts[id] ??= []);
