@@ -65,8 +65,57 @@ function parseStartList(text) {
   return rows;
 }
 
+// --- Auto-discovery: find triathlon.de pro start-list articles via the sitemap --
+const MONTHS_DE = {
+  januar: 1, februar: 2, märz: 3, maerz: 3, april: 4, mai: 5, juni: 6, juli: 7,
+  august: 8, september: 9, oktober: 10, november: 11, dezember: 12,
+};
+/** First clearly future race date in the article text ("28. Juni 2026" / "28.06.2026"). */
+function extractRaceDate(text, now) {
+  let m = text.match(/(\d{1,2})\.\s*([A-Za-zäöü]+)\s+(20\d{2})/);
+  if (m && MONTHS_DE[m[2].toLowerCase()]) {
+    const iso = `${m[3]}-${String(MONTHS_DE[m[2].toLowerCase()]).padStart(2, '0')}-${String(+m[1]).padStart(2, '0')}`;
+    if (+new Date(iso) >= now) return iso;
+  }
+  for (const mm of text.matchAll(/\b(\d{1,2})\.(\d{1,2})\.(20\d{2})\b/g)) {
+    const iso = `${mm[3]}-${String(+mm[2]).padStart(2, '0')}-${String(+mm[1]).padStart(2, '0')}`;
+    if (+new Date(iso) >= now) return iso;
+  }
+  return null;
+}
+function seriesFromSlug(s) {
+  if (/70-?3/.test(s)) return 'ironman703';
+  if (/t100/.test(s)) return 't100';
+  if (/ironman|im-/.test(s)) return 'ironman';
+  return undefined; // Challenge etc. → no series enum
+}
+function eventFromSlug(s) {
+  const words = s
+    .replace(/profi|startliste|favoriten|streckenplan|maenner|m[äa]nner|frauen|\b20\d{2}\b/g, ' ')
+    .replace(/-/g, ' ').replace(/70 3/g, '70.3').replace(/\s+/g, ' ').trim()
+    .split(' ').filter(Boolean);
+  return words
+    .map((w) => (/^(wm|em)$/i.test(w) ? w.toUpperCase() : /ironman/i.test(w) ? 'IRONMAN' : w === '70.3' ? '70.3' : w.charAt(0).toUpperCase() + w.slice(1)))
+    .join(' ');
+}
+async function discover() {
+  const xml = (await fetchText('https://triathlon.de/sitemap_blogs_1.xml')) || '';
+  return [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)]
+    .map((m) => m[1].replace(/&amp;/g, '&'))
+    .filter((u) => /startliste/i.test(u) && /profi/i.test(u) && /20(2[6-9]|[3-9]\d)/.test(u));
+}
+
 async function main() {
+  const now = Date.now() - 864e5;
   const { articles } = JSON.parse(await readFile(REG, 'utf8'));
+  // Auto-discovered triathlon.de articles (event/series from slug, date from the
+  // article) — added unless already pinned in the registry (registry meta wins).
+  const pinned = new Set(articles.map((a) => a.url.split('?')[0]));
+  for (const url of await discover()) {
+    if (pinned.has(url.split('?')[0])) continue;
+    const slug = url.split('/').pop().replace(/\?.*$/, '');
+    articles.push({ url, slug, _derive: true, event: eventFromSlug(slug), series: seriesFromSlug(slug), confidence: 'confirmed' });
+  }
   const athletes = new Map();
   const starts = {};
 
@@ -80,6 +129,13 @@ async function main() {
       .replace(/<script[\s\S]*?<\/script>/gi, ' ')
       .replace(/<style[\s\S]*?<\/style>/gi, ' ');
     const text = body.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+    if (art._derive) {
+      art.date = extractRaceDate(text, now);
+      if (!art.date) {
+        console.log(`· ${art.event}: no clear future race date → skip`);
+        continue;
+      }
+    }
     const rows = parseStartList(text);
     if (!rows.length) {
       console.log(`· ${art.event}: no start-list table found`);

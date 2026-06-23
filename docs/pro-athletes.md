@@ -19,18 +19,34 @@ Der Merge passiert in `services/athletes.ts`: kuratierte Athlet:innen
 (`mocks/athletes.ts`) **gewinnen** bei gleicher id, generierte kommen oben drauf →
 hand-getunte Profile bleiben maßgeblich, neue Pros erscheinen automatisch.
 
-## Quellen-Stand (ehrlich)
-| Circuit | Startliste maschinenlesbar? | Status |
-|---|---|---|
-| **WTCS** (World Triathlon API) | ✅ Elite-Entries, sauber | **live** |
-| IRONMAN / 70.3 / Pro Series | ❌ JS-gerendert (ironman.com) | Headless-Robo |
-| T100 / PTO | ❌ JS-gerendert (protriathletes.org) | Headless-Robo |
+## Quellen-Stand
+Jeder Start trägt ein `confidence`: **`confirmed`** (offizielle/Medien-Startliste)
+oder **`expected`** (angekündigt). Im Profil als „✓ bestätigt" / „erwartet".
 
-Die anderen Circuits liefern ihre Startlisten erst per JavaScript im Browser aus
-(kein `__NEXT_DATA__`, keine Namen im HTML) → ein reiner Node-Roboter kommt nicht
-ran. Dafür kommt ein **Headless-Browser-Roboter** (Playwright in der Action) als
-nächster Schritt; Muster und App-Merge stehen schon, er muss nur dasselbe
-`proAthletes.json`-Format schreiben.
+| Layer | Quelle | Robo | Key? | Status |
+|---|---|---|---|---|
+| **WTCS** | World-Triathlon-API (Elite-Entries) | `ingest-pro-athletes.mjs` | – | ✅ live |
+| **IRONMAN/70.3/Challenge/T100** | protriathletes.org (server-gerendert!) | `ingest-pro-starts.mjs` | – | ✅ live |
+| Medien-Startlisten (früh, z. B. triathlon.de) | Artikel → Abgleich mit Roster | `ingest-pro-starts-media.mjs` | – | ✅ live |
+| Angekündigt/„erwartet" | News/Interviews per LLM | (Robo #4) | Haiku | geplant |
+
+Medien-Startlisten: Registry `src/data/proStartArticles.json` (eine Zeile pro
+Artikel). Der Roboter **parst die Startlisten-Tabelle** (BIB · Name · Nation;
+M#/W# → Geschlecht, ISO-3→ISO-2-Land) und legt **alle** gelisteten Pros an +
+bestätigte Starts mit Link zum Artikel — oft **früher** als PTO (z. B. IRONMAN
+Frankfurt = 70 Pros auf triathlon.de, bevor PTO es hat). `<script>`/JSON-LD wird
+vorher entfernt (sonst landen Athleten aus fremden Event-Schemas in der Liste).
+
+**Wichtige Spike-Erkenntnis:** protriathletes.org ist **server-gerendert** (die
+frühere „JS-gerendert"-Annahme stimmte nicht — die getestete 2026-Liste war nur
+leer). Ergebnis-/Teilnehmer-/Rankings-Seiten haben die Daten im HTML → ein
+**schlanker Node-Roboter reicht, kein Headless-Browser.** Eine Quelle deckt
+IRONMAN, 70.3, Challenge und T100 ab; Land kommt aus der PTO-Weltrangliste.
+
+**Ehrliche Grenze:** PTO-Teilnehmerlisten erscheinen erst **wenige Wochen vor dem
+Rennen** (T100 früh, IRONMAN/Challenge spät). Früh angekündigte Ziel-Rennen (Kona,
+Roth) Monate vorher liefern erst Robo #3 (Medien-Startlisten) + #4 (News) als
+`expected`.
 
 ## Manuell / Zeitplan
 ```bash
