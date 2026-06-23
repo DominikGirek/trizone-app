@@ -58,7 +58,8 @@
     "ingest:pro": "node scripts/ingest-pro-athletes.mjs",
     "ingest:pro-starts": "node scripts/ingest-pro-starts.mjs",
     "ingest:pro-media": "node scripts/ingest-pro-starts-media.mjs",
-    "ingest:pro-llm": "node scripts/ingest-pro-starts-llm.mjs"
+    "ingest:pro-llm": "node scripts/ingest-pro-starts-llm.mjs",
+    "ingest:venues": "node scripts/ingest-race-venues.mjs"
   },
   "private": true
 }

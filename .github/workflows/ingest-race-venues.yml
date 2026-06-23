@@ -1,0 +1,41 @@
+name: Ingest race venues (swim-start map pins)
+
+# Weekly: for each series race (the ones with a map button), Claude Haiku proposes the
+# swim-start VENUE name (told to answer null when unsure), OpenStreetMap Nominatim
+# geocodes it, and the result is kept only if it lies within ~25 km of the town centroid
+# (rejects an invented venue or the organizer HQ in another city). Writes verified
+# coordinates to src/data/raceVenues.json so the "Karte" button points at the real swim
+# start, never the town centre or the organizer. Needs ANTHROPIC_API_KEY (no-op without).
+
+on:
+  schedule:
+    # Weekly, Saturdays ~05:41 UTC.
+    - cron: "41 5 * * 6"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ingest-race-venues
+  cancel-in-progress: false
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Geocode swim-start venues
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: node scripts/ingest-race-venues.mjs
+
+      - name: Commit venues if changed
+        run: >-
+          node scripts/ci-commit-data.mjs src/data/raceVenues.json
+          "chore(data): refresh race swim-start venues"

@@ -1,3 +1,4 @@
+import raceVenuesData from '@/data/raceVenues.json';
 import { races as mockRaces, racesById as mockRacesById } from '@/mocks/events';
 import { resultsByRace } from '@/mocks/results';
 import { getAthletes } from '@/services/athletes';
@@ -105,6 +106,29 @@ export function raceKey(event: string, date: string): string {
   const city = cityTokens(event).sort();
   if (!city.length) return '';
   return `${date.slice(0, 10)}-${city.join('-')}`;
+}
+
+/** Date-independent city key (a venue rarely moves year to year) → keys raceVenues. */
+export function cityKey(event: string): string {
+  return cityTokens(event).sort().join('-');
+}
+
+export interface StartPoint {
+  lat: number;
+  lon: number;
+  label?: string;
+}
+const VENUES = (raceVenuesData as { venues: Record<string, StartPoint & { source?: string }> }).venues;
+
+/**
+ * Best map target for an event: the verified SWIM-START coordinates if we have them
+ * (raceVenues.json, geocoded from the real venue, never the organizer), otherwise null
+ * so the caller can fall back to a name search. Town centroids are NOT returned here —
+ * the caller already has those.
+ */
+export function startPointFor(event: string): StartPoint | null {
+  const v = VENUES[cityKey(event)];
+  return v ? { lat: v.lat, lon: v.lon, label: v.label } : null;
 }
 
 /** Friendly source name from a start's URL (shown per athlete). */

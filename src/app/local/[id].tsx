@@ -21,7 +21,7 @@ import { mergeRaceNews, newsForRace, raceSearchQuery } from '@/lib/newsTopics';
 import { fetchNews } from '@/services/news';
 import { fetchRaceNews } from '@/services/raceNews';
 import { getLocalEventById, providerLabel } from '@/services/localEvents';
-import { getRaceStartList, raceKey } from '@/services/races';
+import { getRaceStartList, raceKey, startPointFor } from '@/services/races';
 import { useMyRaces } from '@/store/myRaces';
 import { useReminders } from '@/store/reminders';
 import type { DistanceOption, LocalEvent } from '@/types';
@@ -191,7 +191,15 @@ export default function LocalEventScreen() {
     }
   };
 
-  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${event.lat},${event.lon}`;
+  // Prefer the verified swim-start coordinates; otherwise search by name+town (Google
+  // resolves known races to their venue far better than a town centroid). The bare
+  // centroid is the last resort.
+  const startPoint = startPointFor(event.name);
+  const mapsUrl = startPoint
+    ? `https://www.google.com/maps/search/?api=1&query=${startPoint.lat},${startPoint.lon}`
+    : event.name
+      ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${event.name} ${event.town}`)}`
+      : `https://www.google.com/maps/search/?api=1&query=${event.lat},${event.lon}`;
 
   return (
     <ThemedView style={styles.container}>

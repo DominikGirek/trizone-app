@@ -1,0 +1,9 @@
+{
+  "generatedAt": "2026-06-23T15:00:00.000Z",
+  "note": "Verified SWIM-START coordinates per race, keyed by city token(s) (date-independent — a city's swim venue rarely changes year to year). Geocoded from the real swim-venue NAME via OpenStreetMap Nominatim and validated to lie within ~25 km of the event town (guards against the organizer HQ / a wrong-city match / an LLM-invented venue). NEVER the organizer's office. Robot: scripts/ingest-race-venues.mjs regenerates/extends this; only verified coordinates are written, never fabricated.",
+  "venues": {
+    "roth": { "lat": 49.1932, "lon": 11.2462, "label": "Schwimmstart Main-Donau-Kanal, Hilpoltstein", "source": "OSM: Main-Donau-Kanal Hilpoltstein" },
+    "frankfurt": { "lat": 50.0139, "lon": 8.6205, "label": "Schwimmstart Langener Waldsee", "source": "OSM: Langener Waldsee" },
+    "hamburg": { "lat": 53.5548, "lon": 9.9953, "label": "Schwimmstart Binnenalster", "source": "OSM: Binnenalster Hamburg" }
+  }
+}
