@@ -152,6 +152,7 @@ async function main() {
   const ctx = await browser.newContext({ userAgent: UA });
   const starts = {};
   const minted = new Map();
+  let diag = 0; // recon budget: dump payload shapes for the first races that find nothing
 
   for (const race of races) {
     const page = await ctx.newPage();
@@ -183,6 +184,20 @@ async function main() {
       }
     }
     console.log(`· ${race.name}: ${payloads.length} JSON responses, best start list = ${best.count} pros${best.from ? ` (${best.from.slice(0, 70)})` : ''}`);
+    // Recon: when nothing matched, show what the page actually fetched so we can target it.
+    if (best.count === 0 && diag < 2) {
+      diag++;
+      console.log(`   [recon] ${race.url}`);
+      for (const { url, json } of payloads) {
+        for (const arr of objectArrays(json)) {
+          if (arr.length < 2) continue;
+          const keys = Object.keys(arr[0] || {}).slice(0, 14).join(',');
+          if (/name|athlete|first|last|bib|country|nat/i.test(keys)) {
+            console.log(`   [recon] array[${arr.length}] @ ${url.split('?')[0].slice(0, 75)} :: ${keys}`);
+          }
+        }
+      }
+    }
     if (best.count < 3) continue; // not a credible start list
 
     for (const a of best.names) {
