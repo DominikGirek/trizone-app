@@ -1,6 +1,7 @@
 import athleteLinksData from '@/data/athleteLinks.json';
 import athleteStartsData from '@/data/athleteStarts.json';
 import proAthletesData from '@/data/proAthletes.json';
+import proStartsIronmanData from '@/data/proStartsIronman.json';
 import proStartsLlmData from '@/data/proStartsLLM.json';
 import proStartsMediaData from '@/data/proStartsMedia.json';
 import proStartsPtoData from '@/data/proStartsPTO.json';
@@ -76,7 +77,7 @@ function build(
 const bundled = build(
   athleteLinksData as LinksFile,
   athleteStartsData as StartsFile,
-  [proAthletesData, proStartsPtoData, proStartsMediaData, proStartsLlmData] as unknown as ProFile[],
+  [proAthletesData, proStartsPtoData, proStartsIronmanData, proStartsMediaData, proStartsLlmData] as unknown as ProFile[],
 );
 
 // Cached merge of the HOSTED data (refreshed hourly).
@@ -84,15 +85,16 @@ let cache: { at: number; data: Merged } | null = null;
 const TTL = 60 * 60 * 1000;
 async function loadMerged(): Promise<Merged> {
   if (cache && Date.now() - cache.at < TTL) return cache.data;
-  const [links, hand, pro, ptoStarts, mediaStarts, llmStarts] = await Promise.all([
+  const [links, hand, pro, ptoStarts, ironmanStarts, mediaStarts, llmStarts] = await Promise.all([
     fetchJson('athleteLinks.json', athleteLinksData as unknown as LinksFile),
     fetchJson('athleteStarts.json', athleteStartsData as unknown as StartsFile),
     fetchJson('proAthletes.json', proAthletesData as unknown as ProFile),
     fetchJson('proStartsPTO.json', proStartsPtoData as unknown as ProFile),
+    fetchJson('proStartsIronman.json', proStartsIronmanData as unknown as ProFile),
     fetchJson('proStartsMedia.json', proStartsMediaData as unknown as ProFile),
     fetchJson('proStartsLLM.json', proStartsLlmData as unknown as ProFile),
   ]);
-  const data = build(links, hand, [pro, ptoStarts, mediaStarts, llmStarts]);
+  const data = build(links, hand, [pro, ptoStarts, ironmanStarts, mediaStarts, llmStarts]);
   cache = { at: Date.now(), data };
   return data;
 }
