@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-23T09:48:50.612Z",
+  "generatedAt": "2026-06-23T09:52:17.175Z",
   "note": "Code candidates found by the Code-Radar robot. Review and move good ones into src/lib/discountCodes.ts. NOT shown in the app.",
   "candidates": [
     {
