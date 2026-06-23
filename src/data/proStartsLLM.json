@@ -1,6 +1,150 @@
 {
-  "generatedAt": null,
-  "note": "Pro starts extracted by the LLM robot from multi-language media start-list articles (only athletes matching our known pro set). Confidence confirmed. Merged on top of curated + WTCS + PTO + media.",
-  "athletes": [],
-  "starts": {}
+  "generatedAt": "2026-06-23T12:13:51.446Z",
+  "note": "Pro starts extracted by the LLM robot from multi-language media start-list articles (only athletes already in our roster → no new/hallucinated athletes). confidence confirmed. Merged on top of curated + WTCS + PTO + media.",
+  "starts": {
+    "casper-stornes": [
+      {
+        "date": "2026-06-28",
+        "event": "Mainova IRONMAN Frankfurt European Championship",
+        "series": "ironman",
+        "url": "https://triathlon.de/blogs/journal/profi-startliste-ironman-frankfurt-2026",
+        "confidence": "confirmed"
+      }
+    ],
+    "gustav-iden": [
+      {
+        "date": "2026-06-28",
+        "event": "Mainova IRONMAN Frankfurt European Championship",
+        "series": "ironman",
+        "url": "https://triathlon.de/blogs/journal/profi-startliste-ironman-frankfurt-2026",
+        "confidence": "confirmed"
+      }
+    ],
+    "magnus-ditlev": [
+      {
+        "date": "2026-06-28",
+        "event": "Mainova IRONMAN Frankfurt European Championship",
+        "series": "ironman",
+        "url": "https://triathlon.de/blogs/journal/profi-startliste-ironman-frankfurt-2026",
+        "confidence": "confirmed"
+      }
+    ],
+    "gregory-barnaby": [
+      {
+        "date": "2026-06-28",
+        "event": "Mainova IRONMAN Frankfurt European Championship",
+        "series": "ironman",
+        "url": "https://triathlon.de/blogs/journal/profi-startliste-ironman-frankfurt-2026",
+        "confidence": "confirmed"
+      }
+    ],
+    "kieran-lindars": [
+      {
+        "date": "2026-06-28",
+        "event": "Mainova IRONMAN Frankfurt European Championship",
+        "series": "ironman",
+        "url": "https://triathlon.de/blogs/journal/profi-startliste-ironman-frankfurt-2026",
+        "confidence": "confirmed"
+      }
+    ],
+    "vincent-luis": [
+      {
+        "date": "2026-06-28",
+        "event": "Mainova IRONMAN Frankfurt European Championship",
+        "series": "ironman",
+        "url": "https://triathlon.de/blogs/journal/profi-startliste-ironman-frankfurt-2026",
+        "confidence": "confirmed"
+      }
+    ],
+    "kyle-smith": [
+      {
+        "date": "2026-06-28",
+        "event": "Mainova IRONMAN Frankfurt European Championship",
+        "series": "ironman",
+        "url": "https://triathlon.de/blogs/journal/profi-startliste-ironman-frankfurt-2026",
+        "confidence": "confirmed"
+      }
+    ],
+    "leon-chevalier": [
+      {
+        "date": "2026-06-28",
+        "event": "Mainova IRONMAN Frankfurt European Championship",
+        "series": "ironman",
+        "url": "https://triathlon.de/blogs/journal/profi-startliste-ironman-frankfurt-2026",
+        "confidence": "confirmed"
+      }
+    ],
+    "pieter-heemeryck": [
+      {
+        "date": "2026-06-28",
+        "event": "Mainova IRONMAN Frankfurt European Championship",
+        "series": "ironman",
+        "url": "https://triathlon.de/blogs/journal/profi-startliste-ironman-frankfurt-2026",
+        "confidence": "confirmed"
+      }
+    ],
+    "cameron-wurf": [
+      {
+        "date": "2026-06-28",
+        "event": "Mainova IRONMAN Frankfurt European Championship",
+        "series": "ironman",
+        "url": "https://triathlon.de/blogs/journal/profi-startliste-ironman-frankfurt-2026",
+        "confidence": "confirmed"
+      }
+    ],
+    "jonas-hoffmann": [
+      {
+        "date": "2026-06-28",
+        "event": "Mainova IRONMAN Frankfurt European Championship",
+        "series": "ironman",
+        "url": "https://triathlon.de/blogs/journal/profi-startliste-ironman-frankfurt-2026",
+        "confidence": "confirmed"
+      }
+    ],
+    "finn-grosse-freese": [
+      {
+        "date": "2026-06-28",
+        "event": "Mainova IRONMAN Frankfurt European Championship",
+        "series": "ironman",
+        "url": "https://triathlon.de/blogs/journal/profi-startliste-ironman-frankfurt-2026",
+        "confidence": "confirmed"
+      }
+    ],
+    "florian-angert": [
+      {
+        "date": "2026-06-28",
+        "event": "Mainova IRONMAN Frankfurt European Championship",
+        "series": "ironman",
+        "url": "https://triathlon.de/blogs/journal/profi-startliste-ironman-frankfurt-2026",
+        "confidence": "confirmed"
+      }
+    ],
+    "jan-stratmann": [
+      {
+        "date": "2026-06-28",
+        "event": "Mainova IRONMAN Frankfurt European Championship",
+        "series": "ironman",
+        "url": "https://triathlon.de/blogs/journal/profi-startliste-ironman-frankfurt-2026",
+        "confidence": "confirmed"
+      }
+    ],
+    "wilhelm-hirsch": [
+      {
+        "date": "2026-06-28",
+        "event": "Mainova IRONMAN Frankfurt European Championship",
+        "series": "ironman",
+        "url": "https://triathlon.de/blogs/journal/profi-startliste-ironman-frankfurt-2026",
+        "confidence": "confirmed"
+      }
+    ],
+    "paul-schuster": [
+      {
+        "date": "2026-06-28",
+        "event": "Mainova IRONMAN Frankfurt European Championship",
+        "series": "ironman",
+        "url": "https://triathlon.de/blogs/journal/profi-startliste-ironman-frankfurt-2026",
+        "confidence": "confirmed"
+      }
+    ]
+  }
 }
