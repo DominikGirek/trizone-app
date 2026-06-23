@@ -152,55 +152,40 @@ async function main() {
   const ctx = await browser.newContext({ userAgent: UA });
   const starts = {};
   const minted = new Map();
-  let diag = 0; // recon budget: dump payload shapes for the first races that find nothing
 
   for (const race of races) {
     const page = await ctx.newPage();
     const payloads = [];
     page.on('response', async (res) => {
-      const ctype = res.headers()['content-type'] || '';
-      if (!/json/i.test(ctype)) return;
-      try { payloads.push({ url: res.url(), json: await res.json() }); } catch { /* */ }
+      if (!/json/i.test(res.headers()['content-type'] || '')) return;
+      try { payloads.push(await res.json()); } catch { /* */ }
     });
+    let text = '';
     try {
       await page.goto(race.url, { waitUntil: 'networkidle', timeout: 45000 });
       await page.waitForTimeout(2500);
+      text = await page.innerText('body');
     } catch { /* */ }
     await page.close();
     seen.add(race.url);
 
-    // Score every captured array by how many of its entries are verified pros.
-    let best = { count: 0, names: [], from: '' };
-    for (const { url, json } of payloads) {
-      for (const arr of objectArrays(json)) {
-        const found = [];
-        for (const o of arr) {
-          const nm = fullName(o);
-          if (!nm) continue;
-          const hit = roster.get(nameKey(nm));
-          if (hit) found.push({ ...hit, name: nm, country: countryOf(o) || hit.country });
-        }
-        if (found.length > best.count) best = { count: found.length, names: found, from: url };
-      }
-    }
-    console.log(`· ${race.name}: ${payloads.length} JSON responses, best start list = ${best.count} pros${best.from ? ` (${best.from.slice(0, 70)})` : ''}`);
-    // Recon: when nothing matched, show what the page actually fetched so we can target it.
-    if (best.count === 0 && diag < 2) {
-      diag++;
-      console.log(`   [recon] ${race.url}`);
-      for (const { url, json } of payloads) {
-        for (const arr of objectArrays(json)) {
-          if (arr.length < 2) continue;
-          const keys = Object.keys(arr[0] || {}).slice(0, 14).join(',');
-          if (/name|athlete|first|last|bib|country|nat/i.test(keys)) {
-            console.log(`   [recon] array[${arr.length}] @ ${url.split('?')[0].slice(0, 75)} :: ${keys}`);
-          }
-        }
-      }
-    }
-    if (best.count < 3) continue; // not a credible start list
+    // Verified pros found in the RENDERED page text (robust to however the list loads) +
+    // in any captured JSON (firstName/lastName payloads). Roster-gated → only real pros.
+    const found = new Map();
+    const consider = (nm, country) => {
+      if (!nm) return;
+      const hit = roster.get(nameKey(nm));
+      if (hit && !found.has(hit.id)) found.set(hit.id, { ...hit, name: nm.trim(), country: country || hit.country });
+    };
+    for (const m of text.matchAll(/[A-ZÀ-Þ][\p{L}'’.-]+(?:\s+[A-ZÀ-Þ][\p{L}'’.-]+){1,2}/gu)) consider(m[0]);
+    for (const json of payloads) for (const arr of objectArrays(json)) for (const o of arr) consider(fullName(o), countryOf(o));
+    const pros = [...found.values()];
 
-    for (const a of best.names) {
+    const hint = pros.length === 0 ? (text.length < 200 ? ' [empty render]' : /\bpro\b/i.test(text) ? ' [page says "pro" but 0 roster names]' : ' [no roster names in text]') : '';
+    console.log(`· ${race.name}: ${text.length} chars text, ${payloads.length} JSON, ${pros.length} verified pros${hint}`);
+    if (pros.length < 3) continue; // not a credible start list
+
+    for (const a of pros) {
       if (!minted.has(a.id)) minted.set(a.id, { id: a.id, name: a.name, country: a.country || '', series: [race.series] });
       const list = (starts[a.id] ??= []);
       if (!list.some((s) => s.date === race.date)) {
