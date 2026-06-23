@@ -35,7 +35,7 @@ const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (
 
 const KEY = process.env.ANTHROPIC_API_KEY;
 const MODEL = process.env.TRIZONE_LLM_MODEL || 'claude-haiku-4-5-20251001';
-const MAX_LLM_CALLS = Number(process.env.TRIZONE_LLM_MAX_CALLS || 16); // hard cost ceiling / run
+const MAX_LLM_CALLS = Number(process.env.TRIZONE_LLM_MAX_CALLS || 24); // hard cost ceiling / run (~$0.25 of Haiku)
 const RACE_WINDOW_DAYS = 75; // only search races this close (fields are published near the race)
 const norm = (s) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 const TITLE_RE = /startliste|start[\s-]?list|startlist|starterfeld|profi.?(feld|liste|start)|elite (field|start|wave)|pro (field|start ?list)|lista de (salida|inscritos)|liste des? (d[ée]part|engag[ée]s)|engag[ée]s|lista di partenza|start ?list/i;
@@ -87,10 +87,29 @@ async function upcomingRaces(now, until) {
   }
   return races;
 }
-async function ddgUrls(query) {
-  const h = (await get('https://html.duckduckgo.com/html/?q=' + encodeURIComponent(query))) || '';
-  return [...new Set([...h.matchAll(/uddg=([^&"]+)/g)].map((m) => { try { return decodeURIComponent(m[1]); } catch { return ''; } }))]
-    .filter((u) => u && TRI_DOMAIN.test(u) && !/protriathletes|facebook|instagram|youtube/i.test(u));
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// Pull triathlon-media result links out of a SERP (DuckDuckGo `uddg=` redirects or
+// plain external hrefs from Bing).
+function serpUrls(html) {
+  const out = new Set();
+  for (const m of html.matchAll(/uddg=([^&"]+)/g)) { try { out.add(decodeURIComponent(m[1])); } catch { /* */ } }
+  for (const m of html.matchAll(/href="(https?:\/\/[^"]+)"/g)) out.add(m[1]);
+  return [...out].filter(
+    (u) => TRI_DOMAIN.test(u) && !/protriathletes|facebook|instagram|youtube|duckduckgo|bing\.com|microsoft|msn\.com/i.test(u),
+  );
+}
+
+// Keyless open-web search. DuckDuckGo throttles burst queries, so we retry once
+// after a pause and fall back to Bing — this is what lets ALL races get searched,
+// not just the first one.
+async function searchUrls(query) {
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const urls = serpUrls((await get('https://html.duckduckgo.com/html/?q=' + encodeURIComponent(query))) || '');
+    if (urls.length) return urls;
+    await sleep(1500 + Math.random() * 1500);
+  }
+  return serpUrls((await get('https://www.bing.com/search?q=' + encodeURIComponent(query) + '&setlang=en')) || '');
 }
 
 // --- Feed parsing (Discovery B) ----------------------------------------------
@@ -137,9 +156,11 @@ async function main() {
   races.sort((a, b) => a.date.localeCompare(b.date));
   console.log(`Per-race search: ${races.length} races in the next ${RACE_WINDOW_DAYS} days`);
   for (const race of races) {
-    const urls = await ddgUrls(`${race.name} ${race.year} Startliste start list Profis lista de salida liste de départ`);
+    const urls = await searchUrls(`${race.name} ${race.year} Startliste start list Profis lista de salida liste de départ`);
     for (const url of urls.slice(0, 2)) jobs.push({ url: url.split('?')[0], ctx: race });
+    await sleep(1200 + Math.random() * 1200); // space queries out → avoid burst throttling
   }
+  console.log(`Per-race search queued ${jobs.length} candidate URLs from ${races.length} races`);
   try {
     const { feeds } = JSON.parse(await readFile(FEEDS, 'utf8'));
     for (const feed of feeds) {
