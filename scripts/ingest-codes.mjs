@@ -14,7 +14,7 @@
  *  - Recall over precision: catch loosely, let the human filter in the inbox.
  *
  * Usage:
- *   node scripts/ingest-codes.mjs            # newest 4 episodes / feed, last 180 days
+ *   node scripts/ingest-codes.mjs            # newest 4 episodes / feed, last 365 days
  *   node scripts/ingest-codes.mjs --max=8 --days=120
  */
 import { readFile, writeFile } from 'node:fs/promises';
@@ -33,12 +33,12 @@ const argNum = (name, def) => {
   return m ? Number(m.split('=')[1]) : def;
 };
 const MAX_ITEMS = argNum('max', 4); // only the freshest episodes → freshest codes
-const MAX_DAYS = argNum('days', 180);
+const MAX_DAYS = argNum('days', 365); // outer bound; the 4-newest cap keeps it fresh
 
 // --- HTTP --------------------------------------------------------------------
 async function fetchText(url, opts = {}) {
   const ctrl = new AbortController();
-  const t = setTimeout(() => ctrl.abort(), 20000);
+  const t = setTimeout(() => ctrl.abort(), 30000); // some podcast feeds are several MB
   try {
     const r = await fetch(url, { headers: { 'User-Agent': UA, ...opts.headers }, signal: ctrl.signal });
     if (!r.ok) return null;

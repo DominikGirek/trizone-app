@@ -1,15 +1,65 @@
 {
-  "note": "Watchlist for the Code-Radar robot (scripts/ingest-codes.mjs). ADD A SOURCE = ADD ONE ENTRY here. For podcasts you only need `name` (+ optional `athleteId` if it's a pro's own show); the robot auto-resolves the RSS feed via the iTunes lookup. Set `rss` to pin an exact feed, or `country` (default DE) to disambiguate. `type` 'youtube' / 'affiliate' handlers come in later stages — same file, just new entries.",
+  "note": "Watchlist for the Code-Radar robot (scripts/ingest-codes.mjs). ADD A SOURCE = ADD ONE ENTRY here. For podcasts you only need `name` (+ optional `athleteId` if it's a pro's own show); the robot auto-resolves the RSS feed via the iTunes lookup. Set `country` (default DE) to hit the right store, or `rss` to pin an exact feed. `type` 'youtube' / 'affiliate' handlers come in later stages — same file, just new entries. Source names verified against the iTunes catalogue 2026-06-23.",
   "sources": [
     { "name": "Pushing Limits Podcast", "type": "podcast" },
     { "name": "Achilles Running", "type": "podcast" },
     { "name": "Einer rennt, einer hinterher", "type": "podcast" },
     { "name": "PACE - der Ausdauerpodcast", "type": "podcast" },
     { "name": "Schnellerwerden", "type": "podcast" },
+    { "name": "Laufen ist einfach", "type": "podcast" },
+    { "name": "Auslaufen", "type": "podcast" },
+    { "name": "Frodeno Going Mental", "type": "podcast", "athleteId": "jan-frodeno" },
+
+    { "name": "Mission Triathlon", "type": "podcast" },
+    { "name": "Klartext Triathlon", "type": "podcast" },
+    { "name": "Think Complete Ausdauer und Triathlon Podcast", "type": "podcast" },
+    { "name": "Tri it Fit", "type": "podcast" },
+    { "name": "Triathlon Querbeet", "type": "podcast" },
+    { "name": "In der Wechselzone", "type": "podcast" },
+    { "name": "Watt is los", "type": "podcast" },
+
+    { "name": "FatBoysRun", "type": "podcast" },
+    { "name": "runSkills", "type": "podcast" },
+    { "name": "runventure", "type": "podcast" },
+
+    { "name": "Der Besenwagen", "type": "podcast" },
+    { "name": "Antritt", "type": "podcast" },
+    { "name": "Wattasia", "type": "podcast" },
+    { "name": "ENJOYYOURBIKE", "type": "podcast" },
+
     { "name": "That Triathlon Show", "type": "podcast", "country": "US" },
     { "name": "The Triathlon Hour", "type": "podcast", "country": "GB" },
-    { "name": "Frodeno Going Mental", "type": "podcast", "athleteId": "jan-frodeno" },
-    { "name": "Laufen ist einfach", "type": "podcast" },
-    { "name": "Auslaufen", "type": "podcast" }
+    { "name": "The Norwegian Method", "type": "podcast", "country": "US" },
+    { "name": "Fitter Radio", "type": "podcast", "country": "US" },
+    { "name": "Purple Patch Podcast", "type": "podcast", "country": "US" },
+    { "name": "Crushing Iron Triathlon Podcast", "type": "podcast", "country": "US" },
+    { "name": "TriDot Triathlon Podcast", "type": "podcast", "country": "US" },
+    { "name": "Tri Beginners Luck", "type": "podcast", "country": "US" },
+    { "name": "Triathlon Science", "type": "podcast", "country": "GB" },
+    { "name": "The Greg Bennett Show", "type": "podcast", "country": "US" },
+
+    { "name": "Marathon Talk", "type": "podcast", "country": "GB" },
+    { "name": "Bad Boy Running", "type": "podcast", "country": "GB" },
+    { "name": "The Running Channel Podcast", "type": "podcast", "country": "GB" },
+    { "name": "Marathon Training Academy", "type": "podcast", "country": "US" },
+    { "name": "The Strength Running Podcast", "type": "podcast", "country": "US" },
+    { "name": "Run to the Top", "type": "podcast", "country": "US" },
+    { "name": "The Morning Shakeout Podcast", "type": "podcast", "country": "US" },
+    { "name": "Single Malt Marathoners", "type": "podcast", "country": "GB" },
+    { "name": "The Running Hub", "type": "podcast", "country": "GB" },
+
+    { "name": "KoopCast", "type": "podcast", "country": "US" },
+    { "name": "Some Work All Play", "type": "podcast", "country": "US" },
+    { "name": "Singletrack", "type": "podcast", "country": "US" },
+    { "name": "Dirt Church Radio", "type": "podcast", "country": "US" },
+    { "name": "Ten Junk Miles", "type": "podcast", "country": "US" },
+
+    { "name": "The Cycling Podcast", "type": "podcast", "country": "GB" },
+    { "name": "Lanterne Rouge Cycling Podcast", "type": "podcast", "country": "GB" },
+    { "name": "Life in the Peloton", "type": "podcast", "country": "AU" },
+    { "name": "The Roadman Cycling Podcast", "type": "podcast", "country": "GB" },
+    { "name": "Empirical Cycling", "type": "podcast", "country": "US" },
+    { "name": "Fast Talk", "type": "podcast", "country": "US" },
+    { "name": "The NERO Show", "type": "podcast", "country": "GB" }
   ]
 }

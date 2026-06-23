@@ -1,7 +1,30 @@
 {
-  "generatedAt": "2026-06-23T09:12:04.879Z",
+  "generatedAt": "2026-06-23T09:26:17.096Z",
   "note": "Code candidates found by the Code-Radar robot. Review and move good ones into src/lib/discountCodes.ts. NOT shown in the app.",
   "candidates": [
+    {
+      "id": "cand-mission-triathlon-mtprabatt",
+      "code": "MTPRABATT",
+      "podcast": "Mission Triathlon",
+      "episode": "Caro Pohle: erst Langdistanz & Käsebrötchenliebe - MTP Folge 198",
+      "date": "2026-06-23",
+      "url": "https://mission-triathlon.de",
+      "snippet": "👉 https://racing-team.me Den ersten Monat gratis bekommst Du mit dem Code: MTPRABATT Dieser Podcast wird Dir präsentiert von https://mission-triathl",
+      "status": "pending"
+    },
+    {
+      "id": "cand-singletrack-singletrack",
+      "code": "SINGLETRACK",
+      "brand": "Precision Fuel",
+      "brandId": "precision",
+      "percent": 15,
+      "podcast": "Singletrack",
+      "episode": "Lotti Brinks | 2026 Western States 100 Pre-Race Interview",
+      "date": "2026-06-23",
+      "url": "Buzzsprout-19388634",
+      "snippet": "and her race-day goals. Partners: Precision Fuel and Hydration - use code SINGLETRACK at checkout for 15% off your next order Norda - check out the 00",
+      "status": "pending"
+    },
     {
       "id": "cand-schnellerwerden-schneller10",
       "code": "SCHNELLER10",
@@ -30,6 +53,42 @@
       "status": "pending"
     },
     {
+      "id": "cand-klartext-triathlon-klartext10",
+      "code": "KLARTEXT10",
+      "brand": "feels.like",
+      "brandId": "feelslike",
+      "podcast": "Klartext Triathlon",
+      "episode": "Triathlon-IQ: Hitze- wie reagiere ich im Training und im Wettkampf?",
+      "date": "2026-06-22",
+      "url": "https://redcircle.com/shows/baa4ab11-3bd2-4e04-97d6-dfce70f2c37b/episodes/3ba150e8-8d05-46e1-8025-6cb6d20b8e57",
+      "snippet": "athletes. (@feelslike.sport) • Instagram-Fotos und -Videos</a></p><p>RABATTCODE: KLARTEXT10</p><p><strong>Schneider und Piecha</strong></p><p><a href",
+      "status": "pending"
+    },
+    {
+      "id": "cand-marathon-training-academy-mta",
+      "code": "MTA",
+      "percent": 15,
+      "podcast": "Marathon Training Academy",
+      "episode": "More Ask the Coach Q&A",
+      "date": "2026-06-20",
+      "url": "https://www.marathontrainingacademy.com/more-ask-the-coach-qa?utm_source=rss&utm_medium=rss&utm_campaign=more-ask-the-coach-qa",
+      "snippet": "ll be most comfortable for your sleep position and body type. Use the code “MTA” for 15% off your first purchase. Altra Running -Altra shoes ar",
+      "status": "pending"
+    },
+    {
+      "id": "cand-marathon-training-academy-mta10",
+      "code": "MTA10",
+      "brand": "AG1",
+      "brandId": "ag1",
+      "percent": 10,
+      "podcast": "Marathon Training Academy",
+      "episode": "More Ask the Coach Q&A",
+      "date": "2026-06-20",
+      "url": "https://www.marathontrainingacademy.com/more-ask-the-coach-qa?utm_source=rss&utm_medium=rss&utm_campaign=more-ask-the-coach-qa",
+      "snippet": "Fit, with room for your toes for comfort, balance, and strength. Use code MTA10 for 10% off. And Stay Out There with Altra. AG1 Next Gen has new",
+      "status": "pending"
+    },
+    {
       "id": "cand-pace-der-ausdauerpodcast-pace",
       "code": "PACE",
       "brand": "PILLAR Performance",
@@ -55,6 +114,19 @@
       "status": "pending"
     },
     {
+      "id": "cand-der-besenwagen-besenwagen",
+      "code": "BESENWAGEN",
+      "brand": "BLACKROLL",
+      "brandId": "blackroll",
+      "percent": 10,
+      "podcast": "Der Besenwagen",
+      "episode": "Einseitig Aero (mit Tobias Müller)",
+      "date": "2026-06-18",
+      "url": "https://www.besenwagen.com/403-einseitigaero",
+      "snippet": "nd Besenwagen bei der Erholung punkten und dabei noch sparen! Mit dem Code BESENWAGEN gibt es 10% Rabatt auf alle Produkte (ausser Sale) → blackroll.d",
+      "status": "pending"
+    },
+    {
       "id": "cand-that-triathlon-show-tts",
       "code": "TTS",
       "podcast": "That Triathlon Show",
@@ -76,6 +148,16 @@
       "status": "pending"
     },
     {
+      "id": "cand-the-strength-running-podcast-strength20",
+      "code": "STRENGTH20",
+      "podcast": "The Strength Running Podcast",
+      "episode": "2:11 Marathoner Charlie Sweeney on Mega Mileage: How He Runs 145 Mile Weeks",
+      "date": "2026-06-18",
+      "url": "https://strengthrunning.libsyn.com/211-marathoner-charlie-sweeney-on-mega-mileage-how-he-runs-145-mile-weeks",
+      "snippet": "l destination race weekend right at the foothills of the Rockies. Use code STRENGTH20 for $20 off the marathon or half marathon. Join me in Boulder, o",
+      "status": "pending"
+    },
+    {
       "id": "cand-auslaufen-auslaufen",
       "code": "AUSLAUFEN",
       "brand": "BLACKROLL",
@@ -88,6 +170,28 @@
       "status": "pending"
     },
     {
+      "id": "cand-watt-is-los-podcast",
+      "code": "PODCAST",
+      "podcast": "Watt is los",
+      "episode": "Danke für 4,5 Jahre! Watt is los Behind The Scenes (das Ende)",
+      "date": "2026-06-16",
+      "url": "https://watt-is-los-podcast.captivate.fm/episode/danke-fur-4-5-jahre-watt-is-los-behind-the-scenes",
+      "snippet": "und direkt mit passenden Marken umsetzen. Jetzt registrieren und mit Code PODCAST den ersten Monat kostenlos testen. Hier kostenfrei dein Athleten",
+      "status": "pending"
+    },
+    {
+      "id": "cand-some-work-all-play-swap",
+      "code": "SWAP",
+      "brand": "Wahoo",
+      "brandId": "wahoo",
+      "podcast": "Some Work All Play",
+      "episode": "315. How Lower Carb Arguments Miss The Mark, Answering Bicarb Questions, Overload Weeks, and Heat Training!",
+      "date": "2026-06-16",
+      "url": "https://podcasters.spotify.com/pod/show/someworkallplay/episodes/315--How-Lower-Carb-Arguments-Miss-The-Mark--Answering-Bicarb-Questions--Overload-Weeks--and-Heat-Training-e3ksh8n",
+      "snippet": "d here: thefeed.com/swap Buy Janji's amazing gear: https://janji.com (code \"SWAP\") Wahoo Kickr Run treadmill: https://www.wahoofitness.com/devic",
+      "status": "pending"
+    },
+    {
       "id": "cand-the-triathlon-hour-tth15",
       "code": "TTH15",
       "percent": 15,
@@ -96,6 +200,31 @@
       "date": "2026-06-15",
       "url": "https://HowTheyTrain.podbean.com/e/gustav-ep-with-3-ads/",
       "snippet": "ant to hear. This podcast was worth the wait. Try NOMIO for yourself. Discount code - TTH15 (for 15% off). In Europe - https://drinknomio.com In",
+      "status": "pending"
+    },
+    {
+      "id": "cand-lanterne-rouge-cycling-podcast-lrcp15",
+      "code": "LRCP15",
+      "brand": "Maurten",
+      "brandId": "maurten",
+      "percent": 15,
+      "podcast": "Lanterne Rouge Cycling Podcast",
+      "episode": "Tour Auvergne - Rhône-Alpes Stage 8",
+      "date": "2026-06-14",
+      "url": "https://shows.acast.com/lanterne-rouge-cycling-podcast/episodes/tour-auvergne-rhone-alpes-stage-8",
+      "snippet": "the fastest riders in the peloton. Get 15% off your first order with code LRCP15 👉 https://www.maurten.com 🚴‍♂️ Want to reach your goals with c",
+      "status": "pending"
+    },
+    {
+      "id": "cand-lanterne-rouge-cycling-podcast-lrcp",
+      "code": "LRCP",
+      "brand": "Maurten",
+      "brandId": "maurten",
+      "podcast": "Lanterne Rouge Cycling Podcast",
+      "episode": "Tour Auvergne - Rhône-Alpes Stage 8",
+      "date": "2026-06-14",
+      "url": "https://shows.acast.com/lanterne-rouge-cycling-podcast/episodes/tour-auvergne-rhone-alpes-stage-8",
+      "snippet": "mpaigns/lanternerouge 🛡️ Get your first 30 days free with Laka using code LRCP. T&Cs apply, new customers only 👉 https://laka.co ☕ Become an L",
       "status": "pending"
     },
     {
@@ -123,6 +252,28 @@
       "status": "pending"
     },
     {
+      "id": "cand-the-strength-running-podcast-jason15",
+      "code": "jason15",
+      "percent": 15,
+      "podcast": "The Strength Running Podcast",
+      "episode": "Plyometrics: How to Start the Easy Way, with 5x National Champ Eoin Everard",
+      "date": "2026-06-11",
+      "url": "https://strengthrunning.libsyn.com/plyometrics-how-to-start-the-easy-way-with-5x-national-champ-eoin-everard",
+      "snippet": "in! Thank you Previnex! Get yourself 15% off your first purchase with code jason15 here . Previnex is a unique supplement company - one that I trus",
+      "status": "pending"
+    },
+    {
+      "id": "cand-the-strength-running-podcast-strengthrun10",
+      "code": "STRENGTHRUN10",
+      "percent": 10,
+      "podcast": "The Strength Running Podcast",
+      "episode": "Plyometrics: How to Start the Easy Way, with 5x National Champ Eoin Everard",
+      "date": "2026-06-11",
+      "url": "https://strengthrunning.libsyn.com/plyometrics-how-to-start-the-easy-way-with-5x-national-champ-eoin-everard",
+      "snippet": "arned how important (and rare) this simple movement is. Save 10% with code STRENGTHRUN10 at checkout at moboboard.com . Thanks to The Performance Trainin",
+      "status": "pending"
+    },
+    {
       "id": "cand-frodeno-going-mental-ironman10",
       "code": "IRONMAN10",
       "brand": "Ryzon",
@@ -134,6 +285,80 @@
       "date": "2026-06-08",
       "url": "6605f1aa-60f9-11f1-bbe6-ffabc90751bb",
       "snippet": "combining technical innovation with a clean, timeless design. Use the code “IRONMAN10” to save 10% at Ryzon (valid until July 31, 2026). https://ryzo",
+      "status": "pending"
+    },
+    {
+      "id": "cand-the-nero-show-nero10",
+      "code": "NERO10",
+      "brand": "Specialized",
+      "brandId": "specialized",
+      "percent": 10,
+      "podcast": "The NERO Show",
+      "episode": "Vingegaard Back to Tadej Level? + New S-Works Crux 5 | NERO Show",
+      "date": "2026-06-03",
+      "url": "https://shows.acast.com/the-nero-show-1/episodes/vingegaard-back-to-tadej-level-new-s-works-crux-5-nero-show",
+      "snippet": "Pro and Chris chats about the Australian Gravel Championship. 🧦 Use Code NERO10 for 10% off the best aero accessories: https://velotoze.com/ 💻",
+      "status": "pending"
+    },
+    {
+      "id": "cand-marathon-training-academy-mta40",
+      "code": "MTA40",
+      "percent": 40,
+      "podcast": "Marathon Training Academy",
+      "episode": "Hard Work Pays Off -Interview with Cari Masek",
+      "date": "2026-06-02",
+      "url": "https://www.marathontrainingacademy.com/cari-masek-2?utm_source=rss&utm_medium=rss&utm_campaign=cari-masek-2",
+      "snippet": "AN is doing their biggest sale of the year! Get 40% OFF sitewide with code MTA40 . Stock up on long-lasting, easy-on-the-gut fuel, including the",
+      "status": "pending"
+    },
+    {
+      "id": "cand-enjoyyourbike-enjoyyourbike-20",
+      "code": "ENJOYYOURBIKE-20",
+      "percent": 20,
+      "podcast": "ENJOYYOURBIKE",
+      "episode": "199: ENVE MOG von André! Und: ENVE G SES 4.5 Test & Mai-Schnee in den Alpen",
+      "date": "2026-05-22",
+      "url": "https://enjoyyourbike.podigee.io/200-199-enve-mog-von-andre-und-enve-g-ses-4-5-test-mai-schnee-in-den-alpen",
+      "snippet": "jeden Fahrstil und frei von allem, was nicht wesentlich ist. Mit dem CODE ENJOYYOURBIKE-20 spart Ihr 20% auf www.gonso.de ! ## LINKS ZU PRODUKTEN & THEMEN",
+      "status": "pending"
+    },
+    {
+      "id": "cand-enjoyyourbike-enjoy10",
+      "code": "ENJOY10",
+      "brand": "BLACKROLL",
+      "brandId": "blackroll",
+      "percent": 10,
+      "podcast": "ENJOYYOURBIKE",
+      "episode": "198: Mehr Energie, mehr Reifen - Ingos SPD-Cleat-Fehler - Ingos TIME ADHX 45 Review",
+      "date": "2026-05-08",
+      "url": "https://enjoyyourbike.podigee.io/199-198-mehr-energie-mehr-reifen-ingos-spd-cleat-fehler-ingos-time-adhx-45-review",
+      "snippet": "leicht die Länge ;-) ## BLACKROLL RECOVERY PILLOW & MASSAGEPISTOLE ## Code: ENJOY10 Damit gibt es 10% auf alle nicht reduzierten Produkte im deutsc",
+      "status": "pending"
+    },
+    {
+      "id": "cand-in-der-wechselzone-plattfuss10",
+      "code": "PLATTFUSS10",
+      "brand": "Polar",
+      "brandId": "polar",
+      "percent": 10,
+      "podcast": "In der Wechselzone",
+      "episode": "In der Wechselzone mit Dr. Marie Prüßmann über „Longevity“",
+      "date": "2026-02-10",
+      "url": "https://podcasters.spotify.com/pod/show/hannes813/episodes/In-der-Wechselzone-mit-Dr--Marie-Prmann-ber-Longevity-e3etbvl",
+      "snippet": "chaftlich fundiert dosiert und ohne unnötigen Schnickschnack. Mit dem Code PLATTFUSS10 bekommst du 10 Prozent Rabatt auf deine Bestellung. Kjavik steht",
+      "status": "pending"
+    },
+    {
+      "id": "cand-in-der-wechselzone-plattfuss",
+      "code": "PLATTFUSS",
+      "brand": "Polar",
+      "brandId": "polar",
+      "percent": 15,
+      "podcast": "In der Wechselzone",
+      "episode": "In der Wechselzone mit Dr. Marie Prüßmann über „Longevity“",
+      "date": "2026-02-10",
+      "url": "https://podcasters.spotify.com/pod/show/hannes813/episodes/In-der-Wechselzone-mit-Dr--Marie-Prmann-ber-Longevity-e3etbvl",
+      "snippet": "elt wurden – für natürliche Bewegung und ein neues Fußgefühl. Mit dem Code PLATTFUSS bekommst du 15 % Rabatt , gratis Versand und zusätzlich das KJAV",
       "status": "pending"
     }
   ]

@@ -56,11 +56,25 @@ Fehltreffer einfach ignorieren.
 ## Manuell starten / lokal testen
 
 ```bash
-npm run ingest:codes                 # newest 4 episodes/feed, last 180 days
-node scripts/ingest-codes.mjs --max=8 --days=120
+npm run ingest:codes                 # newest 4 episodes/feed, last 365 days
+node scripts/ingest-codes.mjs --max=8 --days=400
 ```
 
 Oder auf GitHub: **Actions → „Code-Radar (podcasts)" → Run workflow**.
+
+## Bekannte Grenze: veraltete iTunes-Feeds
+
+Bei wenigen Podcasts liefert die iTunes-Suche einen **alten Feed** (der Podcast
+ist zu einem neuen Hoster umgezogen) → im Log steht „0 episodes". Das ist nicht
+kaputt, nur stale. Fix = den **aktuellen RSS-Link pinnen**:
+
+```jsonc
+{ "name": "FatBoysRun", "type": "podcast", "rss": "https://aktueller-feed.xml" }
+```
+
+Den aktuellen Feed findest du auf der Podcast-Website oder via „RSS"-Link bei
+fyyd.de / castfeedvalidator. Aktuell betrifft das u. a. FatBoysRun, Tri it Fit,
+Triathlon Science, The Greg Bennett Show.
 
 ## Ausbaustufen
 
