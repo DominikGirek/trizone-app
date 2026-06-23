@@ -209,6 +209,43 @@ function parseItems(xml, max, cutoff) {
   return out;
 }
 
+// --- YouTube (no API key) ----------------------------------------------------
+// Every channel exposes an Atom feed at feeds/videos.xml?channel_id=UC… that
+// includes the full video description (<media:description>) — same idea as a
+// podcast feed, that's where channels put their sponsor codes.
+const BROWSER_UA = 'Mozilla/5.0 (TriZone-CodeRadar)';
+const channelCache = new Map();
+async function resolveChannelId(url) {
+  if (!url) return null;
+  let m = url.match(/channel\/(UC[\w-]+)/);
+  if (m) return m[1];
+  if (/^UC[\w-]+$/.test(url)) return url; // raw id given
+  if (channelCache.has(url)) return channelCache.get(url);
+  const html = await fetchText(url, { headers: { 'User-Agent': BROWSER_UA } });
+  m = html && (html.match(/"channelId":"(UC[\w-]+)"/) || html.match(/channel\/(UC[\w-]+)/));
+  const cid = m ? m[1] : null;
+  channelCache.set(url, cid);
+  return cid;
+}
+
+function parseYouTube(xml, max, cutoff) {
+  const entries = [...xml.matchAll(/<entry>[\s\S]*?<\/entry>/g)].map((m) => m[0]);
+  const out = [];
+  for (const e of entries) {
+    const date = new Date(clean(tag(e, 'published')) || 0);
+    if (cutoff && +date && +date < cutoff) continue;
+    const vid = (e.match(/<yt:videoId>([^<]+)<\/yt:videoId>/) || [])[1];
+    out.push({
+      title: clean(tag(e, 'title')),
+      body: clean(tag(e, 'media:description')),
+      date: +date ? date.toISOString().slice(0, 10) : '',
+      link: vid ? `https://youtu.be/${vid}` : '',
+    });
+    if (out.length >= max) break;
+  }
+  return out;
+}
+
 const slug = (s) => norm(s).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40);
 
 // --- Main --------------------------------------------------------------------
@@ -222,24 +259,41 @@ async function main() {
 
   const candidates = new Map(); // dedupe key -> candidate
   for (const src of sources) {
-    if (src.type !== 'podcast') {
-      console.log(`· skip ${src.name} (type "${src.type}" not handled yet)`);
+    let items;
+    if (src.type === 'podcast') {
+      const feed = await resolveFeed(src);
+      if (!feed) {
+        console.log(`· ${src.name}: no RSS feed resolved`);
+        continue;
+      }
+      const xml = await fetchText(feed);
+      if (!xml) {
+        console.log(`· ${src.name}: feed fetch failed`);
+        continue;
+      }
+      items = parseItems(xml, MAX_ITEMS, cutoff);
+    } else if (src.type === 'youtube') {
+      const cid = await resolveChannelId(src.youtube || src.url);
+      if (!cid) {
+        console.log(`· ${src.name}: no YouTube channel resolved`);
+        continue;
+      }
+      const xml = await fetchText(`https://www.youtube.com/feeds/videos.xml?channel_id=${cid}`, {
+        headers: { 'User-Agent': BROWSER_UA },
+      });
+      if (!xml) {
+        console.log(`· ${src.name}: YouTube feed fetch failed`);
+        continue;
+      }
+      items = parseYouTube(xml, MAX_ITEMS, cutoff);
+    } else {
+      console.log(`· skip ${src.name} (type "${src.type}" not handled)`);
       continue;
     }
-    const feed = await resolveFeed(src);
-    if (!feed) {
-      console.log(`· ${src.name}: no RSS feed resolved`);
-      continue;
-    }
-    const xml = await fetchText(feed);
-    if (!xml) {
-      console.log(`· ${src.name}: feed fetch failed (${feed})`);
-      continue;
-    }
-    const items = parseItems(xml, MAX_ITEMS, cutoff);
+
     let n = 0;
     for (const it of items) {
-      for (const c of extract(it.body, { podcast: src.name, episode: it.title, date: it.date, url: it.link }, now)) {
+      for (const c of extract(it.body, { source: src.name, sourceType: src.type, episode: it.title, date: it.date, url: it.link }, now)) {
         if (live.has(c.code.toLowerCase())) continue; // already a live code
         if (c.validUntil && c.validUntil < todayISO) continue; // already expired → drop
         const brand = matchBrand(`${c.snippet} ${it.body.slice(0, 400)}`, brands);
@@ -253,7 +307,8 @@ async function main() {
           percent: c.percent,
           validUntil: c.validUntil,
           athleteId: src.athleteId,
-          podcast: c.podcast,
+          source: c.source,
+          sourceType: c.sourceType,
           episode: c.episode,
           date: c.date,
           url: c.url,
@@ -263,7 +318,8 @@ async function main() {
         n++;
       }
     }
-    console.log(`· ${src.name}: ${items.length} episodes → ${n} candidate(s)`);
+    const unit = src.type === 'youtube' ? 'videos' : 'episodes';
+    console.log(`· ${src.name}: ${items.length} ${unit} → ${n} candidate(s)`);
   }
 
   const list = [...candidates.values()].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
@@ -274,7 +330,7 @@ async function main() {
   if (list.length) {
     console.log('\nTop candidates:');
     for (const c of list.slice(0, 25)) {
-      console.log(`  [${c.brand || '??'}] ${c.code}${c.percent ? ` (${c.percent}%)` : ''}${c.validUntil ? ` [bis ${c.validUntil}]` : ''} — ${c.podcast}${c.athleteId ? ` · ${c.athleteId}` : ''}`);
+      console.log(`  [${c.brand || '??'}] ${c.code}${c.percent ? ` (${c.percent}%)` : ''}${c.validUntil ? ` [bis ${c.validUntil}]` : ''} — ${c.sourceType === 'youtube' ? '▶ ' : ''}${c.source}${c.athleteId ? ` · ${c.athleteId}` : ''}`);
     }
   }
 }

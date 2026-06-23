@@ -1,5 +1,5 @@
 {
-  "note": "Watchlist for the Code-Radar robot (scripts/ingest-codes.mjs). ADD A SOURCE = ADD ONE ENTRY here. For podcasts you only need `name` (+ optional `athleteId` if it's a pro's own show); the robot auto-resolves the RSS feed via the iTunes lookup. Set `country` (default DE) to hit the right store, or `rss` to pin an exact feed. `type` 'youtube' / 'affiliate' handlers come in later stages — same file, just new entries. Source names verified against the iTunes catalogue 2026-06-23.",
+  "note": "Watchlist for the Code-Radar robot (scripts/ingest-codes.mjs). ADD A SOURCE = ADD ONE ENTRY here. For podcasts you only need `name` (+ optional `athleteId` if it's a pro's own show); the robot auto-resolves the RSS feed via the iTunes lookup. Set `country` (default DE) to hit the right store, or `rss` to pin an exact feed. `type` 'podcast' (auto-resolves RSS) and `type` 'youtube' (give a channel URL or @handle in `youtube` — the robot reads the keyless channel feed incl. video descriptions) are live; 'affiliate' comes later. Verified against the iTunes / YouTube catalogues 2026-06-23.",
   "sources": [
     { "name": "Pushing Limits Podcast", "type": "podcast" },
     { "name": "Achilles Running", "type": "podcast" },
@@ -60,6 +60,15 @@
     { "name": "The Roadman Cycling Podcast", "type": "podcast", "country": "GB" },
     { "name": "Empirical Cycling", "type": "podcast", "country": "US" },
     { "name": "Fast Talk", "type": "podcast", "country": "US" },
-    { "name": "The NERO Show", "type": "podcast", "country": "GB" }
+    { "name": "The NERO Show", "type": "podcast", "country": "GB" },
+
+    { "name": "Lionel Sanders (YouTube)", "type": "youtube", "youtube": "https://www.youtube.com/@Lionel.Sanders", "athleteId": "lionel-sanders" },
+    { "name": "Sam Long (YouTube)", "type": "youtube", "youtube": "https://www.youtube.com/@SamYoYoYoLong", "athleteId": "sam-long" },
+    { "name": "Frederic Funk (YouTube)", "type": "youtube", "youtube": "https://www.youtube.com/@FredericFunk97", "athleteId": "frederic-funk" },
+    { "name": "Lucy Charles-Barclay (YouTube)", "type": "youtube", "youtube": "https://www.youtube.com/channel/UC6PP69DCmBwMCPf9RSSTNTg", "athleteId": "lucy-charles-barclay" },
+    { "name": "Sebastian Kienle (YouTube)", "type": "youtube", "youtube": "https://www.youtube.com/@SebastianKienleTriathlete", "athleteId": "sebastian-kienle" },
+    { "name": "Daniela Ryf (YouTube)", "type": "youtube", "youtube": "https://www.youtube.com/@danielaryf", "athleteId": "daniela-ryf" },
+    { "name": "Global Triathlon Network", "type": "youtube", "youtube": "https://www.youtube.com/@gtn" },
+    { "name": "Global Cycling Network", "type": "youtube", "youtube": "https://www.youtube.com/@gcn" }
   ]
 }

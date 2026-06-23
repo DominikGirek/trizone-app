@@ -30,7 +30,15 @@ Podcasts (RSS)  →  scripts/ingest-codes.mjs  →  src/data/codeInbox.json  →
   - `"country": "US"` / `"GB"` — falls der Name im falschen Store landet (Standard: DE).
   - `"rss": "https://…"` — exakten Feed festnageln, statt ihn suchen zu lassen.
 
-Beim nächsten Lauf ist die Quelle dabei. Fertig.
+Für einen **YouTube-Kanal** stattdessen:
+
+```jsonc
+{ "name": "Lionel Sanders (YouTube)", "type": "youtube",
+  "youtube": "https://www.youtube.com/@Lionel.Sanders", "athleteId": "lionel-sanders" }
+```
+
+(Kanal-URL, `@handle` oder `channel/UC…` — der Roboter liest den keyless
+Kanal-Feed inkl. Video-Beschreibungen.) Beim nächsten Lauf ist die Quelle dabei.
 
 ## So prüfst du die Funde
 
@@ -79,9 +87,11 @@ Triathlon Science, The Greg Bennett Show.
 ## Ausbaustufen
 
 - **Stufe 1 (jetzt):** Podcasts via RSS-Shownotes. ✅
-- **Stufe 2:** YouTube — Video-Beschreibungen + Untertitel über die offizielle
-  YouTube-Data-API (braucht einen gratis API-Key als GitHub-Secret). Neue
-  Einträge mit `"type": "youtube"`.
+- **Stufe 2 (jetzt):** YouTube — Video-Beschreibungen über den **keyless**
+  Kanal-Feed (kein API-Key, kein Secret!). ✅ Neue Quelle:
+  `{ "name": "…", "type": "youtube", "youtube": "https://www.youtube.com/@handle", "athleteId": "…" }`
+  (Kanal-URL, `@handle` oder `channel/UC…`). Nur-gesprochene Codes (nicht in der
+  Beschreibung) bräuchten Untertitel/Whisper → späterer Ausbau.
 - **Stufe 3:** Affiliate-Feeds (Awin etc.) als „Wahrheits-Schicht" mit echtem
   Ablaufdatum. `"type": "affiliate"`.
 - **Instagram:** bewusst manuell (kein offener Zugang, Sperr-Risiko).
