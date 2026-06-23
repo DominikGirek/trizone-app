@@ -107,8 +107,16 @@ async function seriesRaces() {
 // articles to upcoming races by host-city token + year. triathlon.de covers German +
 // major international races, often in prose the table parsers can't read but Haiku
 // can, e.g. "challenge-roth-2026-das-staerkste-profifeld-aller-zeiten".
-const SITEMAPS = ['https://triathlon.de/sitemap_blogs_1.xml'];
-const FIELD_RE = /starterfeld|startliste|startlist|elitefeld|profifeld|profi-?feld|favoriten|profi/i;
+// Publisher sitemaps. triathlon.de (DE) covers German + major races; triatlonnoticias
+// (ES) covers Spanish + many international IRONMAN/Challenge/T100 fields that German
+// media skip (e.g. "ironman-lanzarote-2026-start-list"). A sitemap-INDEX is expanded to
+// its most recent sub-sitemaps. Add more publishers (FR/IT/EN) here to widen coverage.
+const SITEMAPS = [
+  'https://triathlon.de/sitemap_blogs_1.xml',
+  'https://www.triatlonnoticias.com/sitemap_index.xml',
+];
+// Field-article markers across languages (DE/EN/ES/FR/IT).
+const FIELD_RE = /starterfeld|startliste|start-?list|elitefeld|profifeld|profi-?feld|favoriten|favoritos|\bprofi\b|salida|inscritos|engag[ée]s|lista-?de-?(salida|partenza)|previa/i;
 const GENERIC_TOK = new Set([
   'ironman', 'im', 'challenge', 't100', 'wtcs', 'pto', 'triathlon', 'world',
   'european', 'championship', 'series', 'pro', 'profi', 'feld', 'das', 'der',
@@ -128,8 +136,15 @@ async function fieldArticles() {
   const urls = new Set();
   for (const sm of SITEMAPS) {
     const xml = (await get(sm)) || '';
-    for (const m of xml.matchAll(/https?:\/\/[^\s<]+/g)) {
-      if (TRI_DOMAIN.test(m[0]) && FIELD_RE.test(m[0])) urls.add(m[0]);
+    // A sitemap index points at sub-sitemaps — expand the most recent POST sitemaps
+    // (the index lists category/author/page sitemaps too; we only want article posts).
+    const subs = [...xml.matchAll(/<loc>\s*([^<\s]+\.xml)\s*<\/loc>/g)].map((m) => m[1]);
+    const posts = subs.filter((s) => /post|article|news|blog/i.test(s));
+    let body = subs.length ? '' : xml;
+    for (const sub of (posts.length ? posts : subs).slice(-3)) body += (await get(sub)) || '';
+    for (const m of body.matchAll(/https?:\/\/[^\s<]+/g)) {
+      const u = m[0];
+      if (TRI_DOMAIN.test(u) && FIELD_RE.test(u) && !/\.(jpg|jpeg|png|webp|gif|svg)/i.test(u)) urls.add(u);
     }
   }
   return [...urls];
@@ -147,8 +162,9 @@ const stripDate = (raw) => { try { const o = JSON.parse(raw); delete o.generated
 
 async function extractWithHaiku(text, ctx) {
   const prompt = ctx
-    ? `This article is about the PROFESSIONAL field for the triathlon race "${ctx.name}" (${ctx.date}). It may be a formal start list OR a preview/field announcement that names the pros.
-List EVERY professional/elite athlete the article names as racing / starting / entered / confirmed for THIS race. Return STRICT JSON:
+    ? `This article should be about the PROFESSIONAL field for the triathlon race "${ctx.name}" (${ctx.date}). It may be a formal start list OR a preview/field announcement that names the pros.
+FIRST verify it is actually about THIS race. A city can host several different events — if the article is about a DIFFERENT race (e.g. a World Triathlon Cup / a different distance / a different year), return {"isStartList":false}.
+Otherwise list EVERY professional/elite athlete the article names as racing / starting / entered / confirmed for THIS race. Return STRICT JSON:
 {"isStartList":true,"race":"${ctx.name}","date":"${ctx.date}","series":"ironman|ironman703|challenge|t100|wtcs|null","athletes":[{"name":"First Last","country":"ISO-2 or null","gender":"men|women|null"}]}
 Rules: ELITE/PRO only, never age groupers. Use ONLY full names literally in the text — never invent. INCLUDE someone only if the text says they ARE racing this event; EXCLUDE anyone described as absent, withdrawn, skipping, injured, or named only as a PAST winner. If the article names no pro starters for this race, return {"isStartList":false}. JSON only.
 
@@ -198,8 +214,17 @@ async function main() {
   for (const race of races) {
     const toks = cityTokens(race.name);
     if (!toks.length) continue;
-    const hits = articles.filter((u) => u.includes(String(race.year)) && toks.some((c) => u.toLowerCase().includes(c)));
-    for (const url of hits.slice(0, 2)) jobs.push({ url: url.split('?')[0], ctx: race });
+    const hits = articles.filter((u) => {
+      const lo = u.toLowerCase();
+      if (!toks.some((c) => lo.includes(c))) return false;
+      // accept the target year, or a year-less URL; reject a different explicit edition
+      const years = lo.match(/\b20\d{2}\b/g) || [];
+      return years.length === 0 || years.includes(String(race.year));
+    });
+    // Prefer explicit start-list articles over looser previews.
+    const score = (u) => (/start-?list|startliste|starterfeld|profifeld|profi-?feld|lista-?de/i.test(u) ? 0 : 1);
+    hits.sort((a, b) => score(a) - score(b));
+    for (const url of hits.slice(0, 3)) jobs.push({ url: url.split('?')[0], ctx: race });
   }
   console.log(`Per-race discovery queued ${jobs.length} candidate URLs from sitemaps`);
   try {
