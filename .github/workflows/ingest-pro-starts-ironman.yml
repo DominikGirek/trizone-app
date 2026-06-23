@@ -1,10 +1,9 @@
-name: Ingest IRONMAN pro start lists (headless)
+name: Ingest IRONMAN pro start lists
 
-# Weekly: drives a headless Chromium (Playwright) over ironman.com race pages, captures
-# the page's own athlete XHR JSON, keeps only verified pros (PTO World Ranking + our
-# roster), and writes src/data/proStartsIronman.json. ironman.com renders the pro field
-# client-side with no public API, so a real browser is the only way to read it. Heavier
-# than the pure-Node robots (installs Chromium); runs weekly + on demand.
+# Weekly: reads ironman.com's SERVER-RENDERED Pro Series starter pages
+# (/proseries/races/{slug}/starters-men|women) with a plain fetch — the names are in the
+# HTML, so no headless browser is needed. Writes src/data/proStartsIronman.json with a
+# separate men/women gender per athlete. Polite delays between requests.
 
 on:
   schedule:
@@ -29,20 +28,10 @@ jobs:
         with:
           node-version: "22"
 
-      - name: Install Playwright + Chromium
-        run: |
-          npm install playwright@latest
-          npx playwright install --with-deps chromium
-
-      - name: Render IRONMAN start lists
+      - name: Read IRONMAN Pro Series start lists
         run: node scripts/ingest-pro-starts-ironman.mjs
 
       - name: Commit starts if changed
         run: >-
           node scripts/ci-commit-data.mjs src/data/proStartsIronman.json
           "chore(data): refresh IRONMAN pro start lists"
-
-      - name: Commit rendered-race cache if changed
-        run: >-
-          node scripts/ci-commit-data.mjs src/data/ironmanSeenRaces.json
-          "chore(data): update IRONMAN rendered-race cache"

@@ -28,6 +28,16 @@ export default function StartListScreen() {
   if (isLoading) return <LoadingState />;
   if (!race) return <EmptyState message={t('startlist.empty')} />;
 
+  // Separate Pro Women / Pro Men tables; any entry without a known gender goes last.
+  const women = race.entries.filter((e) => e.athlete.gender === 'women');
+  const men = race.entries.filter((e) => e.athlete.gender === 'men');
+  const rest = race.entries.filter((e) => e.athlete.gender !== 'women' && e.athlete.gender !== 'men');
+  const groups = [
+    { label: t('startlist.women'), items: women },
+    { label: t('startlist.men'), items: men },
+    { label: women.length || men.length ? t('startlist.more') : t('startlist.field'), items: rest },
+  ].filter((g) => g.items.length);
+
   return (
     <ThemedView style={{ flex: 1 }}>
       <Stack.Screen options={{ title: t('startlist.title') }} />
@@ -50,43 +60,46 @@ export default function StartListScreen() {
           </ThemedText>
         </View>
 
-        <ThemedText type="smallBold" themeColor="textSecondary" style={styles.section}>
-          {t('startlist.count', { count: race.entries.length }).toUpperCase()}
-        </ThemedText>
-
-        {race.entries.map(({ athlete, start }) => {
-          const src = sourceLabel(start.url);
-          return (
-            <Pressable
-              key={athlete.id}
-              onPress={() => router.push(`/athlete/${athlete.id}`)}
-              style={({ pressed }) => [
-                styles.row,
-                { borderColor: theme.border },
-                pressed && { backgroundColor: theme.backgroundElement },
-              ]}>
-              <ThemedText style={styles.flag}>{countryFlag(athlete.country)}</ThemedText>
-              <View style={{ flex: 1 }}>
-                <ThemedText type="smallBold" numberOfLines={1}>
-                  {athlete.name}
-                </ThemedText>
-                {!!src && (
-                  <ThemedText type="small" themeColor="textSecondary" style={{ fontSize: 11 }}>
-                    {t('startlist.via', { source: src })}
-                  </ThemedText>
-                )}
-              </View>
-              {start.confidence && (
-                <ThemedText
-                  type="small"
-                  style={{ fontSize: 11, color: start.confidence === 'confirmed' ? theme.primary : theme.textSecondary }}>
-                  {start.confidence === 'confirmed' ? `✓ ${t('profile.confirmed')}` : t('profile.expected')}
-                </ThemedText>
-              )}
-              <Ionicons name="chevron-forward" size={16} color={theme.textSecondary} />
-            </Pressable>
-          );
-        })}
+        {groups.map(({ label, items }) => (
+          <View key={label}>
+            <ThemedText type="smallBold" themeColor="textSecondary" style={styles.section}>
+              {label.toUpperCase()} · {items.length}
+            </ThemedText>
+            {items.map(({ athlete, start }) => {
+              const src = sourceLabel(start.url);
+              return (
+                <Pressable
+                  key={athlete.id}
+                  onPress={() => router.push(`/athlete/${athlete.id}`)}
+                  style={({ pressed }) => [
+                    styles.row,
+                    { borderColor: theme.border },
+                    pressed && { backgroundColor: theme.backgroundElement },
+                  ]}>
+                  <ThemedText style={styles.flag}>{countryFlag(athlete.country)}</ThemedText>
+                  <View style={{ flex: 1 }}>
+                    <ThemedText type="smallBold" numberOfLines={1}>
+                      {athlete.name}
+                    </ThemedText>
+                    {!!src && (
+                      <ThemedText type="small" themeColor="textSecondary" style={{ fontSize: 11 }}>
+                        {t('startlist.via', { source: src })}
+                      </ThemedText>
+                    )}
+                  </View>
+                  {start.confidence && (
+                    <ThemedText
+                      type="small"
+                      style={{ fontSize: 11, color: start.confidence === 'confirmed' ? theme.primary : theme.textSecondary }}>
+                      {start.confidence === 'confirmed' ? `✓ ${t('profile.confirmed')}` : t('profile.expected')}
+                    </ThemedText>
+                  )}
+                  <Ionicons name="chevron-forward" size={16} color={theme.textSecondary} />
+                </Pressable>
+              );
+            })}
+          </View>
+        ))}
       </ScrollView>
     </ThemedView>
   );

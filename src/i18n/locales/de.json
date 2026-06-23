@@ -315,6 +315,10 @@
   "startlist": {
     "title": "Profi-Starterliste",
     "open": "Profi-Starterliste",
+    "women": "Profi-Frauen",
+    "men": "Profi-Männer",
+    "more": "Weitere Profis",
+    "field": "Profi-Feld",
     "count_one": "{{count}} Profi",
     "count_other": "{{count}} Profis",
     "via": "Quelle: {{source}}",

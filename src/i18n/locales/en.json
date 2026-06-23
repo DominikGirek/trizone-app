@@ -315,6 +315,10 @@
   "startlist": {
     "title": "Pro start list",
     "open": "Pro start list",
+    "women": "Pro Women",
+    "men": "Pro Men",
+    "more": "More pros",
+    "field": "Pro field",
     "count_one": "{{count}} pro",
     "count_other": "{{count}} pros",
     "via": "Source: {{source}}",

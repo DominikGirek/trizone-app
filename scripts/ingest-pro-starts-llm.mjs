@@ -176,11 +176,10 @@ const stripDate = (raw) => { try { const o = JSON.parse(raw); delete o.generated
 
 async function extractWithHaiku(text, ctx) {
   const prompt = ctx
-    ? `This article should be about the PROFESSIONAL field for the triathlon race "${ctx.name}" (${ctx.date}). It may be a formal start list OR a preview/field announcement that names the pros.
-FIRST verify it is actually about THIS race. A city can host several different events — if the article is about a DIFFERENT race (e.g. a World Triathlon Cup / a different distance / a different year), return {"isStartList":false}.
-Otherwise list EVERY professional/elite athlete the article names as racing / starting / entered / confirmed for THIS race. Return STRICT JSON:
+    ? `This article is about the PROFESSIONAL field for the triathlon race "${ctx.name}" (${ctx.date}) — it may be a formal start list OR a preview / field announcement that names the pros. BOTH are valid.
+List EVERY professional/elite athlete the article names as racing / starting / entered / confirmed for this race. Return STRICT JSON:
 {"isStartList":true,"race":"${ctx.name}","date":"${ctx.date}","series":"ironman|ironman703|challenge|t100|wtcs|null","athletes":[{"name":"First Last","country":"ISO-2 or null","gender":"men|women|null"}]}
-Rules: ELITE/PRO only, never age groupers. Use ONLY full names literally in the text — never invent. INCLUDE someone only if the text says they ARE racing this event; EXCLUDE anyone described as absent, withdrawn, skipping, injured, or named only as a PAST winner. If the article names no pro starters for this race, return {"isStartList":false}. JSON only.
+Rules: ELITE/PRO only, never age groupers. Use ONLY full names literally in the text — never invent. INCLUDE someone only if the text says they ARE racing this event; EXCLUDE anyone described as absent / withdrawn / skipping / injured, or named only as a past winner. Return {"isStartList":false} ONLY if the article is clearly about a COMPLETELY different event, or names no pro starters at all. JSON only.
 
 ARTICLE:
 ${text.slice(0, 9000)}`
