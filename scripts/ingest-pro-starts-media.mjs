@@ -2,18 +2,18 @@
  * Pro start lists ingest — Stage 3 (media start-list articles).
  *
  * Triathlon media (triathlon.de, tri-mag.de, …) publish "Profi-Startliste <race>"
- * articles — server-rendered and often EARLIER than the official PTO/IRONMAN list
- * (e.g. IRONMAN Frankfurt is on triathlon.de before it's on protriathletes.org).
+ * articles — server-rendered and often EARLIER than the official PTO/IRONMAN list.
+ * Their pro field is a table: BIB (M1/W1 …) · Name · Nation (ISO-3). We PARSE that
+ * table directly (no LLM) → create every listed pro as an athlete (id slug, name,
+ * country from ISO-3→ISO-2, gender from the M/W bib, series from the race circuit)
+ * + a CONFIRMED upcoming start linking to the article.
  *
- * No LLM: the robot fetches each article from the registry (src/data/proStartArticles.json),
- * strips it to text, and matches it against our existing athlete roster (curated +
- * WTCS + PTO) by FULL name → adds a CONFIRMED upcoming start for each matched pro,
- * linking to the article. Full-name matching means no false positives, but it only
- * enriches athletes we already know (the roster grows via the WTCS/PTO robots).
+ * Important: <script>/<style> (incl. JSON-LD competitor blocks for OTHER events)
+ * are stripped first, and only the M#/W# table rows are read — so we get the whole
+ * field and nothing from teasers/related content.
  *
- * Pure Node built-ins. Writes src/data/proStartsMedia.json (starts only).
- *
- * Usage: node scripts/ingest-pro-starts-media.mjs
+ * Registry: src/data/proStartArticles.json. Pure Node built-ins.
+ * Writes src/data/proStartsMedia.json. Usage: node scripts/ingest-pro-starts-media.mjs
  */
 import { readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
@@ -24,7 +24,20 @@ const REG = resolve(ROOT, 'src/data/proStartArticles.json');
 const OUT = resolve(ROOT, 'src/data/proStartsMedia.json');
 const UA = 'Mozilla/5.0 (TriZone-ProRadar; +https://trizone.app)';
 
-const norm = (s) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+// ISO 3166-1 alpha-3 → alpha-2 (the codes triathlon.de uses). Endurance nations.
+const A3 = {
+  DEU: 'DE', GBR: 'GB', FRA: 'FR', ITA: 'IT', ESP: 'ES', NOR: 'NO', SWE: 'SE',
+  DNK: 'DK', FIN: 'FI', NLD: 'NL', BEL: 'BE', CHE: 'CH', AUT: 'AT', PRT: 'PT',
+  POL: 'PL', CZE: 'CZ', SVK: 'SK', HUN: 'HU', IRL: 'IE', LUX: 'LU', EST: 'EE',
+  LTU: 'LT', LVA: 'LV', UKR: 'UA', ROU: 'RO', BGR: 'BG', GRC: 'GR', HRV: 'HR',
+  SVN: 'SI', SRB: 'RS', USA: 'US', CAN: 'CA', MEX: 'MX', BRA: 'BR', ARG: 'AR',
+  CHL: 'CL', AUS: 'AU', NZL: 'NZ', ZAF: 'ZA', JPN: 'JP', CHN: 'CN', KOR: 'KR',
+  HKG: 'HK', SGP: 'SG', ISR: 'IL', TUR: 'TR', ISL: 'IS', RSA: 'ZA',
+};
+
+const slug = (s) =>
+  s.toLowerCase().replace(/ß/g, 'ss').normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
 async function fetchText(url) {
   const ctrl = new AbortController();
@@ -39,68 +52,75 @@ async function fetchText(url) {
   }
 }
 
-/** name(normalised, must contain a space) → athlete id, from all roster sources. */
-async function buildRoster() {
-  const roster = new Map();
-  const add = (name, id) => {
-    if (name && id && name.includes(' ')) roster.set(norm(name), id);
-  };
-  for (const f of ['src/data/proAthletes.json', 'src/data/proStartsPTO.json']) {
-    try {
-      const d = JSON.parse(await readFile(resolve(ROOT, f), 'utf8'));
-      for (const a of d.athletes ?? []) add(a.name, a.id);
-    } catch {
-      /* file may not exist yet */
-    }
+/** Parse the BIB·Name·Nation rows of a start-list table. */
+function parseStartList(text) {
+  const rows = [];
+  const re = /\b([MW])\d+\s+([A-Za-zÀ-ÿ.'’\- ]{3,40}?)\s+([A-Z]{3})\b/g;
+  let m;
+  while ((m = re.exec(text))) {
+    const name = m[2].replace(/\s+/g, ' ').trim();
+    if (!/[a-zà-ÿ]/.test(name) || !name.includes(' ')) continue; // need a real "First Last"
+    rows.push({ gender: m[1] === 'W' ? 'women' : 'men', name, noc: m[3] });
   }
-  const mocks = await readFile(resolve(ROOT, 'src/mocks/athletes.ts'), 'utf8').catch(() => '');
-  for (const m of mocks.matchAll(/id: '([^']+)',\s*name: '([^']+)'/g)) add(m[2], m[1]);
-  return roster;
+  return rows;
 }
 
 async function main() {
   const { articles } = JSON.parse(await readFile(REG, 'utf8'));
-  const roster = await buildRoster();
-  console.log(`Roster: ${roster.size} athletes; articles: ${articles.length}`);
-
+  const athletes = new Map();
   const starts = {};
+
   for (const art of articles) {
     const html = await fetchText(art.url);
     if (!html) {
       console.log(`· ${art.event}: fetch failed`);
       continue;
     }
-    // Strip <script> (incl. JSON-LD competitor blocks for OTHER events!) and
-    // <style> first, else we'd match athletes that are not on this start list.
     const body = html
       .replace(/<script[\s\S]*?<\/script>/gi, ' ')
       .replace(/<style[\s\S]*?<\/style>/gi, ' ');
-    const text = norm(body.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' '));
-    const matched = [...roster].filter(([n]) => text.includes(n)).map(([, id]) => id);
-    for (const id of matched) {
-      const list = (starts[id] ??= []);
-      if (!list.some((s) => s.event === art.event)) {
-        list.push({
-          date: art.date,
-          event: art.event,
-          ...(art.series ? { series: art.series } : {}),
-          ...(art.location ? { location: art.location } : {}),
-          url: art.url,
-          confidence: art.confidence || 'confirmed',
-        });
-      }
+    const text = body.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+    const rows = parseStartList(text);
+    if (!rows.length) {
+      console.log(`· ${art.event}: no start-list table found`);
+      continue;
     }
-    console.log(`· ${art.event} (${art.date}): ${matched.length} roster matches`);
+    const seen = new Set();
+    for (const r of rows) {
+      const id = slug(r.name);
+      if (seen.has(id)) continue; // one entry per athlete per race
+      seen.add(id);
+      if (!athletes.has(id)) {
+        athletes.set(id, {
+          id,
+          name: r.name,
+          country: A3[r.noc] || '',
+          gender: r.gender,
+          series: art.series ? [art.series] : [],
+        });
+      } else if (art.series && !athletes.get(id).series.includes(art.series)) {
+        athletes.get(id).series.push(art.series);
+      }
+      (starts[id] ??= []).push({
+        date: art.date,
+        event: art.event,
+        ...(art.series ? { series: art.series } : {}),
+        ...(art.location ? { location: art.location } : {}),
+        url: art.url,
+        confidence: art.confidence || 'confirmed',
+      });
+    }
+    console.log(`· ${art.event} (${art.date}): ${seen.size} pros parsed from the start list`);
   }
 
   const out = {
     generatedAt: new Date().toISOString(),
-    note: 'CONFIRMED starts harvested from media pro start-list articles (registry: proStartArticles.json) by matching article text against our roster. No LLM. Merged on top of curated + WTCS + PTO. Regenerated by the pipeline.',
+    note: 'Pro athletes + CONFIRMED upcoming starts parsed from media start-list tables (registry: proStartArticles.json). BIB/Name/Nation rows only (scripts incl. JSON-LD stripped). No LLM. Merged on top of curated + WTCS + PTO. Regenerated by the pipeline.',
+    athletes: [...athletes.values()].sort((a, b) => a.name.localeCompare(b.name)),
     starts,
   };
   await writeFile(OUT, JSON.stringify(out, null, 2) + '\n');
-  const total = Object.values(starts).reduce((n, l) => n + l.length, 0);
-  console.log(`\nWrote ${total} starts for ${Object.keys(starts).length} athletes → ${OUT}`);
+  console.log(`\nWrote ${out.athletes.length} pro athletes (+ confirmed starts) → ${OUT}`);
 }
 
 main().catch((e) => {
