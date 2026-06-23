@@ -1,7 +1,6 @@
 {
   "note": "Magazine RSS/Atom feeds the LLM start-list robot (scripts/ingest-pro-starts-llm.mjs) scans for 'start list' articles in ANY language. Direct article URLs (no Google-redirect). ADD A SOURCE = one entry (name + rss + lang). The robot only LLM-processes items whose title looks like a start list and that pass a free pre-filter; extracted athletes are kept only if they match our known pro set (no hallucinated athletes). Needs ANTHROPIC_API_KEY (else the robot no-ops).",
   "feeds": [
-    { "name": "triathlon.de", "rss": "https://triathlon.de/blogs/journal.atom", "lang": "de" },
     { "name": "tri-mag.de", "rss": "https://tri-mag.de/feed/", "lang": "de" }
   ]
 }

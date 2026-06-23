@@ -49,14 +49,17 @@ const allById: Record<string, Athlete> = {
 
 function withLinks(athlete: Athlete): Athlete {
   const links = LINKS[athlete.id];
-  // Merge hand-curated + all generated starts, deduped by event (curated wins).
+  // Merge hand-curated + all generated starts, deduped by DATE — an athlete can't
+  // start two races on the same day, so same date = same race (handles different
+  // event names across sources, e.g. "IRONMAN Frankfurt" vs the official long name).
+  // Priority: hand-curated, then WTCS, PTO, media, LLM (PRO_SOURCES order).
   const hand = STARTS[athlete.id] ?? [];
   const gen = PRO_STARTS[athlete.id] ?? [];
   let starts: AthleteStart[] | undefined;
   if (hand.length || gen.length) {
-    const byEvent = new Map<string, AthleteStart>();
-    for (const s of [...hand, ...gen]) if (!byEvent.has(s.event)) byEvent.set(s.event, s);
-    starts = [...byEvent.values()];
+    const byDate = new Map<string, AthleteStart>();
+    for (const s of [...hand, ...gen]) if (!byDate.has(s.date)) byDate.set(s.date, s);
+    starts = [...byDate.values()];
   }
   if (!links && !starts) return athlete;
   return {
