@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-23T09:41:18.129Z",
+  "generatedAt": "2026-06-23T09:44:45.574Z",
   "note": "Code candidates found by the Code-Radar robot. Review and move good ones into src/lib/discountCodes.ts. NOT shown in the app.",
   "candidates": [
     {
@@ -67,6 +67,18 @@
       "date": "2026-06-22",
       "url": "https://redcircle.com/shows/baa4ab11-3bd2-4e04-97d6-dfce70f2c37b/episodes/3ba150e8-8d05-46e1-8025-6cb6d20b8e57",
       "snippet": "athletes. (@feelslike.sport) • Instagram-Fotos und -Videos</a></p><p>RABATTCODE: KLARTEXT10</p><p><strong>Schneider und Piecha</strong></p><p><a href",
+      "status": "pending"
+    },
+    {
+      "id": "cand-radio-rtw-rtw26",
+      "code": "RTW26",
+      "percent": 10,
+      "source": "Radio RTW",
+      "sourceType": "podcast",
+      "episode": "Technik verweigern!",
+      "date": "2026-06-22",
+      "url": "https://radio-rtw.blogs.audiorella.com/71-new-episode",
+      "snippet": "W Hörer:in bekommst du 10% Rabatt auf deine Police! Nutze einfach den Code RTW26 beim Checkout. Heutiger Werbepartner ist NordVPN 🌏 Verbessere d",
       "status": "pending"
     },
     {
@@ -309,6 +321,20 @@
       "date": "2026-06-08",
       "url": "6605f1aa-60f9-11f1-bbe6-ffabc90751bb",
       "snippet": "combining technical innovation with a clean, timeless design. Use the code “IRONMAN10” to save 10% at Ryzon (valid until July 31, 2026). https://ryzo",
+      "status": "pending"
+    },
+    {
+      "id": "cand-radio-rtw-rtw10",
+      "code": "RTW10",
+      "brand": "BLACKROLL",
+      "brandId": "blackroll",
+      "percent": 10,
+      "source": "Radio RTW",
+      "sourceType": "podcast",
+      "episode": "Sieglos seit Donnerstag",
+      "date": "2026-06-08",
+      "url": "https://radio-rtw.blogs.audiorella.com/69-new-episode",
+      "snippet": "rtner ist BLACKROLL Hier geht es direkt zum Recovery Pillow . Mit dem Code RTW10 spart ihr 10%. Wir wünschen erholsamen Schlaf! Alle Infos, Rabat",
       "status": "pending"
     },
     {
