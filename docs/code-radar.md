@@ -59,7 +59,10 @@ veröffentlicht ihn nicht erneut. Sonst musst du nichts tun.
 ## Was wo liegt
 
 - **`src/data/autoCodes.json`** — die **live** ausgespielten Codes (nicht von Hand
-  bearbeiten, der Roboter überschreibt sie).
+  bearbeiten, der Roboter überschreibt sie). Die App lädt diese Datei **zur
+  Laufzeit** von der GitHub-Raw-URL (überschreibbar via `EXPO_PUBLIC_CODES_URL`),
+  mit dem gebündelten Stand als Fallback → **neue Wochen-Codes erscheinen ohne
+  App-Update** (`src/services/codes.ts`).
 - **`src/data/codeInbox.json`** — *alle* Funde inkl. der nicht-veröffentlichten
   (Debug/Transparenz). Beispiel-Eintrag:
 

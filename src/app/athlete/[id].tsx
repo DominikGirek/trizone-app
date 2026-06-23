@@ -19,6 +19,7 @@ import type { AppLanguage } from '@/i18n';
 import { haptics } from '@/lib/haptics';
 import { countryFlag, formatDate, monthShort } from '@/lib/format';
 import { codesForAthlete } from '@/lib/discountCodes';
+import { useCodes } from '@/services/codes';
 import { getAthleteById } from '@/services/athletes';
 import { fetchAthleteNews } from '@/services/raceNews';
 import { getAthleteResults } from '@/services/races';
@@ -51,6 +52,7 @@ export default function AthleteScreen() {
     queryFn: () => fetchAthleteNews(athlete!.name),
     enabled: !!athlete,
   });
+  const { data: allCodes = [] } = useCodes();
 
   if (isLoading) return <LoadingState />;
   if (!athlete) return <EmptyState message={t('common.noResults')} />;
@@ -65,7 +67,7 @@ export default function AthleteScreen() {
   if (athlete.residence) facts.push({ label: t('profile.residence'), value: athlete.residence });
 
   const links = LINK_META.filter((l) => athlete.links?.[l.key]);
-  const codes = codesForAthlete(athlete.id);
+  const codes = codesForAthlete(athlete.id, allCodes);
   const starts = (athlete.upcomingStarts ?? [])
     .filter((s) => +new Date(s.date) >= Date.now() - 86400000)
     .sort((a, b) => +new Date(a.date) - +new Date(b.date));

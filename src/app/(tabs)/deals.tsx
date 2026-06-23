@@ -10,12 +10,12 @@ import { TopBar } from '@/components/TopBar';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import {
-  activeCodes,
   codeAthleteName,
   CODE_CATEGORIES,
   type CodeCategory,
   type DiscountCode,
 } from '@/lib/discountCodes';
+import { useCodes } from '@/services/codes';
 import { useCodeVotes } from '@/store/codeVotes';
 import { useFavorites } from '@/store/favorites';
 
@@ -41,10 +41,11 @@ export default function DealsScreen() {
   const followedBrands = idsOf('brand');
   const [cat, setCat] = useState<CodeCategory | null>(null);
   const [q, setQ] = useState('');
+  const { data: codes = [] } = useCodes();
 
   const { mineAthletes, mineBrands, rest } = useMemo(() => {
     const query = q.trim().toLowerCase();
-    const base = activeCodes()
+    const base = codes
       .filter((c) => !downvoted.includes(c.id))
       .filter((c) => (cat ? c.category === cat : true))
       .filter((c) => {
@@ -64,7 +65,7 @@ export default function DealsScreen() {
       rest: base.filter((c) => !isMyAthlete(c) && !isMyBrand(c)),
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cat, q, downvoted.join('|'), followedAthletes.join('|'), followedBrands.join('|')]);
+  }, [codes, cat, q, downvoted.join('|'), followedAthletes.join('|'), followedBrands.join('|')]);
 
   const personalized = mineAthletes.length > 0 || mineBrands.length > 0;
   const Section = ({ title, codes }: { title: string; codes: DiscountCode[] }) =>

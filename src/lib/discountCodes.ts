@@ -111,11 +111,18 @@ const isBlocked = (c: DiscountCode) =>
   BLOCKED.has(c.id.toLowerCase()) || BLOCKED.has(c.code.toLowerCase());
 
 const curatedCodeStrings = new Set(DISCOUNT_CODES.map((c) => c.code.toLowerCase()));
-/** Curated + auto-published codes, minus anything the owner blocked. */
-export const ALL_CODES: DiscountCode[] = [
-  ...DISCOUNT_CODES,
-  ...AUTO_CODES.filter((c) => !curatedCodeStrings.has(c.code.toLowerCase())),
-].filter((c) => !isBlocked(c));
+/** Curated + given auto codes (curated wins on a duplicate code), minus blocked.
+ *  `autoCodes` defaults to the bundled snapshot; the service passes the freshly
+ *  fetched hosted set so new codes reach the app without an OTA. */
+export function mergeCodes(autoCodes: DiscountCode[] = AUTO_CODES): DiscountCode[] {
+  return [
+    ...DISCOUNT_CODES,
+    ...autoCodes.filter((c) => !curatedCodeStrings.has(c.code.toLowerCase())),
+  ].filter((c) => !isBlocked(c));
+}
+
+/** Bundled merged snapshot (curated + bundled auto), minus blocked. */
+export const ALL_CODES: DiscountCode[] = mergeCodes();
 
 /** Brand emoji from the registry (fallback to a ticket). */
 export function codeEmoji(c: DiscountCode): string {
@@ -133,13 +140,18 @@ export function isHiddenByVotes(c: DiscountCode): boolean {
 }
 
 /** Codes still valid today (past validUntil, or down-voted out, are dropped). */
-export function activeCodes(now = Date.now()): DiscountCode[] {
-  return ALL_CODES.filter(
+/** Active (non-expired, non-down-voted) codes from a curated+auto merge. */
+export function buildActiveCodes(autoCodes: DiscountCode[] = AUTO_CODES, now = Date.now()): DiscountCode[] {
+  return mergeCodes(autoCodes).filter(
     (c) => (!c.validUntil || +new Date(c.validUntil) >= now) && !isHiddenByVotes(c),
   );
 }
 
+export function activeCodes(now = Date.now()): DiscountCode[] {
+  return buildActiveCodes(AUTO_CODES, now);
+}
+
 /** Active codes tied to a specific athlete (for the athlete profile). */
-export function codesForAthlete(athleteId: string): DiscountCode[] {
-  return activeCodes().filter((c) => c.athleteId === athleteId);
+export function codesForAthlete(athleteId: string, codes: DiscountCode[] = activeCodes()): DiscountCode[] {
+  return codes.filter((c) => c.athleteId === athleteId);
 }
