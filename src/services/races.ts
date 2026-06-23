@@ -69,14 +69,19 @@ export function getAthleteResults(
 // "IRONMAN Frankfurt". Data comes from the pipeline robots (official + media + LLM).
 const SPONSORS = /\b(datev|mainova|sokin|eko[iï]|isuzu|intermarch[ée]|vinfast)\b/gi;
 export function raceKey(event: string): string {
+  // Tokens are sorted so word-order variants of the same race collapse, e.g.
+  // "Vancouver T100" == "T100 Vancouver", "IRONMAN 70.3 Nice" == "Nice IRONMAN 70.3".
   return event
     .toLowerCase()
     .replace(SPONSORS, '')
     .replace(/\([^)]*\)/g, '') // drop "(Debüt)" / "(Titelverteidigung)"
     .normalize('NFD')
     .replace(/[̀-ͯ]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+    .split(/\s+/)
+    .sort()
+    .join('-');
 }
 
 /** Friendly source name from a start's URL (shown per athlete). */
@@ -107,6 +112,39 @@ export interface RaceStartList {
   series?: SeriesId;
   location?: string;
   entries: StartListEntry[];
+}
+
+export interface StartListIndexEntry {
+  key: string;
+  name: string;
+  date: string;
+  series?: SeriesId;
+  count: number;
+}
+
+/** Upcoming races we have a pro start list for (for the Events-tab entry point). */
+export async function getStartListIndex(now = Date.now()): Promise<StartListIndexEntry[]> {
+  const athletes = await getAthletes();
+  const map = new Map<string, StartListIndexEntry & { _longest: string }>();
+  for (const a of athletes) {
+    for (const s of a.upcomingStarts ?? []) {
+      if (+new Date(s.date) < now - 86400000) continue;
+      const key = raceKey(s.event);
+      const e = map.get(key);
+      if (!e) {
+        map.set(key, { key, name: s.event.replace(/\s*\([^)]*\)/g, '').trim(), date: s.date, series: s.series, count: 1, _longest: s.event });
+      } else {
+        e.count++;
+        if (s.event.length > e._longest.length) {
+          e._longest = s.event;
+          e.name = s.event.replace(/\s*\([^)]*\)/g, '').trim();
+        }
+      }
+    }
+  }
+  return [...map.values()]
+    .map(({ _longest, ...e }) => e)
+    .sort((a, b) => a.date.localeCompare(b.date));
 }
 
 /** All athletes we believe are starting the race identified by `key`. */

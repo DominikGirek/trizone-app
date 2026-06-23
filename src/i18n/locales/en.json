@@ -315,7 +315,8 @@
   "startlist": {
     "title": "Pro start list",
     "open": "Pro start list",
-    "count": "{{count}} pros",
+    "count_one": "{{count}} pro",
+    "count_other": "{{count}} pros",
     "via": "Source: {{source}}",
     "empty": "No pro start list for this race yet.",
     "disclaimer": "Provisional list, completeness not guaranteed – pros may enter or withdraw at short notice. Auto-compiled from several sources."
