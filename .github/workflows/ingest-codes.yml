@@ -33,7 +33,12 @@ jobs:
       - name: Scan podcasts for new codes
         run: node scripts/ingest-codes.mjs
 
-      - name: Commit if candidates changed
+      - name: Publish if live codes changed
+        run: >-
+          node scripts/ci-commit-data.mjs src/data/autoCodes.json
+          "chore(data): auto-publish code-radar codes"
+
+      - name: Commit inbox if candidates changed
         run: >-
           node scripts/ci-commit-data.mjs src/data/codeInbox.json
           "chore(data): refresh code-radar inbox"

@@ -24,6 +24,8 @@ import { fileURLToPath } from 'node:url';
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const SOURCES = resolve(ROOT, 'src/data/codeSources.json');
 const OUT = resolve(ROOT, 'src/data/codeInbox.json');
+const AUTO_OUT = resolve(ROOT, 'src/data/autoCodes.json');
+const BLOCK = resolve(ROOT, 'src/data/codeBlocklist.json');
 const BRANDS_TS = resolve(ROOT, 'src/lib/brands.ts');
 const CODES_TS = resolve(ROOT, 'src/lib/discountCodes.ts');
 const UA = 'TriZone-CodeRadar/1.0 (+https://trizone.app)';
@@ -72,11 +74,43 @@ const tag = (xml, name) => {
 async function loadBrands() {
   const src = await readFile(BRANDS_TS, 'utf8').catch(() => '');
   const out = [];
-  for (const m of src.matchAll(/\{\s*id:\s*'([^']+)',\s*name:\s*'([^']+)'/g)) {
-    out.push({ id: m[1], name: m[2] });
+  for (const m of src.matchAll(/\{\s*id:\s*'([^']+)',\s*name:\s*'([^']+)',\s*emoji:\s*'([^']+)'/g)) {
+    out.push({ id: m[1], name: m[2], emoji: m[3] });
   }
   return out;
 }
+
+/** Codes/ids the owner has taken offline (codeBlocklist.json) — lowercased. */
+async function loadBlocklist() {
+  try {
+    const b = JSON.parse(await readFile(BLOCK, 'utf8'));
+    return new Set((b.blocked ?? []).map((s) => String(s).toLowerCase()));
+  } catch {
+    return new Set();
+  }
+}
+
+// --- Shop URL + brand/category fallback (for auto-publishing) -----------------
+const URL_RE = /https?:\/\/[^\s)<>"'\]]+/gi;
+const SOCIAL = /youtube\.com|youtu\.be|spotify|apple\.com|instagram|facebook|fb\.com|twitter|x\.com|tiktok|linktr|bit\.ly|tinyurl|t\.co|threads|patreon|strava|amzn|amazon/i;
+/** First non-social shop link near the code → used as the code's target + brand. */
+function shopUrlNear(text, at, len) {
+  const win = text.slice(Math.max(0, at - 180), Math.min(text.length, at + len + 220));
+  return [...win.matchAll(URL_RE)].map((m) => m[0].replace(/[.,)]+$/, '')).find((u) => !SOCIAL.test(u)) || undefined;
+}
+function brandFromUrl(u) {
+  try {
+    const p = new URL(u).hostname.replace(/^www\./, '').split('.');
+    if (p.length < 2) return undefined; // needs a real domain.tld
+    const sld = p[p.length - 2];
+    if (sld.length < 3) return undefined; // avoid junk like "no"
+    return sld.charAt(0).toUpperCase() + sld.slice(1);
+  } catch {
+    return undefined;
+  }
+}
+const EMOJI_CAT = { '🚲': 'bike', '🥽': 'wetsuit', '👟': 'run', '🧪': 'nutrition', '⌚': 'tech', '👕': 'apparel', '🧦': 'apparel' };
+const catFromEmoji = (e) => EMOJI_CAT[e] || 'other';
 const norm = (s) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 function matchBrand(text, brands) {
   const t = norm(text);
@@ -164,6 +198,7 @@ function extract(text, ctx, now) {
         code,
         percent: pctNear ? Number(pctNear[1]) : undefined,
         validUntil: findExpiry(win, now) || undefined,
+        shopUrl: shopUrlNear(text, at, code.length),
         snippet,
         ...ctx,
       });
@@ -252,7 +287,9 @@ const slug = (s) => norm(s).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').sl
 async function main() {
   const { sources } = JSON.parse(await readFile(SOURCES, 'utf8'));
   const brands = await loadBrands();
+  const brandEmoji = Object.fromEntries(brands.map((b) => [b.id, b.emoji]));
   const live = await loadLiveCodes();
+  const blocked = await loadBlocklist();
   const now = Date.now();
   const todayISO = new Date(now).toISOString().slice(0, 10);
   const cutoff = now - MAX_DAYS * 24 * 60 * 60 * 1000;
@@ -294,18 +331,21 @@ async function main() {
     let n = 0;
     for (const it of items) {
       for (const c of extract(it.body, { source: src.name, sourceType: src.type, episode: it.title, date: it.date, url: it.link }, now)) {
-        if (live.has(c.code.toLowerCase())) continue; // already a live code
+        if (live.has(c.code.toLowerCase())) continue; // already a curated live code
         if (c.validUntil && c.validUntil < todayISO) continue; // already expired → drop
+        const id = `cand-${slug(src.name)}-${c.code.toLowerCase()}`;
+        if (blocked.has(id.toLowerCase()) || blocked.has(c.code.toLowerCase())) continue; // taken offline
         const brand = matchBrand(`${c.snippet} ${it.body.slice(0, 400)}`, brands);
         const key = `${slug(src.name)}|${c.code.toLowerCase()}`;
         if (candidates.has(key)) continue;
         candidates.set(key, {
-          id: `cand-${slug(src.name)}-${c.code.toLowerCase()}`,
+          id,
           code: c.code,
           brand: brand?.name,
           brandId: brand?.id,
           percent: c.percent,
           validUntil: c.validUntil,
+          shopUrl: c.shopUrl,
           athleteId: src.athleteId,
           source: c.source,
           sourceType: c.sourceType,
@@ -323,10 +363,38 @@ async function main() {
   }
 
   const list = [...candidates.values()].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
-  const out = { generatedAt: new Date().toISOString(), note: 'Code candidates found by the Code-Radar robot. Review and move good ones into src/lib/discountCodes.ts. NOT shown in the app.', candidates: list };
+  const out = { generatedAt: new Date().toISOString(), note: 'All code candidates the Code-Radar robot found (transparency/debug log). The publishable subset is written to autoCodes.json and shown live in the app.', candidates: list };
   await writeFile(OUT, JSON.stringify(out, null, 2) + '\n');
 
+  // Auto-publish: the high-confidence subset (has a % AND a brand label) goes
+  // LIVE in the app automatically — mapped to the DiscountCode shape. Quality gate
+  // keeps junk (no %, no brand) out; the owner takes anything offline via the
+  // blocklist. brand = matched brand, else derived from the shop link's domain.
+  const auto = [];
+  for (const c of list) {
+    if (!c.percent || !c.shopUrl) continue; // need a discount % AND a real shop link
+    const brandLabel = c.brand || brandFromUrl(c.shopUrl);
+    if (!brandLabel) continue;
+    auto.push({
+      id: c.id,
+      ...(c.brandId ? { brandId: c.brandId } : {}),
+      ...(c.athleteId ? { athleteId: c.athleteId } : {}),
+      brand: brandLabel,
+      code: c.code,
+      deal: `${c.percent} %`,
+      description: `via ${c.source}`,
+      url: c.shopUrl,
+      category: c.brandId ? catFromEmoji(brandEmoji[c.brandId]) : 'other',
+      ...(c.validUntil ? { validUntil: c.validUntil } : {}),
+      checkedAt: todayISO,
+      verified: false,
+    });
+  }
+  const autoOut = { generatedAt: new Date().toISOString(), note: 'Auto-published codes (high-confidence subset) the app shows LIVE. Generated by scripts/ingest-codes.mjs. Take a code offline via src/data/codeBlocklist.json — do not hand-edit this file.', codes: auto };
+  await writeFile(AUTO_OUT, JSON.stringify(autoOut, null, 2) + '\n');
+
   console.log(`\nWrote ${list.length} candidate(s) → ${OUT}`);
+  console.log(`Published ${auto.length} live code(s) → ${AUTO_OUT}`);
   if (list.length) {
     console.log('\nTop candidates:');
     for (const c of list.slice(0, 25)) {

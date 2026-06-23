@@ -1,0 +1,4 @@
+{
+  "note": "Offline-Schalter fuer Codes. Der Code-Radar veroeffentlicht Codes vollautomatisch (src/data/autoCodes.json). Um einen Code SOFORT offline zu nehmen: seine id (z.B. \"cand-pace-pacetri20\" aus autoCodes.json/codeInbox.json) ODER den reinen Code-String (z.B. \"PACETRI20\") hier in \"blocked\" eintragen. Die App blendet ihn dann aus und der Roboter veroeffentlicht ihn nicht erneut. Das ist der einzige manuelle Eingriff - alles andere laeuft automatisch.",
+  "blocked": []
+}

@@ -1,3 +1,5 @@
+import autoCodesData from '@/data/autoCodes.json';
+import codeBlocklistData from '@/data/codeBlocklist.json';
 import { brandsById } from '@/lib/brands';
 import { athletesById } from '@/mocks/athletes';
 
@@ -98,6 +100,23 @@ export const DISCOUNT_CODES: DiscountCode[] = [
   { id: 'dc-schaltauge-cm', brandId: 'schaltauge', brand: 'Schaltauge24', code: 'CM15', deal: '15 %', description: 'Schaltaugen · via CyclingMagazine Radsport-Podcast', url: 'https://www.schaltauge24.de', category: 'bike', checkedAt: '2026-06-19', verified: true },
 ];
 
+/**
+ * Codes auto-published by the Code-Radar robot (src/data/autoCodes.json) — they
+ * go live with no manual step. The owner takes any code offline via the blocklist
+ * (src/data/codeBlocklist.json); curated codes win on a duplicate code string.
+ */
+const AUTO_CODES = (autoCodesData.codes ?? []) as unknown as DiscountCode[];
+const BLOCKED = new Set((codeBlocklistData.blocked ?? []).map((s) => String(s).toLowerCase()));
+const isBlocked = (c: DiscountCode) =>
+  BLOCKED.has(c.id.toLowerCase()) || BLOCKED.has(c.code.toLowerCase());
+
+const curatedCodeStrings = new Set(DISCOUNT_CODES.map((c) => c.code.toLowerCase()));
+/** Curated + auto-published codes, minus anything the owner blocked. */
+export const ALL_CODES: DiscountCode[] = [
+  ...DISCOUNT_CODES,
+  ...AUTO_CODES.filter((c) => !curatedCodeStrings.has(c.code.toLowerCase())),
+].filter((c) => !isBlocked(c));
+
 /** Brand emoji from the registry (fallback to a ticket). */
 export function codeEmoji(c: DiscountCode): string {
   return (c.brandId && brandsById[c.brandId]?.emoji) || '🎟️';
@@ -115,7 +134,7 @@ export function isHiddenByVotes(c: DiscountCode): boolean {
 
 /** Codes still valid today (past validUntil, or down-voted out, are dropped). */
 export function activeCodes(now = Date.now()): DiscountCode[] {
-  return DISCOUNT_CODES.filter(
+  return ALL_CODES.filter(
     (c) => (!c.validUntil || +new Date(c.validUntil) >= now) && !isHiddenByVotes(c),
   );
 }

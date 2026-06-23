@@ -1,17 +1,21 @@
 # Code-Radar — automatischer Rabattcode-Finder
 
-Ein „Roboter" (GitHub Action) durchsucht **wöchentlich** die Shownotes unserer
-bekannten Podcasts nach neuen Rabattcodes und legt sie in eine **Prüf-Liste**.
-Veröffentlicht wird **nie automatisch** — ein toter Code an der Kasse kostet
-Vertrauen. Du bestätigst gute Codes von Hand (~2 Min/Woche).
+Ein „Roboter" (GitHub Action) durchsucht **wöchentlich** Podcasts und
+YouTube-Kanäle nach neuen Rabattcodes und **stellt sie vollautomatisch live** in
+der App — kein manueller Schritt. Dein einziger Hebel: einen Code bei Bedarf
+**offline nehmen** (Blockliste).
 
-Für maximale Aktualität schaut er nur die **4 neuesten Folgen** je Podcast an und
-erkennt **Ablaufdaten** in den Shownotes („gültig bis 31.12.2026", „bis 15. August"
-…): bereits abgelaufene Codes werden gar nicht erst gemeldet, und ein erkanntes
-Datum wandert als `validUntil` in den Code → die App blendet ihn nach Ablauf aus.
+Damit nur Brauchbares live geht, gibt es ein **Qualitäts-Gate**: veröffentlicht
+wird nur, was einen **Rabatt-% UND eine echte Shop-URL** hat (Marke = erkannte
+Marke oder aus der Shop-Domain). Alles andere bleibt nur im Debug-Log
+(`codeInbox.json`). Für Aktualität: nur die **4 neuesten Folgen/Videos** je Quelle,
+**Ablaufdaten** werden erkannt (`validUntil` → App blendet abgelaufene aus),
+bereits abgelaufene Codes kommen gar nicht erst rein.
 
 ```
-Podcasts (RSS)  →  scripts/ingest-codes.mjs  →  src/data/codeInbox.json  →  du prüfst  →  src/lib/discountCodes.ts (live)
+Podcasts (RSS) + YouTube  →  scripts/ingest-codes.mjs  →  src/data/autoCodes.json  →  LIVE in der App
+                                                       ↘  src/data/codeInbox.json (alle Funde, Debug)
+src/data/codeBlocklist.json  →  nimmt Codes wieder offline (dein einziger Eingriff)
 ```
 
 ## Eine neue Quelle hinzufügen  ← das Wichtigste
@@ -40,16 +44,33 @@ Für einen **YouTube-Kanal** stattdessen:
 (Kanal-URL, `@handle` oder `channel/UC…` — der Roboter liest den keyless
 Kanal-Feed inkl. Video-Beschreibungen.) Beim nächsten Lauf ist die Quelle dabei.
 
-## So prüfst du die Funde
+## Einen Code offline nehmen  ← dein einziger Eingriff
 
-`src/data/codeInbox.json` enthält die Kandidaten (`status: "pending"`):
+Trage in **`src/data/codeBlocklist.json`** die **id** (aus `autoCodes.json`, z. B.
+`"cand-pace-pacetri20"`) **oder** den reinen **Code** (`"PACETRI20"`) ein:
+
+```jsonc
+{ "blocked": ["PACETRI20", "cand-besenwagen-besenwagen20"] }
+```
+
+Die App blendet ihn sofort aus (beim nächsten Laden/OTA) und der Roboter
+veröffentlicht ihn nicht erneut. Sonst musst du nichts tun.
+
+## Was wo liegt
+
+- **`src/data/autoCodes.json`** — die **live** ausgespielten Codes (nicht von Hand
+  bearbeiten, der Roboter überschreibt sie).
+- **`src/data/codeInbox.json`** — *alle* Funde inkl. der nicht-veröffentlichten
+  (Debug/Transparenz). Beispiel-Eintrag:
 
 ```jsonc
 { "code": "PACETRI20", "brand": "PILLAR Performance", "percent": 20,
-  "validUntil": "2026-12-31", "podcast": "PACE – der Ausdauerpodcast",
-  "snippet": "…mit dem Code PACETRI20 gültig bis 31.12.2026 …",
-  "url": "…", "status": "pending" }
+  "validUntil": "2026-12-31", "source": "PACE – der Ausdauerpodcast",
+  "sourceType": "podcast", "url": "…", "status": "pending" }
 ```
+
+- **`src/lib/discountCodes.ts`** — die **kuratierten** Codes von Hand (gewinnen bei
+  Code-Dopplung). Die App zeigt kuratierte + Auto-Codes zusammen.
 
 `validUntil` ist nur gesetzt, wenn in den Shownotes ein Ablaufdatum stand —
 übernimm es 1:1 in den Code-Eintrag (die App versteckt abgelaufene automatisch).
@@ -101,6 +122,9 @@ Triathlon Science, The Greg Bennett Show.
 
 ## Warum so (Datenintegrität)
 
-Maschine **sammelt**, Mensch **bestätigt**. Das hält die [Daten-Integritäts-Regel](privacy-policy.md)
-ein: nie erfundene/tote Codes ausliefern. Das 👍/👎 + der Auto-Cutoff in der App
-sind das zusätzliche Sicherheitsnetz im Betrieb.
+Der Roboter läuft **vollautomatisch** (kein Freigabe-Schritt). Drei Sicherheitsnetze
+halten die Qualität: (1) das **Qualitäts-Gate** beim Veröffentlichen (nur Code mit
+Rabatt-% + echter Shop-URL), (2) das **Ablaufdatum** (abgelaufene fliegen raus),
+(3) im Betrieb das **👍/👎 + Auto-Cutoff** in der App. Der manuelle Hebel ist nur
+das **Offline-Nehmen** über die Blockliste. Bewusste Abwägung des Owners: lieber
+voll automatisch + selten mal nachsteuern als jede Woche manuell freigeben.

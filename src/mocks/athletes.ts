@@ -28,6 +28,7 @@ export const athletes: Athlete[] = [
   // — Deutsche Stars: Kurzdistanz (WTCS) —
   { id: 'tim-hellwig', name: 'Tim Hellwig', country: 'DE', gender: 'men', series: ['wtcs'] },
   { id: 'jonas-schomburg', name: 'Jonas Schomburg', country: 'DE', gender: 'men', series: ['ironman', 'ironman703'], bio: 'Langdistanz-Shootingstar (2. bei der Challenge Roth 2025), zuvor Kurzdistanz.' },
+  { id: 'rico-bogen', name: 'Rico Bogen', country: 'DE', gender: 'men', series: ['ironman703', 't100', 'ironman'], bio: 'IRONMAN-70.3-Weltmeister 2023 – damals jüngster Weltmeister der 70.3-Geschichte.' },
   { id: 'lasse-luehrs', name: 'Lasse Lührs', country: 'DE', gender: 'men', series: ['wtcs'] },
   { id: 'lasse-nygaard-priester', name: 'Lasse Nygaard-Priester', country: 'DE', gender: 'men', series: ['ironman703'], bio: 'Mitteldistanz-Spezialist (Ironman 70.3), Wechsel von der Kurzdistanz.' },
   { id: 'simon-henseleit', name: 'Simon Henseleit', country: 'DE', gender: 'men', series: ['wtcs'] },

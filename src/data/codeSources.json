@@ -75,6 +75,6 @@
     { "name": "Sam Laidlow (YouTube)", "type": "youtube", "youtube": "https://www.youtube.com/channel/UCP6EsU9T2RykT1quNR5moeg", "athleteId": "sam-laidlow" },
     { "name": "Richie & Tobi", "type": "youtube", "youtube": "https://www.youtube.com/@RichieTobi" },
     { "name": "Santara Tech", "type": "youtube", "youtube": "https://www.youtube.com/@SantaraTechnology" },
-    { "name": "Rico Bogen", "type": "youtube", "youtube": "https://www.youtube.com/@RicoBogen" }
+    { "name": "Rico Bogen", "type": "youtube", "youtube": "https://www.youtube.com/@RicoBogen", "athleteId": "rico-bogen" }
   ]
 }
