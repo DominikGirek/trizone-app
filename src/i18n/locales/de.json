@@ -312,6 +312,14 @@
     "incompleteTitle": "Angaben unvollständig?",
     "incompleteHint": "Schick uns Infos zu diesem Athleten – wir ergänzen sie."
   },
+  "startlist": {
+    "title": "Profi-Starterliste",
+    "open": "Profi-Starterliste",
+    "count": "{{count}} Profis",
+    "via": "Quelle: {{source}}",
+    "empty": "Für dieses Rennen liegt uns noch keine Profi-Starterliste vor.",
+    "disclaimer": "Vorläufige Liste ohne Gewähr auf Vollständigkeit – Profis können kurzfristig zu- oder absagen. Aus mehreren Quellen automatisch zusammengestellt."
+  },
   "reminder": {
     "title": "Bald geht's los: {{name}}",
     "body": "{{location}} – nicht verpassen!"

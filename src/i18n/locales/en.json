@@ -312,6 +312,14 @@
     "incompleteTitle": "Something missing?",
     "incompleteHint": "Send us info on this athlete – we'll fill it in."
   },
+  "startlist": {
+    "title": "Pro start list",
+    "open": "Pro start list",
+    "count": "{{count}} pros",
+    "via": "Source: {{source}}",
+    "empty": "No pro start list for this race yet.",
+    "disclaimer": "Provisional list, completeness not guaranteed – pros may enter or withdraw at short notice. Auto-compiled from several sources."
+  },
   "reminder": {
     "title": "Starting soon: {{name}}",
     "body": "{{location}} – don't miss it!"

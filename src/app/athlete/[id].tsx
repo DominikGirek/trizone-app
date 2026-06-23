@@ -22,7 +22,7 @@ import { codesForAthlete } from '@/lib/discountCodes';
 import { useCodes } from '@/services/codes';
 import { getAthleteById } from '@/services/athletes';
 import { fetchAthleteNews } from '@/services/raceNews';
-import { getAthleteResults } from '@/services/races';
+import { getAthleteResults, raceKey, sourceLabel } from '@/services/races';
 import type { AthleteLinks } from '@/types';
 
 const LINK_META: { key: keyof AthleteLinks; icon: any; label: string }[] = [
@@ -127,11 +127,11 @@ export default function AthleteScreen() {
             {starts.map((s, i) => (
               <Pressable
                 key={i}
-                onPress={() => s.url && WebBrowser.openBrowserAsync(s.url)}
+                onPress={() => router.push(`/startlist/${raceKey(s.event)}`)}
                 style={({ pressed }) => [
                   styles.resultRow,
                   { borderColor: theme.border },
-                  pressed && !!s.url && { backgroundColor: theme.backgroundElement },
+                  pressed && { backgroundColor: theme.backgroundElement },
                 ]}>
                 <View style={styles.startDate}>
                   <ThemedText style={[styles.startDay, { color: theme.primary }]}>
@@ -150,15 +150,23 @@ export default function AthleteScreen() {
                       {s.location}
                     </ThemedText>
                   )}
-                  {!!s.confidence && (
-                    <ThemedText
-                      type="small"
-                      style={{ fontSize: 11, color: s.confidence === 'confirmed' ? theme.primary : theme.textSecondary }}>
-                      {s.confidence === 'confirmed' ? `✓ ${t('profile.confirmed')}` : t('profile.expected')}
-                    </ThemedText>
-                  )}
+                  <View style={styles.startMeta}>
+                    {!!s.confidence && (
+                      <ThemedText
+                        type="small"
+                        style={{ fontSize: 11, color: s.confidence === 'confirmed' ? theme.primary : theme.textSecondary }}>
+                        {s.confidence === 'confirmed' ? `✓ ${t('profile.confirmed')}` : t('profile.expected')}
+                      </ThemedText>
+                    )}
+                    {!!sourceLabel(s.url) && (
+                      <ThemedText type="small" themeColor="textSecondary" style={{ fontSize: 11 }}>
+                        · {t('startlist.via', { source: sourceLabel(s.url) })}
+                      </ThemedText>
+                    )}
+                  </View>
                 </View>
                 {s.series && <SeriesTag series={s.series} />}
+                <Ionicons name="chevron-forward" size={16} color={theme.textSecondary} />
               </Pressable>
             ))}
           </>
@@ -324,6 +332,7 @@ const styles = StyleSheet.create({
   position: { fontSize: 18, fontWeight: '800', width: 30 },
   startDate: { width: 38, alignItems: 'center' },
   startDay: { fontSize: 18, fontWeight: '800', lineHeight: 22 },
+  startMeta: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', columnGap: 4 },
   incomplete: {
     flexDirection: 'row',
     alignItems: 'center',
