@@ -1,6 +1,7 @@
 import athleteLinksData from '@/data/athleteLinks.json';
 import athleteStartsData from '@/data/athleteStarts.json';
 import proAthletesData from '@/data/proAthletes.json';
+import proStartsPtoData from '@/data/proStartsPTO.json';
 import { athletes, athletesById } from '@/mocks/athletes';
 import { fetchWtAthlete } from '@/services/worldTriathlon';
 import type { Athlete, AthleteLinks, AthleteStart } from '@/types';
@@ -13,12 +14,31 @@ const delay = <T>(value: T, ms = 100) =>
 const LINKS = (athleteLinksData as { links: Record<string, AthleteLinks> }).links;
 const STARTS = (athleteStartsData as { starts: Record<string, AthleteStart[]> }).starts;
 
-// Pro athletes auto-ingested from real start lists (WTCS via World Triathlon, …).
-// Merged on TOP of the curated roster — curated ids win, so hand-tuned athletes
-// stay authoritative and new pros appear automatically with full profiles.
-const PRO = (proAthletesData as { athletes: Athlete[] }).athletes as unknown as Athlete[];
-const PRO_STARTS = ((proAthletesData as { starts?: Record<string, AthleteStart[]> }).starts) ?? {};
-const generatedPros = PRO.filter((p) => !athletesById[p.id]);
+// Pro athletes auto-ingested from real start lists (WTCS via World Triathlon API,
+// IRONMAN/70.3/Challenge/T100 via protriathletes.org). Merged on TOP of the curated
+// roster — curated ids win, so hand-tuned athletes stay authoritative and new pros
+// appear automatically with full profiles.
+type ProFile = { athletes?: Athlete[]; starts?: Record<string, AthleteStart[]> };
+const PRO_SOURCES = [proAthletesData, proStartsPtoData] as unknown as ProFile[];
+
+// Generated athletes, deduped by id (first source wins; series unioned).
+const genById = new Map<string, Athlete>();
+for (const src of PRO_SOURCES) {
+  for (const a of src.athletes ?? []) {
+    const existing = genById.get(a.id);
+    if (!existing) genById.set(a.id, { ...a });
+    else existing.series = [...new Set([...(existing.series ?? []), ...(a.series ?? [])])];
+  }
+}
+// Generated upcoming starts, concatenated across sources per athlete.
+const PRO_STARTS: Record<string, AthleteStart[]> = {};
+for (const src of PRO_SOURCES) {
+  for (const [id, list] of Object.entries(src.starts ?? {})) {
+    PRO_STARTS[id] = [...(PRO_STARTS[id] ?? []), ...list];
+  }
+}
+
+const generatedPros = [...genById.values()].filter((p) => !athletesById[p.id]);
 const allAthletes: Athlete[] = [...athletes, ...generatedPros];
 const allById: Record<string, Athlete> = {
   ...Object.fromEntries(generatedPros.map((a) => [a.id, a])),

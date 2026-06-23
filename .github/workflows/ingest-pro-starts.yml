@@ -1,0 +1,42 @@
+name: Ingest pro start lists (IRONMAN/70.3/Challenge/T100)
+
+# Weekly: scrapes upcoming pro start lists from protriathletes.org (server-rendered,
+# no headless browser, no LLM) → src/data/proStartsPTO.json: pro athletes + CONFIRMED
+# upcoming starts, each linking to the exact participant list. Country comes from the
+# PTO world ranking. The app merges this on top of curated + WTCS. Pure Node built-ins.
+
+on:
+  schedule:
+    # Weekly, Wednesdays ~04:43 UTC.
+    - cron: "43 4 * * 3"
+  workflow_dispatch:
+    inputs:
+      months:
+        description: "How many months ahead to scan for races"
+        required: false
+        default: "7"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ingest-pro-starts
+  cancel-in-progress: false
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Refresh pro start lists (PTO)
+        run: node scripts/ingest-pro-starts.mjs --months=${{ github.event.inputs.months || '7' }}
+
+      - name: Commit if start lists changed
+        run: >-
+          node scripts/ci-commit-data.mjs src/data/proStartsPTO.json
+          "chore(data): refresh pro start lists (PTO)"

@@ -39,6 +39,8 @@ export interface AthleteStart {
   series?: SeriesId;
   location?: string;
   url?: string;
+  /** confirmed = on an official/media start list; expected = announced (news). */
+  confidence?: 'confirmed' | 'expected';
 }
 
 export interface Athlete {

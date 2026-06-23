@@ -150,6 +150,13 @@ export default function AthleteScreen() {
                       {s.location}
                     </ThemedText>
                   )}
+                  {!!s.confidence && (
+                    <ThemedText
+                      type="small"
+                      style={{ fontSize: 11, color: s.confidence === 'confirmed' ? theme.primary : theme.textSecondary }}>
+                      {s.confidence === 'confirmed' ? `✓ ${t('profile.confirmed')}` : t('profile.expected')}
+                    </ThemedText>
+                  )}
                 </View>
                 {s.series && <SeriesTag series={s.series} />}
               </Pressable>

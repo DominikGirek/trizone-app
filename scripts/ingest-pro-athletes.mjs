@@ -102,6 +102,7 @@ async function main() {
             series: 'wtcs',
             location: [ev.event_venue, ev.event_country].filter(Boolean).join(', '),
             url: ev.event_listing, // official event page incl. the start list
+            confidence: 'confirmed',
           });
           starts.set(id, list);
         }
