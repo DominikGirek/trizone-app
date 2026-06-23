@@ -87,29 +87,38 @@ async function upcomingRaces(now, until) {
   }
   return races;
 }
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-
-// Pull triathlon-media result links out of a SERP (DuckDuckGo `uddg=` redirects or
-// plain external hrefs from Bing).
-function serpUrls(html) {
-  const out = new Set();
-  for (const m of html.matchAll(/uddg=([^&"]+)/g)) { try { out.add(decodeURIComponent(m[1])); } catch { /* */ } }
-  for (const m of html.matchAll(/href="(https?:\/\/[^"]+)"/g)) out.add(m[1]);
-  return [...out].filter(
-    (u) => TRI_DOMAIN.test(u) && !/protriathletes|facebook|instagram|youtube|duckduckgo|bing\.com|microsoft|msn\.com/i.test(u),
-  );
+// --- Discovery A: race field articles from media sitemaps (direct fetch) --------
+// Open-web SERP scraping (DuckDuckGo/Bing) is blocked from CI datacenter IPs, so we
+// read publishers' sitemaps directly — that DOES work from Actions — and match field
+// articles to upcoming races by host-city token + year. triathlon.de covers German +
+// major international races, often in prose the table parsers can't read but Haiku
+// can, e.g. "challenge-roth-2026-das-staerkste-profifeld-aller-zeiten".
+const SITEMAPS = ['https://triathlon.de/sitemap_blogs_1.xml'];
+const FIELD_RE = /starterfeld|startliste|startlist|elitefeld|profifeld|profi-?feld|favoriten|profi/i;
+const GENERIC_TOK = new Set([
+  'ironman', 'im', 'challenge', 't100', 'wtcs', 'pto', 'triathlon', 'world',
+  'european', 'championship', 'series', 'pro', 'profi', 'feld', 'das', 'der',
+  'die', 'the', 'of', 'und', 'and', 'staerkste', 'aller', 'zeiten', 'profifeld',
+]);
+function cityTokens(name) {
+  return name
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+    .split(/\s+/)
+    .filter((t) => t.length > 2 && !/^\d+$/.test(t) && !GENERIC_TOK.has(t));
 }
-
-// Keyless open-web search. DuckDuckGo throttles burst queries, so we retry once
-// after a pause and fall back to Bing — this is what lets ALL races get searched,
-// not just the first one.
-async function searchUrls(query) {
-  for (let attempt = 0; attempt < 2; attempt++) {
-    const urls = serpUrls((await get('https://html.duckduckgo.com/html/?q=' + encodeURIComponent(query))) || '');
-    if (urls.length) return urls;
-    await sleep(1500 + Math.random() * 1500);
+async function fieldArticles() {
+  const urls = new Set();
+  for (const sm of SITEMAPS) {
+    const xml = (await get(sm)) || '';
+    for (const m of xml.matchAll(/https?:\/\/[^\s<]+/g)) {
+      if (TRI_DOMAIN.test(m[0]) && FIELD_RE.test(m[0])) urls.add(m[0]);
+    }
   }
-  return serpUrls((await get('https://www.bing.com/search?q=' + encodeURIComponent(query) + '&setlang=en')) || '');
+  return [...urls];
 }
 
 // --- Feed parsing (Discovery B) ----------------------------------------------
@@ -154,13 +163,15 @@ async function main() {
   const jobs = [];
   const races = await upcomingRaces(now, now + RACE_WINDOW_DAYS * 864e5);
   races.sort((a, b) => a.date.localeCompare(b.date));
-  console.log(`Per-race search: ${races.length} races in the next ${RACE_WINDOW_DAYS} days`);
+  const articles = await fieldArticles();
+  console.log(`Per-race discovery: ${races.length} races · ${articles.length} field-article candidates in sitemaps`);
   for (const race of races) {
-    const urls = await searchUrls(`${race.name} ${race.year} Startliste start list Profis lista de salida liste de départ`);
-    for (const url of urls.slice(0, 2)) jobs.push({ url: url.split('?')[0], ctx: race });
-    await sleep(1200 + Math.random() * 1200); // space queries out → avoid burst throttling
+    const toks = cityTokens(race.name);
+    if (!toks.length) continue;
+    const hits = articles.filter((u) => u.includes(String(race.year)) && toks.some((c) => u.toLowerCase().includes(c)));
+    for (const url of hits.slice(0, 2)) jobs.push({ url: url.split('?')[0], ctx: race });
   }
-  console.log(`Per-race search queued ${jobs.length} candidate URLs from ${races.length} races`);
+  console.log(`Per-race discovery queued ${jobs.length} candidate URLs from sitemaps`);
   try {
     const { feeds } = JSON.parse(await readFile(FEEDS, 'utf8'));
     for (const feed of feeds) {
