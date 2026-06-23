@@ -1,5 +1,267 @@
 {
-  "generatedAt": "2026-06-23T13:16:50.946Z",
+  "generatedAt": "2026-06-23T14:37:12.453Z",
   "note": "Pro starts extracted by the LLM robot from per-race web search + multi-language media feeds (only athletes already in our roster → no new/hallucinated athletes). confidence confirmed. Merged on top of curated + WTCS + PTO + media.",
-  "starts": {}
+  "starts": {
+    "casper-stornes": [
+      {
+        "date": "2026-06-28",
+        "event": "Ironman Frankfurt",
+        "series": "ironman",
+        "url": "https://triathlon.de/blogs/journal/profi-startliste-ironman-frankfurt-2026",
+        "confidence": "confirmed"
+      }
+    ],
+    "gustav-iden": [
+      {
+        "date": "2026-06-28",
+        "event": "Ironman Frankfurt",
+        "series": "ironman",
+        "url": "https://triathlon.de/blogs/journal/profi-startliste-ironman-frankfurt-2026",
+        "confidence": "confirmed"
+      }
+    ],
+    "magnus-ditlev": [
+      {
+        "date": "2026-06-28",
+        "event": "Ironman Frankfurt",
+        "series": "ironman",
+        "url": "https://triathlon.de/blogs/journal/profi-startliste-ironman-frankfurt-2026",
+        "confidence": "confirmed"
+      }
+    ],
+    "gregory-barnaby": [
+      {
+        "date": "2026-06-28",
+        "event": "Ironman Frankfurt",
+        "series": "ironman",
+        "url": "https://triathlon.de/blogs/journal/profi-startliste-ironman-frankfurt-2026",
+        "confidence": "confirmed"
+      }
+    ],
+    "kieran-lindars": [
+      {
+        "date": "2026-06-28",
+        "event": "Ironman Frankfurt",
+        "series": "ironman",
+        "url": "https://triathlon.de/blogs/journal/profi-startliste-ironman-frankfurt-2026",
+        "confidence": "confirmed"
+      }
+    ],
+    "vincent-luis": [
+      {
+        "date": "2026-06-28",
+        "event": "Ironman Frankfurt",
+        "series": "ironman",
+        "url": "https://triathlon.de/blogs/journal/profi-startliste-ironman-frankfurt-2026",
+        "confidence": "confirmed"
+      }
+    ],
+    "kyle-smith": [
+      {
+        "date": "2026-06-28",
+        "event": "Ironman Frankfurt",
+        "series": "ironman",
+        "url": "https://triathlon.de/blogs/journal/profi-startliste-ironman-frankfurt-2026",
+        "confidence": "confirmed"
+      }
+    ],
+    "leon-chevalier": [
+      {
+        "date": "2026-06-28",
+        "event": "Ironman Frankfurt",
+        "series": "ironman",
+        "url": "https://triathlon.de/blogs/journal/profi-startliste-ironman-frankfurt-2026",
+        "confidence": "confirmed"
+      }
+    ],
+    "pieter-heemeryck": [
+      {
+        "date": "2026-06-28",
+        "event": "Ironman Frankfurt",
+        "series": "ironman",
+        "url": "https://triathlon.de/blogs/journal/profi-startliste-ironman-frankfurt-2026",
+        "confidence": "confirmed"
+      }
+    ],
+    "cameron-wurf": [
+      {
+        "date": "2026-06-28",
+        "event": "Ironman Frankfurt",
+        "series": "ironman",
+        "url": "https://triathlon.de/blogs/journal/profi-startliste-ironman-frankfurt-2026",
+        "confidence": "confirmed"
+      }
+    ],
+    "jonas-hoffmann": [
+      {
+        "date": "2026-06-28",
+        "event": "Ironman Frankfurt",
+        "series": "ironman",
+        "url": "https://triathlon.de/blogs/journal/profi-startliste-ironman-frankfurt-2026",
+        "confidence": "confirmed"
+      }
+    ],
+    "finn-grosse-freese": [
+      {
+        "date": "2026-06-28",
+        "event": "Ironman Frankfurt",
+        "series": "ironman",
+        "url": "https://triathlon.de/blogs/journal/profi-startliste-ironman-frankfurt-2026",
+        "confidence": "confirmed"
+      }
+    ],
+    "florian-angert": [
+      {
+        "date": "2026-06-28",
+        "event": "Ironman Frankfurt",
+        "series": "ironman",
+        "url": "https://triathlon.de/blogs/journal/profi-startliste-ironman-frankfurt-2026",
+        "confidence": "confirmed"
+      }
+    ],
+    "jan-stratmann": [
+      {
+        "date": "2026-06-28",
+        "event": "Ironman Frankfurt",
+        "series": "ironman",
+        "url": "https://triathlon.de/blogs/journal/profi-startliste-ironman-frankfurt-2026",
+        "confidence": "confirmed"
+      }
+    ],
+    "wilhelm-hirsch": [
+      {
+        "date": "2026-06-28",
+        "event": "Ironman Frankfurt",
+        "series": "ironman",
+        "url": "https://triathlon.de/blogs/journal/profi-startliste-ironman-frankfurt-2026",
+        "confidence": "confirmed"
+      }
+    ],
+    "paul-schuster": [
+      {
+        "date": "2026-06-28",
+        "event": "Ironman Frankfurt",
+        "series": "ironman",
+        "url": "https://triathlon.de/blogs/journal/profi-startliste-ironman-frankfurt-2026",
+        "confidence": "confirmed"
+      }
+    ],
+    "kristian-blummenfelt": [
+      {
+        "date": "2026-07-05",
+        "event": "Challenge Roth",
+        "series": "challenge",
+        "url": "https://triathlon.de/blogs/journal/challenge-roth-2026-das-staerkste-profi-feld-aller-zeiten",
+        "confidence": "confirmed"
+      }
+    ],
+    "sam-laidlow": [
+      {
+        "date": "2026-07-05",
+        "event": "Challenge Roth",
+        "series": "challenge",
+        "url": "https://triathlon.de/blogs/journal/challenge-roth-2026-das-staerkste-profi-feld-aller-zeiten",
+        "confidence": "confirmed"
+      }
+    ],
+    "patrick-lange": [
+      {
+        "date": "2026-07-05",
+        "event": "Challenge Roth",
+        "series": "challenge",
+        "url": "https://triathlon.de/blogs/journal/challenge-roth-2026-das-staerkste-profi-feld-aller-zeiten",
+        "confidence": "confirmed"
+      }
+    ],
+    "jonas-schomburg": [
+      {
+        "date": "2026-07-05",
+        "event": "Challenge Roth",
+        "series": "challenge",
+        "url": "https://triathlon.de/blogs/journal/challenge-roth-2026-das-staerkste-profi-feld-aller-zeiten",
+        "confidence": "confirmed"
+      }
+    ],
+    "frederic-funk": [
+      {
+        "date": "2026-07-05",
+        "event": "Challenge Roth",
+        "series": "challenge",
+        "url": "https://triathlon.de/blogs/journal/challenge-roth-2026-das-staerkste-profi-feld-aller-zeiten",
+        "confidence": "confirmed"
+      }
+    ],
+    "rico-bogen": [
+      {
+        "date": "2026-07-05",
+        "event": "Challenge Roth",
+        "series": "challenge",
+        "url": "https://triathlon.de/blogs/journal/challenge-roth-2026-das-staerkste-profi-feld-aller-zeiten",
+        "confidence": "confirmed"
+      }
+    ],
+    "will-draper": [
+      {
+        "date": "2026-07-05",
+        "event": "Challenge Roth",
+        "series": "challenge",
+        "url": "https://triathlon.de/blogs/journal/challenge-roth-2026-das-staerkste-profi-feld-aller-zeiten",
+        "confidence": "confirmed"
+      }
+    ],
+    "denis-chevrot": [
+      {
+        "date": "2026-07-05",
+        "event": "Challenge Roth",
+        "series": "challenge",
+        "url": "https://triathlon.de/blogs/journal/challenge-roth-2026-das-staerkste-profi-feld-aller-zeiten",
+        "confidence": "confirmed"
+      }
+    ],
+    "laura-philipp": [
+      {
+        "date": "2026-07-05",
+        "event": "Challenge Roth",
+        "series": "challenge",
+        "url": "https://triathlon.de/blogs/journal/challenge-roth-2026-das-staerkste-profi-feld-aller-zeiten",
+        "confidence": "confirmed"
+      }
+    ],
+    "kat-matthews": [
+      {
+        "date": "2026-07-05",
+        "event": "Challenge Roth",
+        "series": "challenge",
+        "url": "https://triathlon.de/blogs/journal/challenge-roth-2026-das-staerkste-profi-feld-aller-zeiten",
+        "confidence": "confirmed"
+      }
+    ],
+    "fenella-langridge": [
+      {
+        "date": "2026-07-05",
+        "event": "Challenge Roth",
+        "series": "challenge",
+        "url": "https://triathlon.de/blogs/journal/challenge-roth-2026-das-staerkste-profi-feld-aller-zeiten",
+        "confidence": "confirmed"
+      }
+    ],
+    "jasmine-brown": [
+      {
+        "date": "2026-07-05",
+        "event": "Challenge Roth",
+        "series": "challenge",
+        "url": "https://triathlon.de/blogs/journal/challenge-roth-2026-das-staerkste-profi-feld-aller-zeiten",
+        "confidence": "confirmed"
+      }
+    ],
+    "gabrielle-lumkes": [
+      {
+        "date": "2026-07-05",
+        "event": "Challenge Roth",
+        "series": "challenge",
+        "url": "https://triathlon.de/blogs/journal/challenge-roth-2026-das-staerkste-profi-feld-aller-zeiten",
+        "confidence": "confirmed"
+      }
+    ]
+  }
 }
