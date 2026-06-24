@@ -136,11 +136,10 @@ export default function StartListScreen() {
                 <ThemedText type="smallBold" numberOfLines={1}>
                   {athlete.name}
                 </ThemedText>
-                {!!athlete.country && (
-                  <ThemedText type="small" themeColor="textSecondary" style={{ fontSize: 11 }}>
-                    {countryFlag(athlete.country)} {athlete.country}
-                  </ThemedText>
-                )}
+                <ThemedText type="small" themeColor="textSecondary" style={{ fontSize: 11 }}>
+                  {countryFlag(athlete.country ?? '')}
+                  {athlete.country ? ` ${athlete.country}` : ''}
+                </ThemedText>
               </View>
               {start.confidence === 'expected' && (
                 <View style={[styles.tag, { borderColor: theme.border }]}>
