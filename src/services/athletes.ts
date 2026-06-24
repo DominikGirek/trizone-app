@@ -6,6 +6,7 @@ import proStartsLlmData from '@/data/proStartsLLM.json';
 import proStartsMediaData from '@/data/proStartsMedia.json';
 import proStartsMikaData from '@/data/proStartsMika.json';
 import proStartsPtoData from '@/data/proStartsPTO.json';
+import { raceKey } from '@/lib/raceKey';
 import { athletes, athletesById } from '@/mocks/athletes';
 import { fetchWtAthlete } from '@/services/worldTriathlon';
 import type { Athlete, AthleteLinks, AthleteStart } from '@/types';
@@ -116,9 +117,15 @@ function withLinks(athlete: Athlete, m: Merged): Athlete {
   const gen = m.PRO_STARTS[athlete.id] ?? [];
   let starts: AthleteStart[] | undefined;
   if (hand.length || gen.length) {
-    const byDate = new Map<string, AthleteStart>();
-    for (const s of [...hand, ...gen]) if (!byDate.has(s.date)) byDate.set(s.date, s);
-    starts = [...byDate.values()];
+    // Dedup by raceKey (day + host city), NOT just date: that collapses naming variants
+    // of the SAME race ("IRONMAN Frankfurt" == "Mainova … Frankfurt") while keeping two
+    // DIFFERENT races on the same day (e.g. Roth vs Les Sables) as separate starts.
+    const byRace = new Map<string, AthleteStart>();
+    for (const s of [...hand, ...gen]) {
+      const key = raceKey(s.event, s.date) || s.date;
+      if (!byRace.has(key)) byRace.set(key, s);
+    }
+    starts = [...byRace.values()];
   }
   if (!links && !starts) return athlete;
   return {
