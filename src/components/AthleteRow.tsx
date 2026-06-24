@@ -1,17 +1,17 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { FavoriteButton } from '@/components/FavoriteButton';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { athleteTitle } from '@/lib/athleteTitle';
+import { avatarColor, initials } from '@/lib/avatar';
 import { countryFlag } from '@/lib/format';
 import type { Athlete } from '@/types';
 
 export function AthleteRow({ athlete, onPress }: { athlete: Athlete; onPress: () => void }) {
   const theme = useTheme();
-  const { t } = useTranslation();
 
   return (
     <Pressable
@@ -21,14 +21,15 @@ export function AthleteRow({ athlete, onPress }: { athlete: Athlete; onPress: ()
         { borderColor: theme.border },
         pressed && { backgroundColor: theme.backgroundElement },
       ]}>
-      <View style={[styles.avatar, { backgroundColor: theme.backgroundElement }]}>
-        <ThemedText style={styles.flag}>{countryFlag(athlete.country)}</ThemedText>
+      <View style={[styles.avatar, { backgroundColor: avatarColor(athlete.name) }]}>
+        <ThemedText style={styles.avatarText}>{initials(athlete.name)}</ThemedText>
       </View>
       <View style={styles.body}>
-        <ThemedText type="smallBold">{athlete.name}</ThemedText>
-        <ThemedText type="small" themeColor="textSecondary" numberOfLines={1}>
-          {t(`common.${athlete.gender}`)} ·{' '}
-          {athlete.series.map((s) => t(`series.${s}`)).join(', ')}
+        <ThemedText type="smallBold" numberOfLines={1}>
+          {athlete.name}
+        </ThemedText>
+        <ThemedText type="small" numberOfLines={1} style={[styles.title, { color: theme.primary }]}>
+          {countryFlag(athlete.country)} {athleteTitle(athlete)}
         </ThemedText>
       </View>
       <FavoriteButton kind="athlete" id={athlete.id} size={20} />
@@ -53,6 +54,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  flag: { fontSize: 20 },
+  avatarText: { fontSize: 13, fontWeight: '800', color: '#fff' },
   body: { flex: 1, gap: 2 },
+  title: { fontSize: 12, fontWeight: '800' },
 });

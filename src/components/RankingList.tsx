@@ -9,6 +9,9 @@ import { useTheme } from '@/hooks/use-theme';
 import { countryFlag } from '@/lib/format';
 import type { RankingEntry } from '@/types';
 
+// Gold / silver / bronze for the top three — a glanceable leaderboard accent.
+const MEDAL = ['#D4AF37', '#B7BCC2', '#C8814B'];
+
 function Movement({ value }: { value?: number }) {
   const theme = useTheme();
   if (!value) return <Ionicons name="remove" size={12} color={theme.textSecondary} />;
@@ -46,7 +49,13 @@ export function RankingList({
         const tappable = internal && !!onSelectAthlete;
         return (
           <View key={e.athleteId} style={[styles.row, { borderColor: theme.border }]}>
-            <ThemedText style={[styles.rank, { color: theme.text }]}>{e.rank}</ThemedText>
+            {e.rank <= 3 ? (
+              <View style={[styles.medal, { backgroundColor: MEDAL[e.rank - 1] }]}>
+                <ThemedText style={styles.medalText}>{e.rank}</ThemedText>
+              </View>
+            ) : (
+              <ThemedText style={[styles.rank, { color: theme.text }]}>{e.rank}</ThemedText>
+            )}
             <Movement value={e.movement} />
             <Pressable
               style={styles.nameCol}
@@ -80,7 +89,9 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.three,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
-  rank: { width: 22, fontSize: 16, fontWeight: '800' },
+  rank: { width: 22, fontSize: 16, fontWeight: '800', textAlign: 'center' },
+  medal: { width: 22, height: 22, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
+  medalText: { fontSize: 12, fontWeight: '800', color: '#1A1A1A' },
   movement: { width: 26, flexDirection: 'row', alignItems: 'center', gap: 1 },
   nameCol: { flex: 1 },
   points: { fontVariant: ['tabular-nums'], textAlign: 'right' },

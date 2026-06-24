@@ -21,6 +21,7 @@ import { useTheme } from '@/hooks/use-theme';
 import type { AppLanguage } from '@/i18n';
 import { fameScore } from '@/lib/athleteFame';
 import { athleteTitle } from '@/lib/athleteTitle';
+import { avatarColor, initials } from '@/lib/avatar';
 import { countryFlag, formatDate, formatKm, timeAgo } from '@/lib/format';
 import { pickForYou } from '@/lib/newsTopics';
 import { getAthletesByIds } from '@/services/athletes';
@@ -41,22 +42,6 @@ type IoniconName = ComponentProps<typeof Ionicons>['name'];
 
 // A followed athlete with a result/win in a fresh headline → red "athlete moment".
 const RESULT_RE = /\b(gewinnt|siegt|sieg|sieger|weltmeister|holt|triumph|champion|wins?|victory|podium|titel|rekord)\b/i;
-
-const initials = (name: string) =>
-  name
-    .split(/\s+/)
-    .map((w) => w[0])
-    .filter(Boolean)
-    .slice(0, 2)
-    .join('')
-    .toUpperCase();
-
-// Deterministic muted colour per name → varied avatars without photo rights.
-const avatarColor = (s: string) => {
-  let h = 0;
-  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 360;
-  return `hsl(${h}, 42%, 36%)`;
-};
 
 function Section({
   title,
