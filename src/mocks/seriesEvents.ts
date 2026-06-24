@@ -34,15 +34,15 @@ const seed: Seed[] = [
     organizer: 'IRONMAN', websiteUrl: 'https://www.ironman.com/races/im-frankfurt', proStartListUrl: 'https://www.ironman.com/proseries/races/im-frankfurt',
   },
   // IRONMAN full-distance — Europe (dates verified via sportpress.international / IRONMAN)
-  { id: 'se-im-lanzarote', name: 'IRONMAN Lanzarote', series: 'IRONMAN', town: 'Lanzarote', region: 'Spanien', country: 'ES', lat: 28.92, lon: -13.66, date: '2026-05-23T07:00:00', distances: [{ label: 'Langdistanz', ...IRONMAN }], organizer: 'IRONMAN', websiteUrl: 'https://www.ironman.com/races/im-lanzarote', proStartListUrl: 'https://www.ironman.com/races/im-lanzarote' },
-  { id: 'se-im-klagenfurt', name: 'IRONMAN Austria Kärnten', series: 'IRONMAN', town: 'Klagenfurt', region: 'Österreich', country: 'AT', lat: 46.624, lon: 14.308, date: '2026-06-14T07:00:00', distances: [{ label: 'Langdistanz', ...IRONMAN }], organizer: 'IRONMAN', websiteUrl: 'https://www.ironman.com/races/im-austria', proStartListUrl: 'https://www.ironman.com/races/im-austria' },
-  { id: 'se-im-tours', name: 'IRONMAN Tours Loire Valley', series: 'IRONMAN', town: 'Tours', region: 'Frankreich', country: 'FR', lat: 47.394, lon: 0.685, date: '2026-06-14T07:00:00', distances: [{ label: 'Langdistanz', ...IRONMAN }], organizer: 'IRONMAN', websiteUrl: 'https://www.ironman.com/races/im-tours', proStartListUrl: 'https://www.ironman.com/races/im-tours' },
-  { id: 'se-im-nice', name: 'IRONMAN France Nice', series: 'IRONMAN', town: 'Nizza', region: 'Frankreich', country: 'FR', lat: 43.696, lon: 7.266, date: '2026-06-28T07:00:00', distances: [{ label: 'Langdistanz', ...IRONMAN }], organizer: 'IRONMAN', websiteUrl: 'https://www.ironman.com/races/im-france', proStartListUrl: 'https://www.ironman.com/races/im-france' },
-  { id: 'se-im-thun', name: 'IRONMAN Switzerland Thun', series: 'IRONMAN', town: 'Thun', region: 'Schweiz', country: 'CH', lat: 46.758, lon: 7.628, date: '2026-07-05T07:00:00', distances: [{ label: 'Langdistanz', ...IRONMAN }], organizer: 'IRONMAN', websiteUrl: 'https://www.ironman.com/races/im-switzerland', proStartListUrl: 'https://www.ironman.com/races/im-switzerland' },
-  { id: 'se-im-vichy', name: 'IRONMAN Vichy', series: 'IRONMAN', town: 'Vichy', region: 'Frankreich', country: 'FR', lat: 46.128, lon: 3.426, date: '2026-08-23T07:00:00', distances: [{ label: 'Langdistanz', ...IRONMAN }], organizer: 'IRONMAN', websiteUrl: 'https://www.ironman.com/races/im-vichy', proStartListUrl: 'https://www.ironman.com/races/im-vichy' },
-  { id: 'se-im-wales', name: 'IRONMAN Wales', series: 'IRONMAN', town: 'Tenby', region: 'Großbritannien', country: 'GB', lat: 51.673, lon: -4.702, date: '2026-09-13T07:00:00', distances: [{ label: 'Langdistanz', ...IRONMAN }], organizer: 'IRONMAN', websiteUrl: 'https://www.ironman.com/races/im-wales', proStartListUrl: 'https://www.ironman.com/races/im-wales' },
-  { id: 'se-im-emilia', name: 'IRONMAN Italy Emilia-Romagna', series: 'IRONMAN', town: 'Cervia', region: 'Italien', country: 'IT', lat: 44.262, lon: 12.354, date: '2026-09-19T07:00:00', distances: [{ label: 'Langdistanz', ...IRONMAN }], organizer: 'IRONMAN', websiteUrl: 'https://www.ironman.com/races/im-emilia-romagna', proStartListUrl: 'https://www.ironman.com/races/im-emilia-romagna' },
-  { id: 'se-im-cascais', name: 'IRONMAN Portugal Cascais', series: 'IRONMAN', town: 'Cascais', region: 'Portugal', country: 'PT', lat: 38.697, lon: -9.421, date: '2026-10-17T07:00:00', distances: [{ label: 'Langdistanz', ...IRONMAN }], organizer: 'IRONMAN', websiteUrl: 'https://www.ironman.com/races/im-cascais', proStartListUrl: 'https://www.ironman.com/races/im-cascais' },
+  { id: 'se-im-lanzarote', name: 'IRONMAN Lanzarote', series: 'IRONMAN', town: 'Lanzarote', region: 'Spanien', country: 'ES', lat: 28.92, lon: -13.66, date: '2026-05-23T07:00:00', distances: [{ label: 'Langdistanz', ...IRONMAN }], organizer: 'IRONMAN', websiteUrl: 'https://www.ironman.com/races/im-lanzarote' },
+  { id: 'se-im-klagenfurt', name: 'IRONMAN Austria Kärnten', series: 'IRONMAN', town: 'Klagenfurt', region: 'Österreich', country: 'AT', lat: 46.624, lon: 14.308, date: '2026-06-14T07:00:00', distances: [{ label: 'Langdistanz', ...IRONMAN }], organizer: 'IRONMAN', websiteUrl: 'https://www.ironman.com/races/im-austria' },
+  { id: 'se-im-tours', name: 'IRONMAN Tours Loire Valley', series: 'IRONMAN', town: 'Tours', region: 'Frankreich', country: 'FR', lat: 47.394, lon: 0.685, date: '2026-06-14T07:00:00', distances: [{ label: 'Langdistanz', ...IRONMAN }], organizer: 'IRONMAN', websiteUrl: 'https://www.ironman.com/races/im-tours' },
+  { id: 'se-im-nice', name: 'IRONMAN France Nice', series: 'IRONMAN', town: 'Nizza', region: 'Frankreich', country: 'FR', lat: 43.696, lon: 7.266, date: '2026-06-28T07:00:00', distances: [{ label: 'Langdistanz', ...IRONMAN }], organizer: 'IRONMAN', websiteUrl: 'https://www.ironman.com/races/im-france' },
+  { id: 'se-im-thun', name: 'IRONMAN Switzerland Thun', series: 'IRONMAN', town: 'Thun', region: 'Schweiz', country: 'CH', lat: 46.758, lon: 7.628, date: '2026-07-05T07:00:00', distances: [{ label: 'Langdistanz', ...IRONMAN }], organizer: 'IRONMAN', websiteUrl: 'https://www.ironman.com/races/im-switzerland' },
+  { id: 'se-im-vichy', name: 'IRONMAN Vichy', series: 'IRONMAN', town: 'Vichy', region: 'Frankreich', country: 'FR', lat: 46.128, lon: 3.426, date: '2026-08-23T07:00:00', distances: [{ label: 'Langdistanz', ...IRONMAN }], organizer: 'IRONMAN', websiteUrl: 'https://www.ironman.com/races/im-vichy' },
+  { id: 'se-im-wales', name: 'IRONMAN Wales', series: 'IRONMAN', town: 'Tenby', region: 'Großbritannien', country: 'GB', lat: 51.673, lon: -4.702, date: '2026-09-13T07:00:00', distances: [{ label: 'Langdistanz', ...IRONMAN }], organizer: 'IRONMAN', websiteUrl: 'https://www.ironman.com/races/im-wales' },
+  { id: 'se-im-emilia', name: 'IRONMAN Italy Emilia-Romagna', series: 'IRONMAN', town: 'Cervia', region: 'Italien', country: 'IT', lat: 44.262, lon: 12.354, date: '2026-09-19T07:00:00', distances: [{ label: 'Langdistanz', ...IRONMAN }], organizer: 'IRONMAN', websiteUrl: 'https://www.ironman.com/races/im-emilia-romagna' },
+  { id: 'se-im-cascais', name: 'IRONMAN Portugal Cascais', series: 'IRONMAN', town: 'Cascais', region: 'Portugal', country: 'PT', lat: 38.697, lon: -9.421, date: '2026-10-17T07:00:00', distances: [{ label: 'Langdistanz', ...IRONMAN }], organizer: 'IRONMAN', websiteUrl: 'https://www.ironman.com/races/im-cascais' },
   // The big one — IRONMAN World Championship returns to Kona (men + women, one day, 10 Oct 2026)
   { id: 'se-im-worlds-kona', name: 'IRONMAN World Championship Hawaii', series: 'IRONMAN', town: 'Kailua-Kona', region: 'Hawaii, USA', country: 'US', lat: 19.639, lon: -155.997, date: '2026-10-10T06:25:00', distances: [{ label: 'Weltmeisterschaft · Langdistanz', ...IRONMAN }], organizer: 'IRONMAN', websiteUrl: 'https://www.ironman.com/races/im-world-championship-kona', proStartListUrl: 'https://www.ironman.com/proseries/races/im-world-championship-kona' },
   // IRONMAN 70.3 — Europe
@@ -118,19 +118,19 @@ const seed: Seed[] = [
     id: 'se-t100-goldcoast', name: 'T100 Gold Coast', series: 'T100',
     town: 'Gold Coast', region: 'AU', country: 'AU', lat: -28.0023, lon: 153.4145,
     date: '2026-03-21T07:00:00', distances: [{ label: 'T100 (100 km)', ...T100D }],
-    organizer: 'PTO', websiteUrl: 'https://t100triathlon.com/', proStartListUrl: 'https://t100triathlon.com/',
+    organizer: 'PTO', websiteUrl: 'https://t100triathlon.com/',
   },
   {
     id: 'se-t100-singapore', name: 'T100 Singapore', series: 'T100',
     town: 'Singapur', region: 'SG', country: 'SG', lat: 1.2897, lon: 103.8501,
     date: '2026-04-25T07:00:00', distances: [{ label: 'T100 (100 km)', ...T100D }],
-    organizer: 'PTO', websiteUrl: 'https://t100triathlon.com/', proStartListUrl: 'https://t100triathlon.com/',
+    organizer: 'PTO', websiteUrl: 'https://t100triathlon.com/',
   },
   {
     id: 'se-t100-vancouver', name: 'T100 Vancouver', series: 'T100',
     town: 'Vancouver', region: 'CA', country: 'CA', lat: 49.2827, lon: -123.1207,
     date: '2026-08-15T07:00:00', distances: [{ label: 'T100 (100 km)', ...T100D }],
-    organizer: 'PTO', websiteUrl: 'https://t100triathlon.com/', proStartListUrl: 'https://t100triathlon.com/',
+    organizer: 'PTO', websiteUrl: 'https://t100triathlon.com/',
   },
 ];
 
