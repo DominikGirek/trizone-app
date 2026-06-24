@@ -13,7 +13,7 @@ import { Pill } from '@/components/Pill';
 import { NewsListSkeleton } from '@/components/Skeleton';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { HeaderIconButton, TopBar } from '@/components/TopBar';
+import { HeaderAvatar, TopBar } from '@/components/TopBar';
 import { Spacing } from '@/constants/theme';
 import { useLocation } from '@/hooks/use-location';
 import { useTheme } from '@/hooks/use-theme';
@@ -205,8 +205,7 @@ export default function DashboardScreen() {
         title={t(hour < 11 ? 'dashboard.greetingMorning' : hour < 18 ? 'dashboard.greetingDay' : 'dashboard.greetingEvening')}
         eyebrow={today}
         right={
-          <HeaderIconButton
-            icon="person-outline"
+          <HeaderAvatar
             onPress={() => router.push('/following')}
             label={t('following.title')}
             badge={favorites.length}

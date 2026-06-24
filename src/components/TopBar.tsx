@@ -19,6 +19,40 @@ export function Wordmark({ size = 20 }: { size?: number }) {
   );
 }
 
+/** Account avatar — a circle with the user's initials (falls back to a glyph until login). */
+export function HeaderAvatar({
+  onPress,
+  initials,
+  label,
+  badge,
+}: {
+  onPress: () => void;
+  initials?: string;
+  label?: string;
+  badge?: number;
+}) {
+  const theme = useTheme();
+  return (
+    <Pressable
+      onPress={onPress}
+      hitSlop={8}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      style={({ pressed }) => [styles.avatar, { backgroundColor: theme.primary }, pressed && { opacity: 0.7 }]}>
+      {initials ? (
+        <ThemedText style={[styles.avatarText, { color: theme.onPrimary }]}>{initials}</ThemedText>
+      ) : (
+        <Ionicons name="person" size={18} color={theme.onPrimary} />
+      )}
+      {!!badge && badge > 0 && (
+        <View style={[styles.badge, { backgroundColor: theme.text, borderColor: theme.background }]}>
+          <ThemedText style={[styles.badgeText, { color: theme.background }]}>{badge}</ThemedText>
+        </View>
+      )}
+    </Pressable>
+  );
+}
+
 /** Circular header action — a subtle chip so the icons read as intentional buttons. */
 export function HeaderIconButton({
   icon,
@@ -75,7 +109,7 @@ export function TopBar({
         { paddingTop: insets.top + Spacing.two, backgroundColor: theme.background, borderColor: theme.border },
       ]}>
       <View style={styles.brandRow}>
-        <Wordmark />
+        <Wordmark size={26} />
         <View style={styles.actions}>
           {right}
           {showSearch && (
@@ -83,6 +117,7 @@ export function TopBar({
           )}
         </View>
       </View>
+      <View style={[styles.accent, { backgroundColor: theme.primary }]} />
       {!!eyebrow && (
         <ThemedText type="small" themeColor="textSecondary" style={styles.eyebrow}>
           {eyebrow}
@@ -106,6 +141,7 @@ const styles = StyleSheet.create({
     minHeight: 40,
   },
   actions: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
+  accent: { width: 30, height: 3, borderRadius: 2, marginTop: Spacing.two, marginBottom: Spacing.one + 2 },
   iconBtn: {
     width: 38,
     height: 38,
@@ -113,6 +149,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  avatar: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarText: { fontSize: 14, fontWeight: '800' },
   badge: {
     position: 'absolute',
     top: -2,
