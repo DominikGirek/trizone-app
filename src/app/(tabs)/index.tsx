@@ -13,7 +13,7 @@ import { Pill } from '@/components/Pill';
 import { NewsListSkeleton } from '@/components/Skeleton';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { TopBar } from '@/components/TopBar';
+import { HeaderIconButton, TopBar } from '@/components/TopBar';
 import { Spacing } from '@/constants/theme';
 import { useLocation } from '@/hooks/use-location';
 import { useTheme } from '@/hooks/use-theme';
@@ -192,25 +192,25 @@ export default function DashboardScreen() {
       </Pressable>
     );
 
+  const hour = new Date().getHours();
+  const today = new Date().toLocaleDateString(lang === 'de' ? 'de-DE' : 'en-US', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  });
+
   return (
     <ThemedView style={styles.container}>
       <TopBar
-        title={t('tabs.home')}
+        title={t(hour < 11 ? 'dashboard.greetingMorning' : hour < 18 ? 'dashboard.greetingDay' : 'dashboard.greetingEvening')}
+        eyebrow={today}
         right={
-          <Pressable
+          <HeaderIconButton
+            icon="person-outline"
             onPress={() => router.push('/following')}
-            hitSlop={10}
-            accessibilityRole="button"
-            accessibilityLabel={t('following.title')}>
-            <Ionicons name="person-circle-outline" size={26} color={theme.text} />
-            {favorites.length > 0 && (
-              <View style={[styles.followBadge, { backgroundColor: theme.primary }]}>
-                <ThemedText style={[styles.followBadgeText, { color: theme.onPrimary }]}>
-                  {favorites.length}
-                </ThemedText>
-              </View>
-            )}
-          </Pressable>
+            label={t('following.title')}
+            badge={favorites.length}
+          />
         }
       />
       <ScrollView contentContainerStyle={styles.content}>

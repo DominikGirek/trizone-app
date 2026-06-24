@@ -107,10 +107,24 @@ async function fetchFeed(feed: (typeof FEEDS)[number]): Promise<Article[]> {
   }
 }
 
+// Relevant German portals that have NO usable RSS feed (e.g. triathlon.de) — pulled via
+// Google News (runs server-side on web → no CORS) so their coverage still shows in the feed.
+const GOOGLE_NEWS_SITES: { site: string; source: string }[] = [
+  { site: 'triathlon.de', source: 'triathlon.de' },
+];
+
+async function fetchSiteNews(site: string, source: string): Promise<Article[]> {
+  const arts = await fetchGoogleNews(`site:${site}`);
+  return arts.map((a) => ({ ...a, source, lang: 'de' as const }));
+}
+
 /** Aggregate, de-duplicate and sort all feeds by recency. */
 export async function aggregateFeeds(): Promise<Article[]> {
-  const results = await Promise.all(FEEDS.map(fetchFeed));
-  const all = results.flat().filter((a) => a.title && a.link);
+  const [feedResults, siteResults] = await Promise.all([
+    Promise.all(FEEDS.map(fetchFeed)),
+    Promise.all(GOOGLE_NEWS_SITES.map((s) => fetchSiteNews(s.site, s.source))),
+  ]);
+  const all = [...feedResults.flat(), ...siteResults.flat()].filter((a) => a.title && a.link);
 
   const seen = new Set<string>();
   const deduped = all.filter((a) => {

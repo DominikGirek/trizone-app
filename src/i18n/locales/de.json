@@ -88,6 +88,9 @@
     "coverageNote": "Live in der App: Bundesliga, Regionalliga Nord, SHTU. Weitere Verbände öffnen ihre offizielle Tabelle. Team-Suche deckt die live lesbaren Ligen ab."
   },
   "dashboard": {
+    "greetingMorning": "Guten Morgen",
+    "greetingDay": "Guten Tag",
+    "greetingEvening": "Guten Abend",
     "liveNow": "Jetzt live",
     "raceWeek": "Renn-Woche",
     "athleteMoment": "Dein Favorit",

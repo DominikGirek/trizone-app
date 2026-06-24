@@ -88,6 +88,9 @@
     "coverageNote": "Live in-app: Bundesliga, Regionalliga Nord, SHTU. Other associations open their official standings. Team search covers the live-readable leagues."
   },
   "dashboard": {
+    "greetingMorning": "Good morning",
+    "greetingDay": "Good afternoon",
+    "greetingEvening": "Good evening",
     "liveNow": "Live now",
     "raceWeek": "Race week",
     "athleteMoment": "Your favorite",
