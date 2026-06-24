@@ -3,7 +3,7 @@
   "enabled": {
     "wtcs": true,
     "pto": true,
-    "ironman": true,
+    "ironman": false,
     "mika": true,
     "media": true,
     "llm": true

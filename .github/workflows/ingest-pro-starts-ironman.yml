@@ -1,14 +1,12 @@
-name: Ingest IRONMAN pro start lists
+name: Ingest IRONMAN pro start lists (DISABLED — ToS)
 
-# Weekly: reads ironman.com's SERVER-RENDERED Pro Series starter pages
-# (/proseries/races/{slug}/starters-men|women) with a plain fetch — the names are in the
-# HTML, so no headless browser is needed. Writes src/data/proStartsIronman.json with a
-# separate men/women gender per athlete. Polite delays between requests.
+# DISABLED: ironman.com Terms of Use forbid automated access/scraping (robot/spider/
+# crawler/extraction, personal non-commercial use only). We do NOT scrape ironman.com.
+# The schedule is removed so this never runs automatically; the robot is also guarded
+# (no-op unless TRIZONE_ALLOW_IRONMAN=1). Kept only in case of a future data licence.
+# IRONMAN-race pro fields now come from third-party media + the official-list link.
 
 on:
-  schedule:
-    # Weekly, Sundays ~05:51 UTC.
-    - cron: "51 5 * * 0"
   workflow_dispatch:
 
 permissions:

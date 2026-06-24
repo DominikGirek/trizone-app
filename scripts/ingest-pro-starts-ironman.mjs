@@ -104,6 +104,15 @@ function prosOnPage(html, roster) {
 }
 
 async function main() {
+  // DISABLED: ironman.com Terms of Use forbid automated access/scraping ("any robot,
+  // spider, web crawler, extraction software, automated process … to scrape, copy, or
+  // monitor any portion of the Site", and personal non-commercial use only). We do NOT
+  // scrape ironman.com. IRONMAN-race fields come from third-party media instead.
+  // (Left in place, guarded, in case of a future data licence — set TRIZONE_ALLOW_IRONMAN=1.)
+  if (process.env.TRIZONE_ALLOW_IRONMAN !== '1') {
+    console.log('IRONMAN ingest disabled (ironman.com ToS forbids automated access) — no-op.');
+    return;
+  }
   const now = Date.now() - 864e5;
   const todayISO = new Date(now).toISOString().slice(0, 10);
   const roster = await knownRoster();
