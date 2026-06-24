@@ -317,6 +317,8 @@
     "open": "Pro start list",
     "women": "Pro Women",
     "men": "Pro Men",
+    "statPros": "Pros",
+    "statNations": "Nations",
     "more": "More pros",
     "field": "Pro field",
     "count_one": "{{count}} pro",

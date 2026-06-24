@@ -317,6 +317,8 @@
     "open": "Profi-Starterliste",
     "women": "Profi-Frauen",
     "men": "Profi-Männer",
+    "statPros": "Profis",
+    "statNations": "Nationen",
     "more": "Weitere Profis",
     "field": "Profi-Feld",
     "count_one": "{{count}} Profi",
