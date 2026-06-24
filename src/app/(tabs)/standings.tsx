@@ -22,7 +22,7 @@ type Mode = 'leagues' | 'world';
 type RankTab = Extract<SeriesId, 'wtcs' | 'pto'> | 'improseries';
 
 const RANK_TABS: RankTab[] = ['wtcs', 'pto', 'improseries'];
-const IM_PRO_SERIES_URL = 'https://www.ironman.com/im-pro-series';
+const IM_PRO_SERIES_URL = 'https://www.ironman.com/proseries/standings/2026';
 
 function Chip({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
   const theme = useTheme();
