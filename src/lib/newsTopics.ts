@@ -193,6 +193,28 @@ export function mergeRaceNews(primary: Article[], extra: Article[], limit = 8): 
   return out.slice(0, limit);
 }
 
+// A forward-looking PREVIEW (schedule, livestream, start list …) vs. a RECAP (results,
+// report). A preview of a race that already happened is dead weight; a recap stays useful.
+const PREVIEW_RE =
+  /zeitplan|livestream|übertragung|vorschau|vorbericht|startzeit|startliste|preview|favoriten|tickets|anmeldung|countdown|so (siehst|verfolg)|live verfolg/i;
+const RECAP_RE =
+  /ergebnis|nachbericht|rückblick|result|recap|race report|gewinnt|gewann|sieg|siegt|champion|podium|weltmeister wird/i;
+
+/** Drop stale PREVIEW articles about a race that has already finished (e.g. "IRONMAN
+ *  Hamburg: Zeitplan, Livestream" after Hamburg). Recaps/results of past races are kept,
+ *  and anything not tied to a known past race is untouched. `finishedTokens` = distinctive
+ *  venue/name tokens of events that are already over. */
+export function dropPastEventNews(articles: Article[], finishedTokens: Set<string>): Article[] {
+  if (!finishedTokens.size) return articles;
+  return articles.filter((a) => {
+    const hay = `${a.title} ${a.summary}`.toLowerCase();
+    const aboutPast = [...finishedTokens].some((k) => hay.includes(k));
+    if (!aboutPast) return true; // not about a known past race → keep
+    if (RECAP_RE.test(hay)) return true; // a recap/results of it → still relevant
+    return !PREVIEW_RE.test(hay); // a preview of a race that's over → drop
+  });
+}
+
 /** News articles that mention this race (by venue / distinctive name token). */
 export function newsForRace(
   articles: Article[],

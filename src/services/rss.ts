@@ -114,7 +114,8 @@ const GOOGLE_NEWS_SITES: { site: string; source: string }[] = [
 ];
 
 async function fetchSiteNews(site: string, source: string): Promise<Article[]> {
-  const arts = await fetchGoogleNews(`site:${site}`);
+  // when:30d → only the last month, so evergreen/shop pages don't pile up in the feed.
+  const arts = await fetchGoogleNews(`site:${site} when:30d`);
   return arts.map((a) => ({ ...a, source, lang: 'de' as const }));
 }
 
