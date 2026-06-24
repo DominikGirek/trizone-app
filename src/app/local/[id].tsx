@@ -24,6 +24,7 @@ import { fetchRaceNews } from '@/services/raceNews';
 import { getLocalEventById, providerLabel } from '@/services/localEvents';
 import { cityTokens } from '@/lib/raceKey';
 import { getRaceStartList, raceKey, startPointFor } from '@/services/races';
+import { swimVenue } from '@/services/venue';
 import { useMyRaces } from '@/store/myRaces';
 import { useReminders } from '@/store/reminders';
 import type { DistanceOption, LocalEvent } from '@/types';
@@ -105,6 +106,16 @@ export default function LocalEventScreen() {
     enabled: !!startKey,
   });
   const hasStartList = !!startList?.entries.length;
+
+  // Local events have no curated venue → try to resolve the swim water body via OSM (gated to
+  // a water feature in the town). Series events use the curated raceVenues instead.
+  const venueTokens = event && !event.series ? cityTokens(event.name).join(' ') : '';
+  const { data: geoVenue } = useQuery({
+    queryKey: ['swimVenue', venueTokens, event?.town],
+    queryFn: () => swimVenue(venueTokens, event!.town),
+    enabled: !!event && !!venueTokens,
+    staleTime: 24 * 60 * 60 * 1000,
+  });
 
   if (isLoading) return <LoadingState />;
   if (!event) return <EmptyState message={t('local.empty')} />;
@@ -202,13 +213,14 @@ export default function LocalEventScreen() {
   // by city token — applying it to a local DTU event that merely shares a city, e.g. a small
   // Hamburg/Frankfurt race, would drop a WRONG pin at the big race's venue). Local events
   // instead use a town-anchored Google search ("name town") — never a falsely-precise pin.
+  // Exact swim-start pin: curated venue for series races, else the OSM-resolved water venue
+  // for local races (both verified). Otherwise a town-anchored search of the distinctive
+  // name token(s) + town ("Aasee Bocholt" → the lake) — never a falsely-precise pin.
   const startPoint = event.series ? startPointFor(event.name) : null;
-  // For local events search the distinctive venue/name token(s) + town — Google resolves a
-  // named venue ("Aasee Bocholt") to the actual swim spot, while the raw "37. … Triathlon"
-  // string is noisy. Falls back to the town centroid only when no distinctive token exists.
+  const venuePoint = startPoint ?? geoVenue ?? null;
   const localQuery = [...cityTokens(event.name), event.town].filter(Boolean).join(' ').trim();
-  const mapsUrl = startPoint
-    ? `https://www.google.com/maps/search/?api=1&query=${startPoint.lat},${startPoint.lon}`
+  const mapsUrl = venuePoint
+    ? `https://www.google.com/maps/search/?api=1&query=${venuePoint.lat},${venuePoint.lon}`
     : localQuery
       ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(localQuery)}`
       : `https://www.google.com/maps/search/?api=1&query=${event.lat},${event.lon}`;
