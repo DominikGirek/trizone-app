@@ -22,7 +22,7 @@ import { codesForAthlete } from '@/lib/discountCodes';
 import { useCodes } from '@/services/codes';
 import { getAthleteById } from '@/services/athletes';
 import { fetchAthleteNews } from '@/services/raceNews';
-import { getAthleteResults, raceKey, sourceLabel } from '@/services/races';
+import { getAthleteResults, raceKey } from '@/services/races';
 import type { AthleteLinks } from '@/types';
 
 const LINK_META: { key: keyof AthleteLinks; icon: any; label: string }[] = [
@@ -156,11 +156,6 @@ export default function AthleteScreen() {
                         type="small"
                         style={{ fontSize: 11, color: s.confidence === 'confirmed' ? theme.primary : theme.textSecondary }}>
                         {s.confidence === 'confirmed' ? `✓ ${t('profile.confirmed')}` : t('profile.expected')}
-                      </ThemedText>
-                    )}
-                    {!!sourceLabel(s.url) && (
-                      <ThemedText type="small" themeColor="textSecondary" style={{ fontSize: 11 }}>
-                        · {t('startlist.via', { source: sourceLabel(s.url) })}
                       </ThemedText>
                     )}
                   </View>

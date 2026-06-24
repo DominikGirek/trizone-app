@@ -12,7 +12,7 @@ import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import type { AppLanguage } from '@/i18n';
 import { countryFlag, formatDate } from '@/lib/format';
-import { getRaceStartList, sourceLabel } from '@/services/races';
+import { getRaceStartList } from '@/services/races';
 
 export default function StartListScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -66,7 +66,6 @@ export default function StartListScreen() {
               {label.toUpperCase()} · {items.length}
             </ThemedText>
             {items.map(({ athlete, start }) => {
-              const src = sourceLabel(start.url);
               return (
                 <Pressable
                   key={athlete.id}
@@ -81,11 +80,6 @@ export default function StartListScreen() {
                     <ThemedText type="smallBold" numberOfLines={1}>
                       {athlete.name}
                     </ThemedText>
-                    {!!src && (
-                      <ThemedText type="small" themeColor="textSecondary" style={{ fontSize: 11 }}>
-                        {t('startlist.via', { source: src })}
-                      </ThemedText>
-                    )}
                   </View>
                   {start.confidence && (
                     <ThemedText
