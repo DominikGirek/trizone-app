@@ -15,7 +15,7 @@ const GENERIC = new Set([
   'oesterreich', 'italy', 'italia', 'spain', 'espana', 'uk', 'usa',
 ]);
 
-function cityTokens(name: string): string[] {
+export function cityTokens(name: string): string[] {
   return name
     .toLowerCase()
     .normalize('NFD')

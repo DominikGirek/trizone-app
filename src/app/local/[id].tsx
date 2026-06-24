@@ -22,6 +22,7 @@ import { mergeRaceNews, newsForRace, raceSearchQuery } from '@/lib/newsTopics';
 import { fetchNews } from '@/services/news';
 import { fetchRaceNews } from '@/services/raceNews';
 import { getLocalEventById, providerLabel } from '@/services/localEvents';
+import { cityTokens } from '@/lib/raceKey';
 import { getRaceStartList, raceKey, startPointFor } from '@/services/races';
 import { useMyRaces } from '@/store/myRaces';
 import { useReminders } from '@/store/reminders';
@@ -202,10 +203,14 @@ export default function LocalEventScreen() {
   // Hamburg/Frankfurt race, would drop a WRONG pin at the big race's venue). Local events
   // instead use a town-anchored Google search ("name town") — never a falsely-precise pin.
   const startPoint = event.series ? startPointFor(event.name) : null;
+  // For local events search the distinctive venue/name token(s) + town — Google resolves a
+  // named venue ("Aasee Bocholt") to the actual swim spot, while the raw "37. … Triathlon"
+  // string is noisy. Falls back to the town centroid only when no distinctive token exists.
+  const localQuery = [...cityTokens(event.name), event.town].filter(Boolean).join(' ').trim();
   const mapsUrl = startPoint
     ? `https://www.google.com/maps/search/?api=1&query=${startPoint.lat},${startPoint.lon}`
-    : event.name
-      ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${event.name} ${event.town}`)}`
+    : localQuery
+      ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(localQuery)}`
       : `https://www.google.com/maps/search/?api=1&query=${event.lat},${event.lon}`;
 
   return (
