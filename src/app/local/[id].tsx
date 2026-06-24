@@ -197,10 +197,11 @@ export default function LocalEventScreen() {
     }
   };
 
-  // Prefer the verified swim-start coordinates; otherwise search by name+town (Google
-  // resolves known races to their venue far better than a town centroid). The bare
-  // centroid is the last resort.
-  const startPoint = startPointFor(event.name);
+  // Verified swim-start coordinates ONLY for the branded series races (raceVenues is keyed
+  // by city token — applying it to a local DTU event that merely shares a city, e.g. a small
+  // Hamburg/Frankfurt race, would drop a WRONG pin at the big race's venue). Local events
+  // instead use a town-anchored Google search ("name town") — never a falsely-precise pin.
+  const startPoint = event.series ? startPointFor(event.name) : null;
   const mapsUrl = startPoint
     ? `https://www.google.com/maps/search/?api=1&query=${startPoint.lat},${startPoint.lon}`
     : event.name
