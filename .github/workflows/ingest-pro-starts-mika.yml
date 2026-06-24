@@ -1,0 +1,37 @@
+name: Ingest mikatiming pro start lists
+
+# Weekly: reads the COMPLETE official pro field from mikatiming start-list iframes
+# (server-rendered list endpoint, event=Professional, sex filter for gender). Configured
+# per race in scripts/ingest-pro-starts-mika.mjs (Challenge Roth …). Plain fetch, no
+# browser. Writes src/data/proStartsMika.json.
+
+on:
+  schedule:
+    # Weekly, Sundays ~06:11 UTC (after codes + ironman; rebase-retry handles overlap).
+    - cron: "11 6 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ingest-pro-starts-mika
+  cancel-in-progress: false
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Read mikatiming pro start lists
+        run: node scripts/ingest-pro-starts-mika.mjs
+
+      - name: Commit starts if changed
+        run: >-
+          node scripts/ci-commit-data.mjs src/data/proStartsMika.json
+          "chore(data): refresh mikatiming pro start lists"
