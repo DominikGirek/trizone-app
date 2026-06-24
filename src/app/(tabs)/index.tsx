@@ -19,6 +19,7 @@ import { Spacing } from '@/constants/theme';
 import { useLocation } from '@/hooks/use-location';
 import { useTheme } from '@/hooks/use-theme';
 import type { AppLanguage } from '@/i18n';
+import { fameScore } from '@/lib/athleteFame';
 import { athleteTitle } from '@/lib/athleteTitle';
 import { countryFlag, formatDate, formatKm, timeAgo } from '@/lib/format';
 import { pickForYou } from '@/lib/newsTopics';
@@ -171,7 +172,14 @@ export default function DashboardScreen() {
     queryFn: () => getRaceStartList(matchKey),
     enabled: !!matchKey,
   });
-  const matchStarters = matchList?.entries ?? [];
+  // Lead with the best-known names (not alphabetical) so the avatars are recognisable.
+  const matchStarters = useMemo(
+    () =>
+      [...(matchList?.entries ?? [])].sort(
+        (a, b) => fameScore(b.athlete) - fameScore(a.athlete) || a.athlete.name.localeCompare(b.athlete.name),
+      ),
+    [matchList],
+  );
 
   // — "Near you" list.
   const nearby = useMemo(() => {
