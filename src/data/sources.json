@@ -1,0 +1,11 @@
+{
+  "note": "Per-source kill-switch / source mix. The app fetches this at runtime (hosted), so flipping a flag to false drops that source from the app within the cache window — WITHOUT an app update. Use to respond fast to a takedown, or to lean on lower-risk sources. Missing flag = enabled.",
+  "enabled": {
+    "wtcs": true,
+    "pto": true,
+    "ironman": true,
+    "mika": true,
+    "media": true,
+    "llm": true
+  }
+}

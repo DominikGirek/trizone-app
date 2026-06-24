@@ -323,7 +323,9 @@
     "count_other": "{{count}} Profis",
     "via": "Quelle: {{source}}",
     "empty": "Für dieses Rennen liegt uns noch keine Profi-Starterliste vor.",
-    "disclaimer": "Vorläufige Liste ohne Gewähr auf Vollständigkeit – Profis können kurzfristig zu- oder absagen. Aus mehreren Quellen automatisch zusammengestellt."
+    "disclaimer": "Vorläufige Liste ohne Gewähr auf Vollständigkeit – Profis können kurzfristig zu- oder absagen. Aus mehreren öffentlichen Quellen automatisch zusammengestellt.",
+    "notAffiliated": "TriZone ist unabhängig und steht in keiner Verbindung zu IRONMAN, Challenge, World Triathlon oder PTO. Rennnamen sind Marken der jeweiligen Inhaber.",
+    "official": "Offizielle Starterliste"
   },
   "reminder": {
     "title": "Bald geht's los: {{name}}",

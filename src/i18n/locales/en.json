@@ -323,7 +323,9 @@
     "count_other": "{{count}} pros",
     "via": "Source: {{source}}",
     "empty": "No pro start list for this race yet.",
-    "disclaimer": "Provisional list, completeness not guaranteed – pros may enter or withdraw at short notice. Auto-compiled from several sources."
+    "disclaimer": "Provisional list, completeness not guaranteed – pros may enter or withdraw at short notice. Auto-compiled from several public sources.",
+    "notAffiliated": "TriZone is independent and not affiliated with IRONMAN, Challenge, World Triathlon or PTO. Race names are trademarks of their respective owners.",
+    "official": "Official start list"
   },
   "reminder": {
     "title": "Starting soon: {{name}}",

@@ -1,0 +1,4 @@
+{
+  "note": "Takedown list: athlete ids hidden everywhere in the app (profiles + start lists). Add an id + commit → the athlete disappears within the cache window, no app update. For honouring an athlete's objection/erasure request (GDPR Art. 21/17). Ids are name slugs, e.g. \"frederic-funk\".",
+  "blocked": []
+}
