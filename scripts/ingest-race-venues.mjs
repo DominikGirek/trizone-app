@@ -75,7 +75,35 @@ async function seriesRaces() {
   return races;
 }
 
+// Hand-verified swim-start venues for the prominent races, matched to an event by a
+// distinctive name substring. These need no LLM — Nominatim geocodes the named water body
+// directly — so the "Karte" is exact for the most-opened races even without an API key.
+// (Roth/Frankfurt/Hamburg are already seeded in raceVenues.json.)
+const CURATED_BY_NAME = [
+  ['Kraichgau', 'Hardtsee, Ubstadt-Weiher'],
+  ['IRONMAN Lanzarote', 'Playa Grande, Puerto del Carmen, Lanzarote'],
+  ['Austria Kärnten', 'Strandbad Klagenfurt, Wörthersee'],
+  ['France Nice', 'Promenade des Anglais, Nice'],
+  ['70.3 Nice', 'Promenade des Anglais, Nice'],
+  ['Switzerland Thun', 'Strandbad Thun, Thunersee'],
+  ['Switzerland Rapperswil', 'Strandbad Rapperswil'],
+  ['Zell am See', 'Seezentrum Zell am See, Zeller See'],
+  ['IRONMAN 70.3 Duisburg', 'Regattabahn Duisburg'],
+  ['IRONMAN 70.3 Leipzig', 'Kulkwitzer See, Leipzig'],
+  ['Erkner', 'Dämeritzsee, Erkner'],
+  ['Valencia', 'Playa de la Malvarrosa, Valencia'],
+  ['Alcúdia', "Port d'Alcúdia, Mallorca"],
+  ['Málaga', 'Playa de la Malagueta, Málaga'],
+  ['IRONMAN Wales', 'North Beach, Tenby'],
+  ['Vichy', "Lac d'Allier, Vichy"],
+  ['Cascais', 'Baía de Cascais'],
+  ['Hawaii', 'Kailua Bay, Kailua-Kona, Hawaii'],
+];
+
 async function venueName(race) {
+  const curated = CURATED_BY_NAME.find(([m]) => race.name.includes(m));
+  if (curated) return curated[1];
+  if (!KEY) return null; // LLM discovery needs a key; curated venues above don't
   const prompt = `What is the SWIM START venue for the triathlon "${race.name}" in ${race.town}? The swim start is a specific lake, river, canal, harbour or beach (e.g. "Langener Waldsee", "Main-Donau-Kanal Hilpoltstein", "Binnenalster"). Reply STRICT JSON: {"venue":"<water body + town/place, or null if you are not confident>"}. NEVER guess and NEVER return the organizer's office. JSON only.`;
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
@@ -103,10 +131,9 @@ async function geocode(query) {
 }
 
 async function main() {
-  if (!KEY) {
-    console.log('ANTHROPIC_API_KEY not set → race-venue layer skipped (optional).');
-    return;
-  }
+  // Without a key we still geocode the CURATED venues (no LLM needed); the LLM only fills
+  // the long tail when a key is present.
+  if (!KEY) console.log('ANTHROPIC_API_KEY not set → curated venues only (LLM discovery skipped).');
   const existing = JSON.parse(await readFile(OUT, 'utf8').catch(() => '{"venues":{}}'));
   const venues = existing.venues || {};
   const races = await seriesRaces();
