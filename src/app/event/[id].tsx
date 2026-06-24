@@ -120,7 +120,10 @@ export default function EventScreen() {
   if (isLoading) return <LoadingState />;
   if (!race) return <EmptyState message={t('common.noResults')} />;
 
-  const raceNews = mergeRaceNews(newsForRace(news ?? [], race.name, race.location), localNews ?? []);
+  const raceNews = mergeRaceNews(
+    newsForRace(news ?? [], race.name, race.location),
+    newsForRace(localNews ?? [], race.name, race.location),
+  );
 
   const onShare = (r: Race) => {
     haptics.light();

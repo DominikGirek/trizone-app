@@ -143,10 +143,20 @@ export function pickForYou(
 // Generic words that don't identify a specific race (so we match on the venue
 // / distinctive tokens instead — "Roth", "Frankfurt", "Kona", "Quiberon" …).
 const RACE_STOPWORDS = new Set([
-  'ironman', 'challenge', 'triathlon', 'world', 'championship', 'series', 'european',
-  'powered', 'presented', 'the', 'und', 'and', 'von', 'der', 'die', 'das', 'main',
+  'ironman', 'challenge', 'triathlon', 'world', 'championship', 'championships', 'series',
+  'european', 'powered', 'presented', 'the', 'und', 'and', 'von', 'der', 'die', 'das', 'main',
   't100', 'pto', 'wtcs', 'sprint', 'olympic', 'olympisch', 'mixed', 'relay', 'tri',
   'kids', 'schüler', 'schultriathlon', 'race', 'rennen', 'cup',
+  // Common event-descriptor / dictionary words that are NOT race-identifying — without
+  // these, names like "After Work Triathlon" matched any English article saying "after".
+  'after', 'work', 'night', 'nacht', 'abend', 'evening', 'morning', 'classic', 'klassik',
+  'festival', 'summer', 'sommer', 'winter', 'spring', 'autumn', 'herbst', 'city', 'stadt',
+  'lake', 'beach', 'strand', 'park', 'open', 'women', 'woman', 'frauen', 'ladies', 'junior',
+  'juniors', 'youth', 'jugend', 'masters', 'master', 'indoor', 'outdoor', 'charity',
+  'memorial', 'edition', 'international', 'national', 'regional', 'club', 'team', 'results',
+  'ergebnisse', 'finish', 'start', 'course', 'strecke', 'live', 'news', 'guide', 'training',
+  'light', 'color', 'colour', 'family', 'familie', 'volks', 'jedermann', 'cross', 'swim',
+  'bike', 'lauf', 'run', 'jump', 'over', 'event', 'days', 'weekend',
 ]);
 
 /** Distinctive lowercased tokens (venue / event name) used to find a race's news. */

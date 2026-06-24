@@ -144,6 +144,11 @@ export interface LocalEvent {
   raceresultEventId?: string;
   /** Branded series label for big events (e.g. "IRONMAN", "Challenge", "T100"). */
   series?: string;
+  /** Official PRO start-list / pro-field URL. Set ONLY for races that actually have a pro
+   *  field (IRONMAN Pro Series, full-distance IRONMAN, T100 …). Drives whether the
+   *  "Profi-Starterliste" action shows and where it deep-links. Regional age-group races
+   *  (e.g. a small IRONMAN 70.3) leave this unset → no pro start-list button. */
+  proStartListUrl?: string;
 }
 
 /** A favoritable entity reference. */

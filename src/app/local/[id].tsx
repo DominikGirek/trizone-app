@@ -5,6 +5,7 @@ import * as WebBrowser from 'expo-web-browser';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, Share, StyleSheet, View } from 'react-native';
 
+import { Countdown } from '@/components/Countdown';
 import { NewsCard } from '@/components/NewsCard';
 import { StatusPill } from '@/components/StatusPill';
 import { EmptyState, LoadingState } from '@/components/States';
@@ -107,7 +108,12 @@ export default function LocalEventScreen() {
   if (isLoading) return <LoadingState />;
   if (!event) return <EmptyState message={t('local.empty')} />;
 
-  const raceNews = mergeRaceNews(newsForRace(news ?? [], event.name, event.town), localNews ?? []);
+  // Filter BOTH the general feed AND the Google results so only articles that actually
+  // mention this race/venue show — a small local event shows no news rather than random ones.
+  const raceNews = mergeRaceNews(
+    newsForRace(news ?? [], event.name, event.town),
+    newsForRace(localNews ?? [], event.name, event.town),
+  );
 
   const provider = providerLabel(event.provider);
   const reminderOn = hasReminder(event.id);
@@ -205,22 +211,44 @@ export default function LocalEventScreen() {
     <ThemedView style={styles.container}>
       <Stack.Screen options={{ title: event.town }} />
       <ScrollView contentContainerStyle={styles.content}>
-        <View style={[styles.header, { borderColor: theme.border }]}>
-          <View style={styles.topRow}>
-            <ThemedText type="small" style={{ color: theme.primary, fontWeight: '800', fontSize: 11 }}>
-              {event.region}
+        <View style={[styles.hero, { backgroundColor: theme.backgroundElement, borderColor: theme.border }]}>
+          <View style={[styles.heroAccent, { backgroundColor: theme.primary }]} />
+          <View style={styles.heroInner}>
+            <View style={styles.topRow}>
+              <View style={styles.kickerRow}>
+                {!!event.series && (
+                  <View style={[styles.seriesChip, { backgroundColor: theme.primary }]}>
+                    <ThemedText type="small" style={[styles.seriesChipText, { color: theme.onPrimary }]}>
+                      {event.series.toUpperCase()}
+                    </ThemedText>
+                  </View>
+                )}
+                <ThemedText type="small" style={{ color: theme.primary, fontWeight: '800', fontSize: 11 }}>
+                  {event.region}
+                </ThemedText>
+              </View>
+              <StatusPill status={event.status} />
+            </View>
+            <ThemedText style={styles.name} numberOfLines={3}>
+              {event.name}
             </ThemedText>
-            <StatusPill status={event.status} />
+            <View style={styles.heroMeta}>
+              <Ionicons name="location-outline" size={14} color={theme.textSecondary} />
+              <ThemedText type="small" themeColor="textSecondary" style={{ flex: 1 }}>
+                {countryFlag(event.country)} {event.town} · {formatDateTime(event.date, lang)}
+              </ThemedText>
+            </View>
+            {event.status === 'upcoming' && (
+              <View style={styles.heroCountdown}>
+                <Countdown date={event.date} color={theme.text} />
+              </View>
+            )}
+            {!!event.organizer && (
+              <ThemedText type="small" themeColor="textSecondary" style={{ marginTop: 2 }}>
+                {t('local.organizer')}: {event.organizer}
+              </ThemedText>
+            )}
           </View>
-          <ThemedText style={styles.name}>{event.name}</ThemedText>
-          <ThemedText type="small" themeColor="textSecondary">
-            {countryFlag(event.country)} {event.town} · {formatDateTime(event.date, lang)}
-          </ThemedText>
-          {!!event.organizer && (
-            <ThemedText type="small" themeColor="textSecondary">
-              {t('local.organizer')}: {event.organizer}
-            </ThemedText>
-          )}
         </View>
 
         {/* Primary CTA */}
@@ -247,15 +275,16 @@ export default function LocalEventScreen() {
 
         {/* Secondary actions */}
         <View style={styles.actions}>
-          {/* Pro start list. If we have our own field, open the in-app list; otherwise — for
-              a branded series race (IRONMAN/Challenge/T100) — deep-link straight to the
-              official race page (no scraping, just a link; no media break for the user). */}
-          {(hasStartList || (!!event.series && !!event.websiteUrl)) && (
+          {/* Pro start list — ONLY for races that actually have a pro field (our own data, or
+              a known pro race via proStartListUrl). Regional age-group races (e.g. IRONMAN 70.3
+              Duisburg) have no pro field → no button. With our own data we open the in-app list;
+              otherwise we deep-link to the official pro start list (a link, not scraping). */}
+          {(hasStartList || !!event.proStartListUrl) && (
             <ActionChip
               icon="people-outline"
               label={t('startlist.open')}
               onPress={() =>
-                hasStartList ? router.push(`/startlist/${startKey}`) : openUrl(event.websiteUrl)
+                hasStartList ? router.push(`/startlist/${startKey}`) : openUrl(event.proStartListUrl)
               }
             />
           )}
@@ -319,13 +348,23 @@ export default function LocalEventScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   content: { paddingBottom: Spacing.five },
-  header: {
-    padding: Spacing.three,
-    gap: Spacing.one,
-    borderBottomWidth: StyleSheet.hairlineWidth,
+  hero: {
+    flexDirection: 'row',
+    marginHorizontal: Spacing.three,
+    marginTop: Spacing.two,
+    borderRadius: 18,
+    borderWidth: StyleSheet.hairlineWidth,
+    overflow: 'hidden',
   },
-  topRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  heroAccent: { width: 5, alignSelf: 'stretch' },
+  heroInner: { flex: 1, padding: Spacing.three, gap: Spacing.one },
+  topRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: Spacing.two },
+  kickerRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, flex: 1 },
+  seriesChip: { paddingHorizontal: Spacing.two, paddingVertical: 2, borderRadius: 6 },
+  seriesChipText: { fontSize: 10, fontWeight: '800', letterSpacing: 0.5 },
   name: { fontSize: 24, fontWeight: '800', letterSpacing: -0.3, marginTop: Spacing.one },
+  heroMeta: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 },
+  heroCountdown: { marginTop: Spacing.two },
   primary: {
     flexDirection: 'row',
     alignItems: 'center',
