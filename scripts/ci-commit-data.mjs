@@ -49,5 +49,22 @@ run('git config user.name "github-actions[bot]"');
 run('git config user.email "41898282+github-actions[bot]@users.noreply.github.com"');
 run(`git add ${file}`);
 run(`git commit -m ${JSON.stringify(`${message} [skip ci]`)}`);
-run('git push');
-console.log(`Committed ${file}.`);
+
+// Push with rebase + retry: another scheduled/manual bot may have pushed to main since
+// this job checked out. Each bot writes its OWN file, so the rebase replays cleanly —
+// this just stops a concurrent push from failing the run and dropping its commit.
+for (let attempt = 1; attempt <= 5; attempt++) {
+  try {
+    run('git pull --rebase --autostash');
+    run('git push');
+    console.log(`Committed ${file}.`);
+    process.exit(0);
+  } catch {
+    if (attempt === 5) {
+      console.error(`Push failed after ${attempt} attempts.`);
+      process.exit(1);
+    }
+    console.log(`Push attempt ${attempt} failed (main moved?) — retrying…`);
+    execSync(`sleep ${attempt * 3}`); // linear backoff on the CI runner
+  }
+}
