@@ -1,4 +1,4 @@
-import { Platform, StyleSheet, Text, type TextProps } from 'react-native';
+import { Platform, StyleSheet, Text, type TextProps, type TextStyle } from 'react-native';
 
 import { Fonts, ThemeColor } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
@@ -8,26 +8,46 @@ export type ThemedTextProps = TextProps & {
   themeColor?: ThemeColor;
 };
 
+// Custom fonts don't synthesize weights in RN, so each weight is its own family. Map the
+// effective fontWeight onto the matching Archivo face → the whole app renders in Archivo.
+function archivoFamily(weight: TextStyle['fontWeight']): string {
+  const w = weight === 'bold' ? 700 : weight === 'normal' || weight == null ? 400 : Number(weight) || 400;
+  if (w >= 900) return 'Archivo_900Black';
+  if (w >= 800) return 'Archivo_800ExtraBold';
+  if (w >= 700) return 'Archivo_700Bold';
+  if (w >= 600) return 'Archivo_600SemiBold';
+  if (w >= 500) return 'Archivo_500Medium';
+  return 'Archivo_400Regular';
+}
+
 export function ThemedText({ style, type = 'default', themeColor, ...rest }: ThemedTextProps) {
   const theme = useTheme();
 
-  return (
-    <Text
-      style={[
-        { color: theme[themeColor ?? 'text'] },
-        type === 'default' && styles.default,
-        type === 'title' && styles.title,
-        type === 'small' && styles.small,
-        type === 'smallBold' && styles.smallBold,
-        type === 'subtitle' && styles.subtitle,
-        type === 'link' && styles.link,
-        type === 'linkPrimary' && styles.linkPrimary,
-        type === 'code' && styles.code,
-        style,
-      ]}
-      {...rest}
-    />
-  );
+  const typeStyle =
+    type === 'default'
+      ? styles.default
+      : type === 'title'
+        ? styles.title
+        : type === 'small'
+          ? styles.small
+          : type === 'smallBold'
+            ? styles.smallBold
+            : type === 'subtitle'
+              ? styles.subtitle
+              : type === 'link'
+                ? styles.link
+                : type === 'linkPrimary'
+                  ? styles.linkPrimary
+                  : type === 'code'
+                    ? styles.code
+                    : undefined;
+
+  // Code stays monospace; everything else maps its weight onto the right Archivo face.
+  const flat = StyleSheet.flatten([typeStyle, style]) as TextStyle | undefined;
+  const fontStyle: TextStyle =
+    type === 'code' ? {} : { fontFamily: archivoFamily(flat?.fontWeight), fontWeight: 'normal' };
+
+  return <Text style={[{ color: theme[themeColor ?? 'text'] }, typeStyle, style, fontStyle]} {...rest} />;
 }
 
 const styles = StyleSheet.create({
