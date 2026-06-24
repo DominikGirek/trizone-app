@@ -6,10 +6,10 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FlatList, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
-import { LocalEventCard } from '@/components/LocalEventCard';
-import { RaceCard } from '@/components/RaceCard';
 import { ReportNotFound } from '@/components/ReportNotFound';
+import { SeriesTag } from '@/components/SeriesTag';
 import { ListSkeleton } from '@/components/Skeleton';
+import { StatusPill } from '@/components/StatusPill';
 import { EmptyState } from '@/components/States';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -18,10 +18,16 @@ import { Spacing } from '@/constants/theme';
 import { useLocation } from '@/hooks/use-location';
 import { useTheme } from '@/hooks/use-theme';
 import type { AppLanguage } from '@/i18n';
-import { continentOf, countryFlag, monthShort, type ContinentCode } from '@/lib/format';
+import { continentOf, countryFlag, formatDate, formatKm, monthShort, type ContinentCode } from '@/lib/format';
 import { getAllEvents, type FeedItem } from '@/services/events';
 
 type Filter = 'all' | 'near' | 'past' | 'series' | 'pro';
+
+// Rendered sequence: a day-header divides each calendar day in the chronological modes,
+// while "near" stays a flat distance-ordered list (each row then carries its own date).
+type ListEntry =
+  | { type: 'header'; key: string; date: string }
+  | { type: 'row'; key: string; item: FeedItem; showDate: boolean };
 
 const SERIES_FINDERS = [
   { label: 'IRONMAN', url: 'https://www.ironman.com/races' },
@@ -134,6 +140,23 @@ export default function EventsScreen() {
     [afterCountry, month],
   );
 
+  const data = useMemo<ListEntry[]>(() => {
+    // "Near" is sorted by distance, not date → no day headers; the row shows its own date.
+    if (kind === 'near')
+      return list.map((i) => ({ type: 'row', key: `${i.kind}-${i.id}`, item: i, showDate: true }));
+    const out: ListEntry[] = [];
+    let lastDay = '';
+    for (const i of list) {
+      const day = new Date(i.date).toDateString();
+      if (day !== lastDay) {
+        out.push({ type: 'header', key: `h-${day}`, date: i.date });
+        lastDay = day;
+      }
+      out.push({ type: 'row', key: `${i.kind}-${i.id}`, item: i, showDate: false });
+    }
+    return out;
+  }, [list, kind]);
+
   const open = (item: FeedItem) =>
     item.kind === 'pro' ? router.push(`/event/${item.id}`) : router.push(`/local/${item.id}`);
 
@@ -202,14 +225,14 @@ export default function EventsScreen() {
         <ListSkeleton count={8} />
       ) : (
         <FlatList
-          data={list}
-          keyExtractor={(item) => `${item.kind}-${item.id}`}
+          data={data}
+          keyExtractor={(e) => e.key}
           ListHeaderComponent={finderHeader}
-          renderItem={({ item }) =>
-            item.kind === 'pro' ? (
-              <RaceCard race={item.race} onPress={() => open(item)} />
+          renderItem={({ item: e }) =>
+            e.type === 'header' ? (
+              <DayHeader date={e.date} />
             ) : (
-              <LocalEventCard event={item.event} onPress={() => open(item)} />
+              <EventRow item={e.item} showDate={e.showDate} onPress={() => open(e.item)} />
             )
           }
           ListEmptyComponent={<EmptyState icon="calendar-outline" message={t('events.empty')} />}
@@ -218,10 +241,116 @@ export default function EventsScreen() {
               <ReportNotFound type="race" />
             </View>
           }
-          contentContainerStyle={list.length ? undefined : styles.empty}
+          contentContainerStyle={data.length ? styles.listContent : styles.empty}
         />
       )}
     </ThemedView>
+  );
+}
+
+function DayHeader({ date }: { date: string }) {
+  const theme = useTheme();
+  const { i18n } = useTranslation();
+  const locale = i18n.language === 'de' ? 'de-DE' : 'en-US';
+  const d = new Date(date);
+  const weekday = d.toLocaleDateString(locale, { weekday: 'long' });
+  const rest = d.toLocaleDateString(locale, { day: 'numeric', month: 'long' });
+  return (
+    <View style={styles.dayHeader}>
+      <View style={[styles.dayDot, { backgroundColor: theme.primary }]} />
+      <ThemedText type="smallBold" style={styles.dayHeaderText}>
+        {weekday}
+      </ThemedText>
+      <ThemedText type="small" themeColor="textSecondary" style={styles.dayHeaderText}>
+        {rest}
+      </ThemedText>
+    </View>
+  );
+}
+
+function EventRow({
+  item,
+  showDate,
+  onPress,
+}: {
+  item: FeedItem;
+  showDate: boolean;
+  onPress: () => void;
+}) {
+  const theme = useTheme();
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language as AppLanguage;
+
+  const pro = item.kind === 'pro';
+  const name = item.kind === 'pro' ? item.race.name : item.event.name;
+  const country = item.kind === 'pro' ? item.race.country : item.event.country;
+  const town = item.kind === 'pro' ? item.race.location : item.event.town;
+  const status = item.kind === 'pro' ? item.race.status : item.event.status;
+  const distanceKm = item.kind === 'pro' ? null : item.event.distanceKm;
+  const localSeries = item.kind !== 'pro' ? item.event.series : undefined;
+  const distances = item.kind !== 'pro' ? item.event.distances : undefined;
+  const accent = pro || localSeries ? theme.primary : theme.border;
+
+  return (
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.row,
+        { backgroundColor: theme.backgroundElement, borderColor: theme.border },
+        pressed && { opacity: 0.7 },
+      ]}>
+      <View style={[styles.accent, { backgroundColor: accent }]} />
+      <View style={styles.rowBody}>
+        <View style={styles.rowTop}>
+          {item.kind === 'pro' ? (
+            <SeriesTag series={item.race.series} />
+          ) : localSeries ? (
+            <ThemedText type="small" style={[styles.localSeries, { color: theme.primary }]}>
+              {localSeries.toUpperCase()}
+            </ThemedText>
+          ) : null}
+          <View style={{ flex: 1 }} />
+          {showDate && (
+            <ThemedText type="small" themeColor="textSecondary" style={{ fontSize: 11 }}>
+              {formatDate(item.date, lang)}
+            </ThemedText>
+          )}
+          {status === 'live' && <StatusPill status="live" />}
+        </View>
+        <ThemedText type="smallBold" numberOfLines={1} style={styles.rowName}>
+          {name}
+        </ThemedText>
+        <View style={styles.rowMeta}>
+          <Ionicons name="location-outline" size={13} color={theme.textSecondary} />
+          <ThemedText type="small" themeColor="textSecondary" numberOfLines={1} style={{ flex: 1 }}>
+            {countryFlag(country)} {town}
+            {item.kind === 'pro' ? ` · ${t(`format.${item.race.format}`)}` : ''}
+          </ThemedText>
+          {distanceKm != null && (
+            <View style={[styles.distBadge, { backgroundColor: theme.background }]}>
+              <Ionicons name="navigate" size={10} color={theme.primary} />
+              <ThemedText type="small" style={{ color: theme.primary, fontSize: 11, fontWeight: '700' }}>
+                {formatKm(distanceKm)}
+              </ThemedText>
+            </View>
+          )}
+        </View>
+        {distances && distances.length > 0 && (
+          <View style={styles.chips}>
+            {distances.slice(0, 3).map((dd) => (
+              <ThemedText
+                key={dd.label}
+                type="small"
+                themeColor="textSecondary"
+                style={[styles.distChip, { borderColor: theme.border }]}>
+                {dd.label}
+              </ThemedText>
+            ))}
+          </View>
+        )}
+      </View>
+      <Ionicons name="chevron-forward" size={18} color={theme.textSecondary} />
+    </Pressable>
   );
 }
 
@@ -241,6 +370,51 @@ const styles = StyleSheet.create({
     padding: Spacing.three,
     borderRadius: 12,
     borderWidth: 1,
+  },
+  listContent: { paddingBottom: Spacing.two },
+  dayHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+    marginHorizontal: Spacing.three,
+    paddingTop: Spacing.three,
+    paddingBottom: Spacing.one + 2,
+  },
+  dayDot: { width: 6, height: 6, borderRadius: 3 },
+  dayHeaderText: { fontSize: 13 },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+    paddingVertical: Spacing.two + 2,
+    paddingRight: Spacing.three,
+    borderRadius: 14,
+    borderWidth: StyleSheet.hairlineWidth,
+    marginHorizontal: Spacing.three,
+    marginBottom: Spacing.two,
+    overflow: 'hidden',
+  },
+  accent: { width: 4, alignSelf: 'stretch', borderRadius: 2 },
+  rowBody: { flex: 1, gap: 3, paddingVertical: 2 },
+  rowTop: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, minHeight: 18 },
+  localSeries: { fontSize: 10, fontWeight: '800', letterSpacing: 0.5 },
+  rowName: { fontSize: 15 },
+  rowMeta: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  distBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+    paddingHorizontal: Spacing.two,
+    paddingVertical: 2,
+    borderRadius: 999,
+  },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: 2 },
+  distChip: {
+    fontSize: 11,
+    paddingHorizontal: Spacing.two,
+    paddingVertical: 1,
+    borderRadius: 6,
+    borderWidth: StyleSheet.hairlineWidth,
   },
   empty: { flexGrow: 1 },
 });
