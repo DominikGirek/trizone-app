@@ -17,6 +17,7 @@ import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import type { AppLanguage } from '@/i18n';
 import { haptics } from '@/lib/haptics';
+import { athleteTitle } from '@/lib/athleteTitle';
 import { countryFlag, formatDate, monthShort } from '@/lib/format';
 import { codesForAthlete } from '@/lib/discountCodes';
 import { useCodes } from '@/services/codes';
@@ -57,6 +58,17 @@ export default function AthleteScreen() {
   if (isLoading) return <LoadingState />;
   if (!athlete) return <EmptyState message={t('common.noResults')} />;
 
+  const title = athleteTitle(athlete);
+  // Hide the bio when it adds nothing beyond the title (e.g. title "T100- & Mitteldistanz-
+  // Star" vs bio "T100- und Mitteldistanz-Star.") — compare significant words, ignoring
+  // connectors so "&" and "und" don't count as a difference.
+  const STOP = new Set(['und', 'and', 'der', 'die', 'das', 'the', 'ein', 'eine', 'mit']);
+  const sigWords = (s: string) =>
+    (s.toLowerCase().match(/[a-zäöü0-9]+/g) ?? []).filter((w) => w.length >= 3 && !STOP.has(w));
+  const titleWords = new Set(sigWords(title));
+  const bioWords = sigWords(athlete.bio ?? '');
+  const showBio = !!athlete.bio && !(bioWords.length > 0 && bioWords.every((w) => titleWords.has(w)));
+
   const facts: { label: string; value: string }[] = [];
   if (athlete.birthYear) {
     const age = new Date().getFullYear() - athlete.birthYear;
@@ -90,6 +102,9 @@ export default function AthleteScreen() {
             )}
           </View>
           <ThemedText style={styles.name}>{athlete.name}</ThemedText>
+          <ThemedText type="smallBold" style={[styles.title, { color: theme.primary }]}>
+            {title}
+          </ThemedText>
           <ThemedText type="small" themeColor="textSecondary">
             {countryFlag(athlete.country)} · {t(`common.${athlete.gender}`)}
           </ThemedText>
@@ -167,7 +182,7 @@ export default function AthleteScreen() {
           </>
         )}
 
-        {!!athlete.bio && (
+        {showBio && (
           <>
             <Header title={t('profile.vita')} />
             <ThemedText type="small" style={styles.bio}>
@@ -293,6 +308,7 @@ const styles = StyleSheet.create({
   avatarImg: { width: '100%', height: '100%' },
   flag: { fontSize: 40 },
   name: { fontSize: 24, lineHeight: 30, fontWeight: '800', letterSpacing: -0.3, textAlign: 'center' },
+  title: { fontSize: 13, fontWeight: '800', textAlign: 'center', marginTop: 3 },
   series: { flexDirection: 'row', gap: Spacing.two, marginTop: Spacing.one, flexWrap: 'wrap', justifyContent: 'center' },
   favWrap: { marginTop: Spacing.two },
   sectionHeader: {
