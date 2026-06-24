@@ -50,7 +50,13 @@ function build(
     for (const a of src.athletes ?? []) {
       const existing = genById.get(a.id);
       if (!existing) genById.set(a.id, { ...a });
-      else existing.series = [...new Set([...(existing.series ?? []), ...(a.series ?? [])])];
+      else {
+        existing.series = [...new Set([...(existing.series ?? []), ...(a.series ?? [])])];
+        // PTO athletes carry no gender/country — let a later source fill the gaps so the
+        // athlete lands in the right Pro Women / Pro Men table.
+        if (!existing.gender && a.gender) existing.gender = a.gender;
+        if (!existing.country && a.country) existing.country = a.country;
+      }
     }
   }
   // Generated upcoming starts, concatenated across sources per athlete.
