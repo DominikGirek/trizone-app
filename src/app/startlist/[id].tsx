@@ -56,15 +56,6 @@ export default function StartListScreen() {
           {race.series && <SeriesTag series={race.series} />}
         </View>
 
-        <View style={[styles.disclaimer, { backgroundColor: theme.backgroundElement, borderColor: theme.border }]}>
-          <Ionicons name="information-circle-outline" size={16} color={theme.textSecondary} />
-          <ThemedText type="small" themeColor="textSecondary" style={{ flex: 1 }}>
-            {t('startlist.disclaimer')}
-            {'\n\n'}
-            {t('startlist.notAffiliated')}
-          </ThemedText>
-        </View>
-
         {!!officialUrl && (
           <Pressable
             onPress={() => Linking.openURL(officialUrl)}
@@ -110,6 +101,12 @@ export default function StartListScreen() {
             })}
           </View>
         ))}
+
+        <ThemedText type="small" themeColor="textSecondary" style={styles.footnote}>
+          {t('startlist.disclaimer')}
+          {'\n'}
+          {t('startlist.notAffiliated')}
+        </ThemedText>
       </ScrollView>
     </ThemedView>
   );
@@ -119,16 +116,8 @@ const styles = StyleSheet.create({
   content: { padding: Spacing.three, gap: Spacing.one, paddingBottom: Spacing.five },
   raceName: { marginTop: Spacing.two },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, marginBottom: Spacing.two },
-  disclaimer: {
-    flexDirection: 'row',
-    gap: Spacing.two,
-    alignItems: 'flex-start',
-    padding: Spacing.two,
-    borderRadius: 12,
-    borderWidth: StyleSheet.hairlineWidth,
-    marginBottom: Spacing.two,
-  },
   official: { flexDirection: 'row', alignItems: 'center', gap: Spacing.one, paddingVertical: Spacing.one, marginBottom: Spacing.one },
+  footnote: { marginTop: Spacing.three, fontSize: 11, lineHeight: 15, opacity: 0.6 },
   section: { marginTop: Spacing.two, marginBottom: 2, letterSpacing: 0.4 },
   row: {
     flexDirection: 'row',
