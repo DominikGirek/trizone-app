@@ -1,4 +1,5 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { useQuery } from '@tanstack/react-query';
 import { Image } from 'expo-image';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -11,6 +12,7 @@ import { useTheme } from '@/hooks/use-theme';
 import type { AppLanguage } from '@/i18n';
 import { timeAgo } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
+import { fetchOgImage } from '@/services/ogImage';
 import { useBookmarks } from '@/store/bookmarks';
 import type { Article } from '@/types';
 
@@ -29,7 +31,20 @@ export function NewsCard({ article, onPress }: { article: Article; onPress: () =
   const { isSaved, toggle } = useBookmarks();
   const lang = i18n.language as AppLanguage;
   const saved = isSaved(article.id);
-  const [imgFailed, setImgFailed] = useState(false);
+  const [primaryFailed, setPrimaryFailed] = useState(false);
+  const [ogFailed, setOgFailed] = useState(false);
+
+  // Many feeds ship no image (tri-mag, Google-News items, …). When the article has no usable
+  // image, fetch its og:image (web → /api/og-image, native → direct). Branded tile is the
+  // ultimate fallback so a card is never blank.
+  const primary = !primaryFailed ? article.imageUrl : undefined;
+  const { data: ogImage } = useQuery({
+    queryKey: ['ogImage', article.link],
+    queryFn: () => fetchOgImage(article.link),
+    enabled: !primary && !ogFailed && !!article.link,
+    staleTime: 24 * 60 * 60 * 1000,
+  });
+  const imageUri = primary || (!ogFailed ? ogImage : undefined);
 
   const onSave = () => {
     haptics.light();
@@ -50,13 +65,13 @@ export function NewsCard({ article, onPress }: { article: Article; onPress: () =
         { backgroundColor: theme.background, borderColor: theme.border },
         pressed && { opacity: 0.7 },
       ]}>
-      {article.imageUrl && !imgFailed ? (
+      {imageUri ? (
         <Image
-          source={{ uri: article.imageUrl }}
+          source={{ uri: imageUri }}
           style={styles.image}
           contentFit="cover"
           transition={150}
-          onError={() => setImgFailed(true)}
+          onError={() => (primary ? setPrimaryFailed(true) : setOgFailed(true))}
         />
       ) : (
         <View
