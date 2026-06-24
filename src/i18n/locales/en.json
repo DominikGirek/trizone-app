@@ -96,6 +96,9 @@
     "athleteMoment": "Your favorite",
     "myRace": "My race",
     "mainRace": "Main race",
+    "nextHighlight": "Next highlight",
+    "yourStars": "Your stars",
+    "proStarters": "{{count}} pros on the start list",
     "askTitle": "Which race are you racing next?",
     "askSubtitle": "Set your goal event – we'll count down.",
     "topNews": "News",
@@ -104,6 +107,12 @@
     "personalizeHint": "Pick favorite athletes and series for a personal start screen.",
     "personalize": "Choose favorites",
     "watchLive": "Follow live"
+  },
+  "quick": {
+    "live": "Live",
+    "races": "Races",
+    "myRaces": "My races",
+    "ranking": "Ranking"
   },
   "common": {
     "loading": "Loading …",
