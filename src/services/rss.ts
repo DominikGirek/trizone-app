@@ -14,6 +14,9 @@ export const FEEDS: { url: string; source: string; lang: 'de' | 'en' }[] = [
   { url: 'https://www.tri-mag.de/feed/', source: 'tri-mag', lang: 'de' },
   { url: 'https://www.tri2b.com/feed/', source: 'tri2b.com', lang: 'de' },
   { url: 'https://www.trinews.at/feed/', source: 'triNews', lang: 'de' },
+  // triathlon.de has no site-wide RSS, but its editorial Journal exposes a clean Atom feed
+  // (real articles + images) — far better than scraping the shop/event-DB via Google News.
+  { url: 'https://www.triathlon.de/blogs/journal.atom', source: 'triathlon.de', lang: 'de' },
   // English / international magazines
   { url: 'https://www.tri247.com/feed', source: 'Tri247', lang: 'en' },
   { url: 'https://www.triathlete.com/feed/', source: 'Triathlete', lang: 'en' },
@@ -81,7 +84,10 @@ function parseFeed(xml: string, source: string, lang: 'de' | 'en'): Article[] {
     const link =
       textOf(item.link?.['@_href'] ?? item.link) || item.guid?.['#text'] || textOf(item.guid);
     const rawSummary =
-      textOf(item.description) || textOf(item.summary) || textOf(item['content:encoded']);
+      textOf(item.description) ||
+      textOf(item.summary) ||
+      textOf(item['content:encoded']) ||
+      textOf(item.content);
     const summary = stripHtml(rawSummary).slice(0, 220);
     const published = textOf(item.pubDate) || textOf(item.published) || textOf(item.updated);
     return {
@@ -118,25 +124,10 @@ async function fetchFeed(feed: (typeof FEEDS)[number]): Promise<Article[]> {
   }
 }
 
-// Relevant German portals that have NO usable RSS feed (e.g. triathlon.de) — pulled via
-// Google News (runs server-side on web → no CORS) so their coverage still shows in the feed.
-const GOOGLE_NEWS_SITES: { site: string; source: string }[] = [
-  { site: 'triathlon.de', source: 'triathlon.de' },
-];
-
-async function fetchSiteNews(site: string, source: string): Promise<Article[]> {
-  // when:30d → only the last month, so evergreen/shop pages don't pile up in the feed.
-  const arts = await fetchGoogleNews(`site:${site} when:30d`);
-  return arts.map((a) => ({ ...a, source, lang: 'de' as const }));
-}
-
 /** Aggregate, de-duplicate and sort all feeds by recency. */
 export async function aggregateFeeds(): Promise<Article[]> {
-  const [feedResults, siteResults] = await Promise.all([
-    Promise.all(FEEDS.map(fetchFeed)),
-    Promise.all(GOOGLE_NEWS_SITES.map((s) => fetchSiteNews(s.site, s.source))),
-  ]);
-  const all = [...feedResults.flat(), ...siteResults.flat()].filter((a) => a.title && a.link);
+  const results = await Promise.all(FEEDS.map(fetchFeed));
+  const all = results.flat().filter((a) => a.title && a.link);
 
   const seen = new Set<string>();
   const deduped = all.filter((a) => {
