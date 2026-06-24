@@ -51,14 +51,25 @@ function stripHtml(html: string): string {
 }
 
 function extractImage(item: any): string | undefined {
-  const enclosure = item.enclosure?.['@_url'];
-  if (enclosure) return enclosure;
-  const media = asArray(item['media:content'])[0]?.['@_url'];
-  if (media) return media;
-  const thumb = item['media:thumbnail']?.['@_url'];
-  if (thumb) return thumb;
-  const html = textOf(item['content:encoded']) || textOf(item.description);
-  const match = html.match(/<img[^>]+src=["']([^"']+)["']/i);
+  const group = item['media:group'] ?? {};
+  // Try every common RSS/Atom image carrier, then fall back to the first <img> in the body.
+  const candidates = [
+    ...asArray(item.enclosure).map((e: any) => e?.['@_url']),
+    ...asArray(item['media:content']).map((m: any) => m?.['@_url']),
+    ...asArray(group['media:content']).map((m: any) => m?.['@_url']),
+    ...asArray(item['media:thumbnail']).map((m: any) => m?.['@_url']),
+    ...asArray(group['media:thumbnail']).map((m: any) => m?.['@_url']),
+    item['itunes:image']?.['@_href'],
+    item.image?.url ? textOf(item.image.url) : undefined,
+    ...asArray(item.link)
+      .filter((l: any) => l?.['@_rel'] === 'enclosure' && String(l?.['@_type'] ?? '').startsWith('image'))
+      .map((l: any) => l?.['@_href']),
+  ];
+  const direct = candidates.find((u) => typeof u === 'string' && /^https?:\/\//i.test(u));
+  if (direct) return direct;
+  const html =
+    textOf(item['content:encoded']) || textOf(item.description) || textOf(item.summary) || textOf(item.content);
+  const match = html.match(/<img[^>]+src=["'](https?:\/\/[^"']+)["']/i);
   return match?.[1];
 }
 
@@ -160,6 +171,7 @@ function parseGoogleNews(xml: string): Article[] {
         id: `gn-${textOf(item.guid) || link || i}`,
         title,
         summary: '',
+        imageUrl: extractImage(item),
         source,
         link: typeof link === 'string' ? link.trim() : '',
         publishedAt: published ? new Date(published).toISOString() : new Date().toISOString(),

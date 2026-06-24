@@ -14,6 +14,14 @@ import { haptics } from '@/lib/haptics';
 import { useBookmarks } from '@/store/bookmarks';
 import type { Article } from '@/types';
 
+// Deterministic muted hue per source, so image-less cards look intentional (and varied)
+// instead of a row of identical grey boxes.
+function hueFromString(s: string): number {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 360;
+  return h;
+}
+
 export function NewsCard({ article, onPress }: { article: Article; onPress: () => void }) {
   const theme = useTheme();
   const { t, i18n } = useTranslation();
@@ -51,8 +59,16 @@ export function NewsCard({ article, onPress }: { article: Article; onPress: () =
           onError={() => setImgFailed(true)}
         />
       ) : (
-        <View style={[styles.image, styles.imageFallback, { backgroundColor: theme.backgroundElement }]}>
-          <Ionicons name="newspaper-outline" size={26} color={theme.textSecondary} />
+        <View
+          style={[
+            styles.image,
+            styles.imageFallback,
+            { backgroundColor: `hsl(${hueFromString(article.source)}, 42%, 30%)` },
+          ]}>
+          <Ionicons name="newspaper" size={22} color="rgba(255,255,255,0.95)" />
+          <ThemedText style={styles.fallbackSource} numberOfLines={1}>
+            {article.source}
+          </ThemedText>
         </View>
       )}
       <View style={styles.body}>
@@ -99,7 +115,8 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   image: { width: 96, height: 96, borderRadius: 10 },
-  imageFallback: { alignItems: 'center', justifyContent: 'center' },
+  imageFallback: { alignItems: 'center', justifyContent: 'center', gap: 5, paddingHorizontal: 6 },
+  fallbackSource: { fontSize: 10, fontWeight: '800', color: 'rgba(255,255,255,0.95)', textAlign: 'center' },
   body: { flex: 1, gap: Spacing.one, justifyContent: 'center' },
   title: { fontSize: 15, lineHeight: 20 },
   metaRow: {
