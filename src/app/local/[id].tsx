@@ -247,11 +247,16 @@ export default function LocalEventScreen() {
 
         {/* Secondary actions */}
         <View style={styles.actions}>
-          {hasStartList && (
+          {/* Pro start list. If we have our own field, open the in-app list; otherwise — for
+              a branded series race (IRONMAN/Challenge/T100) — deep-link straight to the
+              official race page (no scraping, just a link; no media break for the user). */}
+          {(hasStartList || (!!event.series && !!event.websiteUrl)) && (
             <ActionChip
               icon="people-outline"
               label={t('startlist.open')}
-              onPress={() => router.push(`/startlist/${startKey}`)}
+              onPress={() =>
+                hasStartList ? router.push(`/startlist/${startKey}`) : openUrl(event.websiteUrl)
+              }
             />
           )}
           {primary?.label !== t('local.registration') && (event.registrationUrl || event.websiteUrl) && (

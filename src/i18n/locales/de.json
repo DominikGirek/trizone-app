@@ -48,7 +48,11 @@
     "empty": "Keine Events gefunden.",
     "continent": "Kontinent",
     "country": "Land",
+    "region": "Bundesland",
     "month": "Monat",
+    "filter": "Filter",
+    "thisWeekend": "Dieses Wochenende",
+    "nextHighlight": "Nächstes Highlight",
     "reset": "Zurücksetzen",
     "officialFinder": "Alle {{series}}-Rennen weltweit",
     "officialNote": "Vollständige Renn-Suche auf der offiziellen Seite (nach Land/Monat filterbar)."

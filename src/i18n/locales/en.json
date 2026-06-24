@@ -48,7 +48,11 @@
     "empty": "No events found.",
     "continent": "Continent",
     "country": "Country",
+    "region": "State",
     "month": "Month",
+    "filter": "Filter",
+    "thisWeekend": "This weekend",
+    "nextHighlight": "Next highlight",
     "reset": "Reset",
     "officialFinder": "All {{series}} races worldwide",
     "officialNote": "Full race finder on the official site (filter by country/month)."

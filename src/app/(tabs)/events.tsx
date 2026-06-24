@@ -6,6 +6,7 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FlatList, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
+import { Countdown } from '@/components/Countdown';
 import { ReportNotFound } from '@/components/ReportNotFound';
 import { SeriesTag } from '@/components/SeriesTag';
 import { ListSkeleton } from '@/components/Skeleton';
@@ -77,6 +78,7 @@ function FilterRow<T extends string | number>({
 }
 
 const countryOf = (i: FeedItem) => (i.kind === 'pro' ? i.race.country : i.event.country);
+const regionOf = (i: FeedItem) => (i.kind === 'pro' ? undefined : i.event.region);
 const uniq = <T,>(arr: T[]) => [...new Set(arr)];
 
 export default function EventsScreen() {
@@ -88,7 +90,9 @@ export default function EventsScreen() {
   const [kind, setKind] = useState<Filter>('all');
   const [continent, setContinent] = useState<ContinentCode | null>(null);
   const [country, setCountry] = useState<string | null>(null);
+  const [region, setRegion] = useState<string | null>(null);
   const [month, setMonth] = useState<number | null>(null);
+  const [showFilters, setShowFilters] = useState(false);
 
   const { data: items, isLoading } = useQuery({
     queryKey: ['allEvents', coords?.lat, coords?.lon],
@@ -99,6 +103,7 @@ export default function EventsScreen() {
     setKind(k);
     setContinent(null);
     setCountry(null);
+    setRegion(null);
     setMonth(null);
   };
 
@@ -131,14 +136,36 @@ export default function EventsScreen() {
     () => (country ? afterCont.filter((i) => countryOf(i) === country) : afterCont),
     [afterCont, country],
   );
+  // Bundesland (German state) — only meaningful once Germany is picked.
+  const regions = useMemo(
+    () =>
+      country === 'DE'
+        ? (uniq(afterCountry.map(regionOf).filter(Boolean)) as string[]).sort((a, b) => a.localeCompare(b))
+        : [],
+    [afterCountry, country],
+  );
+  const afterRegion = useMemo(
+    () => (region ? afterCountry.filter((i) => regionOf(i) === region) : afterCountry),
+    [afterCountry, region],
+  );
   const months = useMemo(
-    () => uniq(afterCountry.map((i) => new Date(i.date).getMonth())).sort((a, b) => a - b),
-    [afterCountry],
+    () => uniq(afterRegion.map((i) => new Date(i.date).getMonth())).sort((a, b) => a - b),
+    [afterRegion],
   );
   const list = useMemo(
-    () => (month != null ? afterCountry.filter((i) => new Date(i.date).getMonth() === month) : afterCountry),
-    [afterCountry, month],
+    () => (month != null ? afterRegion.filter((i) => new Date(i.date).getMonth() === month) : afterRegion),
+    [afterRegion, month],
   );
+
+  const activeCount = (continent ? 1 : 0) + (country ? 1 : 0) + (region ? 1 : 0) + (month != null ? 1 : 0);
+
+  // The next big upcoming race (series or pro) → the "highlight" hero on the default view.
+  const nextBig = useMemo(() => {
+    const now = Date.now();
+    return (items ?? [])
+      .filter((i) => (i.kind === 'series' || i.kind === 'pro') && i.status !== 'finished' && +new Date(i.date) >= now)
+      .sort((a, b) => +new Date(a.date) - +new Date(b.date))[0];
+  }, [items]);
 
   const data = useMemo<ListEntry[]>(() => {
     // "Near" is sorted by distance, not date → no day headers; the row shows its own date.
@@ -184,6 +211,16 @@ export default function EventsScreen() {
       </View>
     ) : null;
 
+  // Hero highlight on the clean default view (no filters drilled in).
+  const listHeader = (
+    <>
+      {kind === 'all' && activeCount === 0 && nextBig ? (
+        <HighlightCard item={nextBig} onPress={() => open(nextBig)} />
+      ) : null}
+      {finderHeader}
+    </>
+  );
+
   return (
     <ThemedView style={styles.container}>
       <TopBar title={t('tabs.events')} />
@@ -196,30 +233,78 @@ export default function EventsScreen() {
         </ScrollView>
       </View>
 
-      <FilterRow
-        allLabel={`🌍 ${t('events.continent')}`}
-        options={continents}
-        value={continent}
-        onChange={(v) => {
-          setContinent(v);
-          setCountry(null);
-        }}
-        render={(c) => t(`continent.${c}`)}
-      />
-      <FilterRow
-        allLabel={`🏳️ ${t('events.country')}`}
-        options={countries}
-        value={country}
-        onChange={setCountry}
-        render={(c) => `${countryFlag(c)} ${c}`}
-      />
-      <FilterRow
-        allLabel={`📅 ${t('events.month')}`}
-        options={months}
-        value={month}
-        onChange={setMonth}
-        render={(m) => monthShort(m, lang)}
-      />
+      {/* Slim filter bar: one tap to reveal the facets, with active filters shown as
+          removable chips so nothing is hidden — keeps the default view uncluttered. */}
+      <View style={styles.filterBar}>
+        <Pressable
+          onPress={() => setShowFilters((s) => !s)}
+          style={({ pressed }) => [
+            styles.filterToggle,
+            { backgroundColor: activeCount ? theme.primary : theme.backgroundElement },
+            pressed && { opacity: 0.7 },
+          ]}>
+          <Ionicons name="options-outline" size={15} color={activeCount ? theme.onPrimary : theme.textSecondary} />
+          <ThemedText type="smallBold" style={{ color: activeCount ? theme.onPrimary : theme.textSecondary }}>
+            {t('events.filter')}
+            {activeCount ? ` · ${activeCount}` : ''}
+          </ThemedText>
+          <Ionicons
+            name={showFilters ? 'chevron-up' : 'chevron-down'}
+            size={14}
+            color={activeCount ? theme.onPrimary : theme.textSecondary}
+          />
+        </Pressable>
+        {!showFilters && activeCount > 0 && (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.activeRow}>
+            {continent && <ActiveChip label={t(`continent.${continent}`)} onClear={() => setContinent(null)} />}
+            {country && (
+              <ActiveChip
+                label={`${countryFlag(country)} ${country}`}
+                onClear={() => {
+                  setCountry(null);
+                  setRegion(null);
+                }}
+              />
+            )}
+            {region && <ActiveChip label={region} onClear={() => setRegion(null)} />}
+            {month != null && <ActiveChip label={monthShort(month, lang)} onClear={() => setMonth(null)} />}
+          </ScrollView>
+        )}
+      </View>
+
+      {showFilters && (
+        <View>
+          <FilterRow
+            allLabel={t('events.continent')}
+            options={continents}
+            value={continent}
+            onChange={(v) => {
+              setContinent(v);
+              setCountry(null);
+              setRegion(null);
+            }}
+            render={(c) => t(`continent.${c}`)}
+          />
+          <FilterRow
+            allLabel={t('events.country')}
+            options={countries}
+            value={country}
+            onChange={(v) => {
+              setCountry(v);
+              setRegion(null);
+            }}
+            render={(c) => `${countryFlag(c)} ${c}`}
+          />
+          <FilterRow allLabel={t('events.region')} options={regions} value={region} onChange={setRegion} render={(r) => r} />
+          <FilterRow
+            allLabel={t('events.month')}
+            options={months}
+            value={month}
+            onChange={setMonth}
+            render={(m) => monthShort(m, lang)}
+          />
+        </View>
+      )}
 
       {isLoading ? (
         <ListSkeleton count={8} />
@@ -227,7 +312,7 @@ export default function EventsScreen() {
         <FlatList
           data={data}
           keyExtractor={(e) => e.key}
-          ListHeaderComponent={finderHeader}
+          ListHeaderComponent={listHeader}
           renderItem={({ item: e }) =>
             e.type === 'header' ? (
               <DayHeader date={e.date} />
@@ -354,6 +439,57 @@ function EventRow({
   );
 }
 
+function ActiveChip({ label, onClear }: { label: string; onClear: () => void }) {
+  const theme = useTheme();
+  return (
+    <Pressable onPress={onClear} style={[styles.activeChip, { backgroundColor: theme.primary }]}>
+      <ThemedText type="small" style={{ color: theme.onPrimary, fontSize: 12, fontWeight: '700' }}>
+        {label}
+      </ThemedText>
+      <Ionicons name="close" size={13} color={theme.onPrimary} />
+    </Pressable>
+  );
+}
+
+function HighlightCard({ item, onPress }: { item: FeedItem; onPress: () => void }) {
+  const theme = useTheme();
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language as AppLanguage;
+  const name = item.kind === 'pro' ? item.race.name : item.event.name;
+  const country = item.kind === 'pro' ? item.race.country : item.event.country;
+  const town = item.kind === 'pro' ? item.race.location : item.event.town;
+  const series = item.kind === 'pro' ? t(`series.${item.race.series}`) : item.event.series;
+  const d = new Date(item.date);
+  const days = Math.ceil((+d - Date.now()) / 864e5);
+  const weekend = days >= 0 && days <= 7 && (d.getDay() === 0 || d.getDay() === 6);
+
+  return (
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [styles.hero, { backgroundColor: theme.primary }, pressed && { opacity: 0.92 }]}>
+      <View style={styles.heroTopRow}>
+        <ThemedText type="small" style={[styles.heroKicker, { color: theme.onPrimary }]}>
+          {(weekend ? t('events.thisWeekend') : t('events.nextHighlight')).toUpperCase()}
+        </ThemedText>
+        {!!series && (
+          <ThemedText type="small" style={[styles.heroSeries, { color: theme.onPrimary }]}>
+            {series}
+          </ThemedText>
+        )}
+      </View>
+      <ThemedText type="subtitle" numberOfLines={2} style={[styles.heroName, { color: theme.onPrimary }]}>
+        {name}
+      </ThemedText>
+      <ThemedText type="small" style={[styles.heroLoc, { color: theme.onPrimary }]}>
+        {countryFlag(country)} {town} · {formatDate(item.date, lang)}
+      </ThemedText>
+      <View style={styles.heroCountdown}>
+        <Countdown date={item.date} color={theme.onPrimary} />
+      </View>
+    </Pressable>
+  );
+}
+
 const styles = StyleSheet.create({
   container: { flex: 1 },
   listFooter: { paddingBottom: Spacing.six },
@@ -372,6 +508,39 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   listContent: { paddingBottom: Spacing.two },
+  filterBar: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, paddingHorizontal: Spacing.three, marginBottom: Spacing.two },
+  filterToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.one + 2,
+    borderRadius: 999,
+  },
+  activeRow: { gap: Spacing.two, alignItems: 'center', paddingRight: Spacing.three },
+  activeChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingLeft: Spacing.two + 2,
+    paddingRight: Spacing.two,
+    paddingVertical: Spacing.one,
+    borderRadius: 999,
+  },
+  hero: {
+    marginHorizontal: Spacing.three,
+    marginTop: Spacing.one,
+    marginBottom: Spacing.two,
+    padding: Spacing.four,
+    borderRadius: 18,
+    gap: 4,
+  },
+  heroTopRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  heroKicker: { fontSize: 11, fontWeight: '800', letterSpacing: 1 },
+  heroSeries: { fontSize: 11, fontWeight: '800', opacity: 0.9 },
+  heroName: { fontSize: 22, fontWeight: '800', marginTop: 2 },
+  heroLoc: { fontSize: 13, opacity: 0.92 },
+  heroCountdown: { marginTop: Spacing.two },
   dayHeader: {
     flexDirection: 'row',
     alignItems: 'center',
