@@ -83,6 +83,7 @@
     "source": "Source: Triathlon-Bundesliga (DTU)",
     "live": "Live table",
     "external": "official table",
+    "allGenders": "All",
     "searchPlaceholder": "Search league, association or team …",
     "teamMatch": "Team: {{team}}",
     "coverageNote": "Live in-app: Bundesliga, Regionalliga Nord, SHTU. Other associations open their official standings. Team search covers the live-readable leagues."

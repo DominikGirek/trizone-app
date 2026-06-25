@@ -83,6 +83,7 @@
     "source": "Quelle: Triathlon-Bundesliga (DTU)",
     "live": "Live-Tabelle",
     "external": "offizielle Tabelle",
+    "allGenders": "Alle",
     "searchPlaceholder": "Liga, Verband oder Team suchen …",
     "teamMatch": "Team: {{team}}",
     "coverageNote": "Live in der App: Bundesliga, Regionalliga Nord, SHTU. Weitere Verbände öffnen ihre offizielle Tabelle. Team-Suche deckt die live lesbaren Ligen ab."
