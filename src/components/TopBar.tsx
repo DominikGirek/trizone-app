@@ -1,4 +1,5 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import type { ComponentProps, ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
@@ -10,12 +11,38 @@ import { useTheme } from '@/hooks/use-theme';
 
 type IoniconName = ComponentProps<typeof Ionicons>['name'];
 
+const MARK = require('../../assets/images/logo-mark.png');
+
+/** The TriZone brand mark (white double-chevron) on the red app-icon tile. */
+export function LogoTile({ size = 32 }: { size?: number }) {
+  const theme = useTheme();
+  return (
+    <View
+      style={[
+        styles.logoTile,
+        { width: size, height: size, borderRadius: size * 0.3, backgroundColor: theme.primary },
+      ]}>
+      <Image source={MARK} style={{ width: size * 0.58, height: size * 0.58 }} contentFit="contain" />
+    </View>
+  );
+}
+
 export function Wordmark({ size = 20 }: { size?: number }) {
   const theme = useTheme();
   return (
     <ThemedText style={{ fontSize: size, fontWeight: '900', letterSpacing: -0.5 }}>
       Tri<ThemedText style={{ fontSize: size, fontWeight: '900', color: theme.primary }}>Zone</ThemedText>
     </ThemedText>
+  );
+}
+
+/** Brand lockup: the app-icon tile + the wordmark. */
+export function BrandLockup() {
+  return (
+    <View style={styles.lockup}>
+      <LogoTile size={34} />
+      <Wordmark size={22} />
+    </View>
   );
 }
 
@@ -38,15 +65,15 @@ export function HeaderAvatar({
       hitSlop={8}
       accessibilityRole="button"
       accessibilityLabel={label}
-      style={({ pressed }) => [styles.avatar, { backgroundColor: theme.primary }, pressed && { opacity: 0.7 }]}>
+      style={({ pressed }) => [styles.avatar, { backgroundColor: theme.backgroundElement }, pressed && { opacity: 0.7 }]}>
       {initials ? (
-        <ThemedText style={[styles.avatarText, { color: theme.onPrimary }]}>{initials}</ThemedText>
+        <ThemedText style={[styles.avatarText, { color: theme.text }]}>{initials}</ThemedText>
       ) : (
-        <Ionicons name="person" size={18} color={theme.onPrimary} />
+        <Ionicons name="person" size={18} color={theme.text} />
       )}
       {!!badge && badge > 0 && (
-        <View style={[styles.badge, { backgroundColor: theme.text, borderColor: theme.background }]}>
-          <ThemedText style={[styles.badgeText, { color: theme.background }]}>{badge}</ThemedText>
+        <View style={[styles.badge, { backgroundColor: theme.primary, borderColor: theme.background }]}>
+          <ThemedText style={[styles.badgeText, { color: theme.onPrimary }]}>{badge}</ThemedText>
         </View>
       )}
     </Pressable>
@@ -109,7 +136,7 @@ export function TopBar({
         { paddingTop: insets.top + Spacing.two, backgroundColor: theme.background, borderColor: theme.border },
       ]}>
       <View style={styles.brandRow}>
-        <Wordmark size={26} />
+        <BrandLockup />
         <View style={styles.actions}>
           {right}
           {showSearch && (
@@ -117,7 +144,6 @@ export function TopBar({
           )}
         </View>
       </View>
-      <View style={[styles.accent, { backgroundColor: theme.primary }]} />
       {!!eyebrow && (
         <ThemedText type="small" themeColor="textSecondary" style={styles.eyebrow}>
           {eyebrow}
@@ -140,8 +166,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     minHeight: 40,
   },
+  lockup: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
+  logoTile: { alignItems: 'center', justifyContent: 'center' },
   actions: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
-  accent: { width: 30, height: 3, borderRadius: 2, marginTop: Spacing.two, marginBottom: Spacing.one + 2 },
   iconBtn: {
     width: 38,
     height: 38,
@@ -170,12 +197,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   badgeText: { fontSize: 10, fontWeight: '800' },
-  eyebrow: { fontSize: 12, marginTop: Spacing.two, textTransform: 'capitalize' },
+  eyebrow: { fontSize: 12, marginTop: Spacing.three, textTransform: 'capitalize' },
   title: {
-    fontSize: 28,
-    lineHeight: 34,
+    fontSize: 30,
+    lineHeight: 35,
     fontWeight: '800',
-    letterSpacing: -0.4,
-    marginTop: 2,
+    letterSpacing: -0.6,
+    marginTop: 1,
   },
 });
