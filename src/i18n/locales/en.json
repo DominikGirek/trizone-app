@@ -362,7 +362,8 @@
   "status": {
     "upcoming": "Upcoming",
     "live": "Live",
-    "finished": "Finished"
+    "finished": "Finished",
+    "cancelled": "Cancelled"
   },
   "discipline": {
     "swim": "Swim",

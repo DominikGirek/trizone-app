@@ -18,7 +18,14 @@ import { useTheme } from '@/hooks/use-theme';
 import type { AppLanguage } from '@/i18n';
 import { countryFlag, formatDateTime } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
-import { mergeRaceNews, newsForRace, raceSearchQuery } from '@/lib/newsTopics';
+import {
+  cleanRaceName,
+  isCancelledName,
+  mergeRaceNews,
+  newsForRace,
+  newsSaysCancelled,
+  raceSearchQuery,
+} from '@/lib/newsTopics';
 import { fetchNews } from '@/services/news';
 import { fetchRaceNews } from '@/services/raceNews';
 import { getLocalEventById, providerLabel } from '@/services/localEvents';
@@ -126,6 +133,10 @@ export default function LocalEventScreen() {
     newsForRace(news ?? [], event.name, event.town),
     newsForRace(localNews ?? [], event.name, event.town),
   );
+
+  // Cancelled if the race name flags it ("… ABGESAGT!") or a recent headline says so.
+  const cancelled = isCancelledName(event.name) || newsSaysCancelled(raceNews, event.name, event.town);
+  const cleanName = cancelled ? cleanRaceName(event.name) : event.name;
 
   const provider = providerLabel(event.provider);
   const reminderOn = hasReminder(event.id);
@@ -245,10 +256,10 @@ export default function LocalEventScreen() {
                   {event.region}
                 </ThemedText>
               </View>
-              <StatusPill status={event.status} />
+              <StatusPill status={event.status} cancelled={cancelled} />
             </View>
-            <ThemedText style={styles.name} numberOfLines={3}>
-              {event.name}
+            <ThemedText style={[styles.name, cancelled && styles.struck]} numberOfLines={3}>
+              {cleanName}
             </ThemedText>
             <View style={styles.heroMeta}>
               <Ionicons name="location-outline" size={14} color={theme.textSecondary} />
@@ -256,7 +267,7 @@ export default function LocalEventScreen() {
                 {countryFlag(event.country)} {event.town} · {formatDateTime(event.date, lang)}
               </ThemedText>
             </View>
-            {event.status === 'upcoming' && (
+            {event.status === 'upcoming' && !cancelled && (
               <View style={styles.heroCountdown}>
                 <Countdown date={event.date} color={theme.text} />
               </View>
@@ -381,6 +392,7 @@ const styles = StyleSheet.create({
   seriesChip: { paddingHorizontal: Spacing.two, paddingVertical: 2, borderRadius: 6 },
   seriesChipText: { fontSize: 10, fontWeight: '800', letterSpacing: 0.5 },
   name: { fontSize: 24, fontWeight: '800', letterSpacing: -0.3, marginTop: Spacing.one },
+  struck: { textDecorationLine: 'line-through', opacity: 0.6 },
   heroMeta: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 },
   heroCountdown: { marginTop: Spacing.two },
   primary: {

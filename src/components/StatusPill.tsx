@@ -34,10 +34,11 @@ function LivePill() {
   );
 }
 
-export function StatusPill({ status }: { status: Race['status'] }) {
+export function StatusPill({ status, cancelled }: { status: Race['status']; cancelled?: boolean }) {
   const { t } = useTranslation();
   const theme = useTheme();
 
+  if (cancelled) return <Pill label={t('status.cancelled')} color={theme.onPrimary} background={theme.primary} />;
   if (status === 'live') return <LivePill />;
 
   const cfg =

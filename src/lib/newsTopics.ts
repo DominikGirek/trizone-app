@@ -157,6 +157,9 @@ const RACE_STOPWORDS = new Set([
   'ergebnisse', 'finish', 'start', 'course', 'strecke', 'live', 'news', 'guide', 'training',
   'light', 'color', 'colour', 'family', 'familie', 'volks', 'jedermann', 'cross', 'swim',
   'bike', 'lauf', 'run', 'jump', 'over', 'event', 'days', 'weekend',
+  // Cancellation markers — a cancelled race's name ("Abgesagt: …") must NOT become a keyword
+  // that then matches every other "… abgesagt" headline.
+  'abgesagt', 'abgebrochen', 'annulliert', 'cancelled', 'canceled', 'cancellation',
 ]);
 
 /** Distinctive lowercased tokens (venue / event name) used to find a race's news. */
@@ -200,22 +203,55 @@ const PREVIEW_RE =
 const RECAP_RE =
   /ergebnis|nachbericht|rückblick|result|recap|race report|gewinnt|gewann|sieg|siegt|champion|podium|weltmeister wird/i;
 
+// Whole-word match — a city token must NOT match inside an unrelated word ("bonn" should
+// not hit "Charbonnet"). \w is ASCII-only, so we bound on Unicode letters/digits (\p{L}\p{N})
+// to also respect German umlauts on the edges.
+const wordRe = (tok: string) =>
+  new RegExp(`(^|[^\\p{L}\\p{N}])${tok.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}($|[^\\p{L}\\p{N}])`, 'iu');
+export function mentionsAny(text: string, tokens: string[]): boolean {
+  return tokens.some((t) => t.length >= 3 && wordRe(t).test(text));
+}
+
+// A headline declaring a race cancelled / called off.
+export const CANCEL_RE = /\b(abgesagt|abgebrochen|annulliert|cancell?ed|cancellation)\b/i;
+
+/** True when the race name itself flags a cancellation ("… ABGESAGT!" / "Abgesagt: …"). */
+export const isCancelledName = (name: string): boolean => CANCEL_RE.test(name);
+
+/** Strip a leading/trailing cancellation marker from a race name (the badge carries it). */
+export const cleanRaceName = (name: string): string =>
+  name
+    .replace(/^\s*(abgesagt|abgebrochen|cancell?ed)\b[\s:!–-]*/i, '')
+    .replace(/[\s–-]*\b(abgesagt|abgebrochen|cancell?ed)\b!?\s*$/i, '')
+    .trim() || name;
+
+/** True when a recent news headline says THIS race is cancelled — a cancellation word AND a
+ *  distinctive race token in the same title (so we don't mislabel an unrelated race). */
+export function newsSaysCancelled(articles: Article[], name: string, place?: string): boolean {
+  const kws = raceNewsKeywords(name, place);
+  if (!kws.length) return false;
+  const cutoff = Date.now() - 21 * 86400000;
+  return articles.some(
+    (a) => +new Date(a.publishedAt) >= cutoff && CANCEL_RE.test(a.title) && mentionsAny(a.title, kws),
+  );
+}
+
 /** Drop stale PREVIEW articles about a race that has already finished (e.g. "IRONMAN
  *  Hamburg: Zeitplan, Livestream" after Hamburg). Recaps/results of past races are kept,
  *  and anything not tied to a known past race is untouched. `finishedTokens` = distinctive
  *  venue/name tokens of events that are already over. */
 export function dropPastEventNews(articles: Article[], finishedTokens: Set<string>): Article[] {
   if (!finishedTokens.size) return articles;
+  const tokens = [...finishedTokens];
   return articles.filter((a) => {
-    const hay = `${a.title} ${a.summary}`.toLowerCase();
-    const aboutPast = [...finishedTokens].some((k) => hay.includes(k));
-    if (!aboutPast) return true; // not about a known past race → keep
+    const hay = `${a.title} ${a.summary}`;
+    if (!mentionsAny(hay, tokens)) return true; // not about a known past race → keep
     if (RECAP_RE.test(hay)) return true; // a recap/results of it → still relevant
     return !PREVIEW_RE.test(hay); // a preview of a race that's over → drop
   });
 }
 
-/** News articles that mention this race (by venue / distinctive name token). */
+/** News articles that mention this race (by venue / distinctive name token, whole-word). */
 export function newsForRace(
   articles: Article[],
   name: string,
@@ -224,10 +260,5 @@ export function newsForRace(
 ): Article[] {
   const kws = raceNewsKeywords(name, place);
   if (!kws.length) return [];
-  return articles
-    .filter((a) => {
-      const hay = `${a.title} ${a.summary}`.toLowerCase();
-      return kws.some((k) => hay.includes(k));
-    })
-    .slice(0, limit);
+  return articles.filter((a) => mentionsAny(`${a.title} ${a.summary}`, kws)).slice(0, limit);
 }

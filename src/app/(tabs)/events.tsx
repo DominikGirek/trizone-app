@@ -20,6 +20,7 @@ import { useLocation } from '@/hooks/use-location';
 import { useTheme } from '@/hooks/use-theme';
 import type { AppLanguage } from '@/i18n';
 import { continentOf, countryFlag, formatDate, formatKm, monthShort, type ContinentCode } from '@/lib/format';
+import { cleanRaceName, isCancelledName } from '@/lib/newsTopics';
 import { getAllEvents, type FeedItem } from '@/services/events';
 
 type Filter = 'all' | 'near' | 'past' | 'series' | 'pro';
@@ -374,7 +375,9 @@ function EventRow({
   const distanceKm = item.kind === 'pro' ? null : item.event.distanceKm;
   const localSeries = item.kind !== 'pro' ? item.event.series : undefined;
   const distances = item.kind !== 'pro' ? item.event.distances : undefined;
-  const accent = pro || localSeries ? theme.primary : theme.border;
+  const cancelled = isCancelledName(name);
+  const displayName = cancelled ? cleanRaceName(name) : name;
+  const accent = cancelled ? theme.primary : pro || localSeries ? theme.primary : theme.border;
 
   return (
     <Pressable
@@ -400,10 +403,10 @@ function EventRow({
               {formatDate(item.date, lang)}
             </ThemedText>
           )}
-          {status === 'live' && <StatusPill status="live" />}
+          {(cancelled || status === 'live') && <StatusPill status={status} cancelled={cancelled} />}
         </View>
-        <ThemedText type="smallBold" numberOfLines={1} style={styles.rowName}>
-          {name}
+        <ThemedText type="smallBold" numberOfLines={1} style={[styles.rowName, cancelled && styles.struck]}>
+          {displayName}
         </ThemedText>
         <View style={styles.rowMeta}>
           <Ionicons name="location-outline" size={13} color={theme.textSecondary} />
@@ -568,6 +571,7 @@ const styles = StyleSheet.create({
   rowTop: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, minHeight: 18 },
   localSeries: { fontSize: 10, fontWeight: '800', letterSpacing: 0.5 },
   rowName: { fontSize: 15 },
+  struck: { textDecorationLine: 'line-through', opacity: 0.6 },
   rowMeta: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   distBadge: {
     flexDirection: 'row',
