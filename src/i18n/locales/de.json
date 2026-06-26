@@ -194,6 +194,8 @@
     "athletes": "Athlet:innen",
     "series": "Serien",
     "brands": "Marken",
+    "seriesLabel": "Rennserie",
+    "brandLabel": "Marke",
     "added": "Zu Favoriten hinzugefügt",
     "removed": "Aus Favoriten entfernt"
   },

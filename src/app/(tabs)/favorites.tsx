@@ -5,7 +5,6 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 
 import { AthleteRow } from '@/components/AthleteRow';
 import { FavoriteButton } from '@/components/FavoriteButton';
-import { SeriesTag } from '@/components/SeriesTag';
 import { EmptyState } from '@/components/States';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -15,6 +14,27 @@ import { useTheme } from '@/hooks/use-theme';
 import { brandsById } from '@/lib/brands';
 import { getAthletesByIds } from '@/services/athletes';
 import { useFavorites } from '@/store/favorites';
+import type { SeriesId } from '@/types';
+
+// Series "crest" — short label + colour, the series analogue of the athlete avatar.
+function seriesCrest(id: SeriesId): { label: string; bg: string } {
+  switch (id) {
+    case 'ironman':
+      return { label: 'IM', bg: '#E2483C' };
+    case 'ironman703':
+      return { label: '70.3', bg: '#E2483C' };
+    case 't100':
+      return { label: 'T100', bg: '#16A0A0' };
+    case 'wtcs':
+      return { label: 'WT', bg: '#2F6FB0' };
+    case 'challenge':
+      return { label: 'CH', bg: '#C77D2E' };
+    case 'pto':
+      return { label: 'PTO', bg: '#6B3FA0' };
+    default:
+      return { label: '★', bg: '#5F5E5A' };
+  }
+}
 
 export default function FavoritesScreen() {
   const { t } = useTranslation();
@@ -38,19 +58,31 @@ export default function FavoritesScreen() {
       {isEmpty ? (
         <EmptyState icon="star-outline" message={t('favorites.hint')} />
       ) : (
-        <ScrollView>
+        <ScrollView contentContainerStyle={{ paddingBottom: Spacing.six }}>
           {seriesIds.length > 0 && (
             <>
               <ThemedText type="smallBold" themeColor="textSecondary" style={styles.section}>
                 {t('favorites.series').toUpperCase()}
               </ThemedText>
-              {seriesIds.map((id) => (
-                <View key={id} style={[styles.seriesRow, { borderColor: theme.border }]}>
-                  <SeriesTag series={id as any} />
-                  <View style={{ flex: 1 }} />
-                  <FavoriteButton kind="series" id={id} size={20} />
-                </View>
-              ))}
+              {seriesIds.map((id) => {
+                const c = seriesCrest(id as SeriesId);
+                return (
+                  <View key={id} style={[styles.row, { borderColor: theme.border }]}>
+                    <View style={[styles.crest, { backgroundColor: c.bg }]}>
+                      <ThemedText style={styles.crestText}>{c.label}</ThemedText>
+                    </View>
+                    <View style={styles.body}>
+                      <ThemedText type="smallBold" numberOfLines={1}>
+                        {t(`series.${id}`)}
+                      </ThemedText>
+                      <ThemedText type="small" themeColor="textSecondary" style={styles.sub}>
+                        {t('favorites.seriesLabel')}
+                      </ThemedText>
+                    </View>
+                    <FavoriteButton kind="series" id={id} size={20} />
+                  </View>
+                );
+              })}
             </>
           )}
 
@@ -63,12 +95,18 @@ export default function FavoritesScreen() {
                 const b = brandsById[id];
                 if (!b) return null;
                 return (
-                  <View key={id} style={[styles.seriesRow, { borderColor: theme.border }]}>
-                    <ThemedText style={{ fontSize: 18 }}>{b.emoji}</ThemedText>
-                    <ThemedText type="smallBold" style={{ marginLeft: Spacing.two }}>
-                      {b.name}
-                    </ThemedText>
-                    <View style={{ flex: 1 }} />
+                  <View key={id} style={[styles.row, { borderColor: theme.border }]}>
+                    <View style={[styles.crest, styles.brandCrest, { backgroundColor: theme.backgroundElement }]}>
+                      <ThemedText style={styles.brandEmoji}>{b.emoji}</ThemedText>
+                    </View>
+                    <View style={styles.body}>
+                      <ThemedText type="smallBold" numberOfLines={1}>
+                        {b.name}
+                      </ThemedText>
+                      <ThemedText type="small" themeColor="textSecondary" style={styles.sub}>
+                        {t('favorites.brandLabel')}
+                      </ThemedText>
+                    </View>
                     <FavoriteButton kind="brand" id={id} size={20} />
                   </View>
                 );
@@ -100,11 +138,18 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.one,
     letterSpacing: 0.5,
   },
-  seriesRow: {
+  row: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: Spacing.three,
     paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.three,
+    paddingVertical: Spacing.two,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
+  crest: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  crestText: { fontSize: 13, fontWeight: '800', color: '#fff', letterSpacing: -0.3 },
+  brandCrest: { borderRadius: 999 },
+  brandEmoji: { fontSize: 20 },
+  body: { flex: 1, gap: 1 },
+  sub: { fontSize: 12 },
 });

@@ -194,6 +194,8 @@
     "athletes": "Athletes",
     "series": "Series",
     "brands": "Brands",
+    "seriesLabel": "Race series",
+    "brandLabel": "Brand",
     "added": "Added to favorites",
     "removed": "Removed from favorites"
   },
