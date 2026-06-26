@@ -36,15 +36,20 @@ const markSvg = (stroke) =>
 
 const solidRed = `<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><rect width="1024" height="1024" fill="${RED}"/></svg>`;
 
-const png = (svg, size) => sharp(Buffer.from(svg)).resize(size, size).png();
+// opaque=true flattens the alpha channel — iOS app icons MUST NOT have transparency.
+const png = (svg, size, opaque = false) => {
+  let p = sharp(Buffer.from(svg)).resize(size, size);
+  if (opaque) p = p.flatten({ background: RED });
+  return p.png();
+};
 
 await Promise.all([
-  png(iconSvg, 1024).toFile(resolve(OUT, 'icon.png')),
+  png(iconSvg, 1024, true).toFile(resolve(OUT, 'icon.png')),
   png(markSvg('#FFFFFF'), 1024).toFile(resolve(OUT, 'android-icon-foreground.png')),
   png(solidRed, 1024).toFile(resolve(OUT, 'android-icon-background.png')),
   png(markSvg('#FFFFFF'), 1024).toFile(resolve(OUT, 'android-icon-monochrome.png')),
   png(markSvg('#FFFFFF'), 1024).toFile(resolve(OUT, 'splash-icon.png')),
-  png(iconSvg, 96).toFile(resolve(OUT, 'favicon.png')),
+  png(iconSvg, 96, true).toFile(resolve(OUT, 'favicon.png')),
   // In-app brand mark (white, transparent) used in the header lockup.
   png(markSvg('#FFFFFF'), 256).toFile(resolve(OUT, 'logo-mark.png')),
 ]);
