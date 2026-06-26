@@ -14,11 +14,16 @@ import { fileURLToPath } from 'node:url';
 const OUT = resolve(dirname(fileURLToPath(import.meta.url)), '..', 'assets', 'images');
 const RED = '#E2231A';
 
-// Two upward chevrons, centered at (512,512) in a 1024 box, with a gap between them.
-const chevrons = (stroke) => `
-  <path d="M257 482 L512 332 L767 482" fill="none" stroke="${stroke}" stroke-width="132" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M257 692 L512 542 L767 692" fill="none" stroke="${stroke}" stroke-width="132" stroke-linecap="round" stroke-linejoin="round"/>
+// THREE upward chevrons (Tri = three → TriZone), centered at (512,512) in a 1024 box.
+const chevrons = (stroke) => {
+  const w = 110;
+  const c = `fill="none" stroke="${stroke}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"`;
+  return `
+  <path d="M257 415 L512 290 L767 415" ${c}/>
+  <path d="M257 575 L512 450 L767 575" ${c}/>
+  <path d="M257 735 L512 610 L767 735" ${c}/>
 `;
+};
 
 const GRAD = `<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#F6C7C2"/></linearGradient></defs>`;
 
