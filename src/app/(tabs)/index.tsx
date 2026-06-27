@@ -345,7 +345,6 @@ export default function DashboardScreen() {
         <Wordmark size={22} />
         <View style={{ flex: 1 }} />
         <HeaderIconButton icon="search" onPress={() => router.push('/search')} label={t('search.placeholder')} />
-        <HeaderIconButton icon="heart-outline" onPress={() => router.push('/favorites')} label={t('tabs.favorites')} />
       </View>
       <ScrollView contentContainerStyle={styles.content}>
         {/* Hot news — urgent race-status changes for upcoming races (preview of a future push). */}

@@ -50,7 +50,8 @@ export default function TabsLayout() {
         name="deals"
         options={{
           title: t('tabs.deals'),
-          tabBarIcon: ({ color, size }) => <Ionicons name="pricetags-outline" size={size} color={color} />,
+          // Moved out of the bottom bar (4 core tabs) — reachable via the "Mehr" hub.
+          href: null,
         }}
       />
       <Tabs.Screen
