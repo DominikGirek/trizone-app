@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-24T13:42:22.497Z",
+  "generatedAt": "2026-06-27T08:13:27.170Z",
   "note": "Verified SWIM-START coordinates per race, keyed by city token(s) (date-independent — a city's swim venue rarely changes year to year). Geocoded from the real swim-venue NAME via OpenStreetMap Nominatim and validated to lie within ~25 km of the event town (guards against the organizer HQ / a wrong-city match / an LLM-invented venue). NEVER the organizer's office. Robot: scripts/ingest-race-venues.mjs regenerates/extends this; only verified coordinates are written, never fabricated.",
   "venues": {
     "roth": {
@@ -109,6 +109,60 @@
       "lon": -4.41094,
       "label": "Schwimmstart Playa de la Malagueta, Málaga",
       "source": "OSM: Playa de la Malagueta, Málaga (natural/beach, 1.0 km from centre)"
+    },
+    "weltmeisterschaft": {
+      "lat": 43.69125,
+      "lon": 7.23991,
+      "label": "Schwimmstart Baie des Anges, Nice",
+      "source": "OSM: Baie des Anges, Nice (landuse/residential, 2.2 km from centre)"
+    },
+    "kaiserwinkl-walchsee": {
+      "lat": 47.65123,
+      "lon": 12.31864,
+      "label": "Schwimmstart Walchsee",
+      "source": "OSM: Walchsee (boundary/administrative, 0.7 km from centre)"
+    },
+    "quebec": {
+      "lat": 46.9444,
+      "lon": -71.29681,
+      "label": "Schwimmstart Lac-Beauport",
+      "source": "OSM: Lac-Beauport (boundary/administrative, 16.3 km from centre)"
+    },
+    "shanghai": {
+      "lat": 31.15089,
+      "lon": 121.45494,
+      "label": "Schwimmstart Huangpu River, Shanghai",
+      "source": "OSM: Huangpu River, Shanghai (waterway/river, 8.9 km from centre)"
+    },
+    "israman": {
+      "lat": 29.55447,
+      "lon": 34.96455,
+      "label": "Schwimmstart Red Sea, Eilat",
+      "source": "OSM: Red Sea, Eilat (building/hotel, 1.5 km from centre)"
+    },
+    "wanaka": {
+      "lat": -44.50542,
+      "lon": 169.13497,
+      "label": "Schwimmstart Lake Wānaka",
+      "source": "OSM: Lake Wānaka (water/lake, 21.6 km from centre)"
+    },
+    "coast-gold": {
+      "lat": -27.95316,
+      "lon": 153.4166,
+      "label": "Schwimmstart Broadwater, Gold Coast",
+      "source": "OSM: Broadwater, Gold Coast (natural/water, 5.5 km from centre)"
+    },
+    "singapore": {
+      "lat": 1.27766,
+      "lon": 103.85369,
+      "label": "Schwimmstart Marina Bay, Singapore",
+      "source": "OSM: Marina Bay, Singapore (natural/bay, 1.4 km from centre)"
+    },
+    "vancouver": {
+      "lat": 49.28648,
+      "lon": -123.14371,
+      "label": "Schwimmstart English Bay Beach, Vancouver",
+      "source": "OSM: English Bay Beach, Vancouver (natural/beach, 1.7 km from centre)"
     }
   }
 }
