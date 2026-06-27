@@ -296,7 +296,7 @@ export default function DashboardScreen() {
     myNext && (
       <Pressable
         onPress={openMyNext}
-        style={({ pressed }) => [styles.hero, styles.heroNeutral, { backgroundColor: theme.backgroundElement, borderColor: theme.border }, pressed && { opacity: 0.85 }]}>
+        style={({ pressed }) => [styles.hero, styles.heroNeutral, { backgroundColor: theme.backgroundSelected, borderColor: theme.border }, pressed && { opacity: 0.85 }]}>
         <Ionicons name="walk" size={150} color={theme.border} style={styles.heroGlyph} />
         <View style={styles.heroTop}>
           <Pill label={pillLabel} color={theme.textSecondary} background={theme.background} />
@@ -406,7 +406,7 @@ export default function DashboardScreen() {
         ) : athleteMoment ? (
           <Pressable
             onPress={() => openArticle(athleteMoment.article.link)}
-            style={({ pressed }) => [styles.hero, styles.heroNeutral, { backgroundColor: theme.backgroundElement, borderColor: theme.border }, pressed && { opacity: 0.85 }]}>
+            style={({ pressed }) => [styles.hero, styles.heroNeutral, { backgroundColor: theme.backgroundSelected, borderColor: theme.border }, pressed && { opacity: 0.85 }]}>
             <Ionicons name="trophy" size={150} color={theme.border} style={styles.heroGlyph} />
             <View style={styles.heroTop}>
               <Pill label={athleteMoment.name} color={theme.textSecondary} background={theme.background} />
@@ -426,7 +426,7 @@ export default function DashboardScreen() {
             onPress={() => router.push('/pick-race')}
             style={({ pressed }) => [
               styles.prompt,
-              { borderColor: theme.border, backgroundColor: theme.backgroundElement },
+              { borderColor: theme.border, backgroundColor: theme.backgroundSelected },
               pressed && { opacity: 0.85 },
             ]}>
             <View style={[styles.promptIcon, { backgroundColor: theme.background }]}>
@@ -641,7 +641,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   avatar: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', borderWidth: 2 },
-  shortcutRow: { gap: Spacing.two, paddingHorizontal: Spacing.three, paddingTop: Spacing.three },
+  shortcutRow: { gap: Spacing.two, paddingHorizontal: Spacing.three, paddingTop: Spacing.four },
   shortcut: { width: 134, padding: Spacing.three, borderRadius: 14, borderWidth: StyleSheet.hairlineWidth, gap: 5 },
   shortcutEmoji: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center', marginBottom: 2 },
   shortcutTitle: { fontSize: 13 },
