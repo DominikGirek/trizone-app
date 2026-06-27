@@ -20,6 +20,7 @@ import { Colors } from '@/constants/theme';
 import '@/i18n';
 import { BookmarksProvider } from '@/store/bookmarks';
 import { CodeVotesProvider } from '@/store/codeVotes';
+import { PushSync } from '@/components/PushSync';
 import { NewsVotesProvider } from '@/store/newsVotes';
 import { FavoritesProvider } from '@/store/favorites';
 import { MyRacesProvider } from '@/store/myRaces';
@@ -99,6 +100,7 @@ export default function RootLayout() {
                     <CodeVotesProvider>
                       <NewsVotesProvider>
                         <ToastProvider>
+                          <PushSync />
                           <NavigationStack />
                         </ToastProvider>
                       </NewsVotesProvider>

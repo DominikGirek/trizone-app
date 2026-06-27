@@ -1,62 +1,51 @@
 # Backend — Push (Phase B)
 
-Managed serverless on **Supabase** (project `TriZone`, region West EU / Ireland). Stage 2 stands up
-the **device + interest registry**; the app calls one Edge Function, never the tables directly.
+Managed serverless on **Supabase** (project `TriZone`, region West EU / Ireland). Stage 2 is the
+**device + interest registry**. No CLI, no edge functions — it's a single Postgres function the app
+calls. The app reaches the (RLS-sealed) tables only through that function.
 
-Project ref: `vldepqrkbdrspgtbyyxu` (from the project URL — not a secret).
+Project: `https://vldepqrkbdrspgtbyyxu.supabase.co` (ref `vldepqrkbdrspgtbyyxu` — not a secret).
 
-## One-time: Supabase CLI
+## Deploy = one paste (≈30 seconds)
 
-```bash
-brew install supabase/tap/supabase      # or: npm i -g supabase
-supabase login                          # opens the browser
-supabase link --project-ref vldepqrkbdrspgtbyyxu
-```
+1. Supabase dashboard → **SQL Editor** → **New query**.
+2. Paste the whole contents of `supabase/migrations/20260627120000_phaseb_init.sql`.
+3. **Run**. Done — it creates `devices`, `device_interests`, and the `register_device` function.
 
-## Deploy stage 2
+(Idempotent: safe to run again.)
 
-```bash
-# 1) schema → creates devices + device_interests (RLS locked to service_role)
-supabase db push
+## App config (public — anon key is meant to ship)
 
-# 2) the register endpoint
-supabase functions deploy register-device
-```
-
-`SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are injected into Edge Functions automatically — you
-do **not** set those by hand. (The classifier's `ANTHROPIC_API_KEY` comes in stage 3:
-`supabase secrets set ANTHROPIC_API_KEY=…`.)
-
-## App env (public — safe to commit to your build config)
-
-Set these so the app knows where to register (anon key is public by design):
+Supabase → **Project Settings → API** → copy the **Project URL** and the **anon / public** key:
 
 ```
 EXPO_PUBLIC_SUPABASE_URL=https://vldepqrkbdrspgtbyyxu.supabase.co
-EXPO_PUBLIC_SUPABASE_ANON_KEY=<your project's anon/public key>
+EXPO_PUBLIC_SUPABASE_ANON_KEY=<anon / public key>
 ```
 
-Local dev: put them in `.env` (see `.env.example`). For builds: `eas env:create` (or the EAS
-dashboard) for the `production`/`preview` profiles. If unset, the app simply skips registration —
-nothing breaks.
+Local dev → `.env.local` (git-ignored, see `.env.example`). Builds → set both via EAS env on the
+`production` + `preview` profiles. If unset, the app simply skips registration — nothing breaks.
 
-## Smoke-test the function (no app needed)
+## Smoke-test (no app needed)
 
 ```bash
 curl -s -X POST \
-  "https://vldepqrkbdrspgtbyyxu.supabase.co/functions/v1/register-device" \
-  -H "Authorization: Bearer <anon key>" \
+  "https://vldepqrkbdrspgtbyyxu.supabase.co/rest/v1/rpc/register_device" \
+  -H "apikey: <anon key>" -H "Authorization: Bearer <anon key>" \
   -H "content-type: application/json" \
-  -d '{"token":"ExponentPushToken[test-1]","platform":"ios","locale":"de",
-       "interests":[{"kind":"series","refId":"ironman"},{"kind":"race","refId":"se-im-nice"}]}'
-# → {"ok":true,"deviceId":"…","interests":2}
+  -d '{"payload":{"token":"ExponentPushToken[test-1]","platform":"ios","locale":"de",
+       "interests":[{"kind":"series","ref_id":"ironman"},{"kind":"race","ref_id":"se-im-nice"}]}}'
+# → a uuid string (the device id)
 ```
 
-Then in the Supabase **Table editor**: `devices` has the row, `device_interests` has 2 rows. Re-running
-with the same token updates in place (no duplicates).
+Then in the **Table editor**: `devices` has the row, `device_interests` has 2 rows. Re-running with
+the same token updates in place (no duplicates).
 
-## What stays server-side / never in the app or chat
+## Notes
 
-`service_role` key and `ANTHROPIC_API_KEY` are secrets — they live only in Supabase. The app ships only
-the **anon** key (public). Tokens + interests are personal data → EU region + a delete path (a device is
-removed when push is turned off; stage 4 adds the explicit opt-out wipe).
+- **Secrets stay in Supabase.** The app ships only the public anon key. The `service_role` key and
+  (stage 3) `ANTHROPIC_API_KEY` never appear in the app or in chat.
+- **iOS push** additionally needs an APNs key in EAS — that's a stage-3 concern (stage 2 only
+  registers tokens, it doesn't send anything yet).
+- GDPR: tokens + interests are personal data → EU region + a delete path (push-off removes the
+  device; stage 4 adds the explicit opt-out wipe).
