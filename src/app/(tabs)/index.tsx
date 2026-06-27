@@ -206,9 +206,15 @@ export default function DashboardScreen() {
   const nextBig = useMemo(() => {
     const now = Date.now();
     return all
-      .filter((i) => (i.kind === 'series' || i.kind === 'pro') && statusOf(i) !== 'finished' && +new Date(dateOf(i)) >= now)
+      .filter(
+        (i) =>
+          (i.kind === 'series' || i.kind === 'pro') &&
+          statusOf(i) === 'upcoming' &&
+          +new Date(dateOf(i)) >= now &&
+          i.id !== relevantLive?.id, // never echo the race that's already the live hero
+      )
       .sort((a, b) => +new Date(dateOf(a)) - +new Date(dateOf(b)))[0];
-  }, [all]);
+  }, [all, relevantLive]);
   const showMatch = !!nextBig && nextBig.id !== myNext?.id;
   const matchKey = showMatch ? raceKey(nameOf(nextBig), dateOf(nextBig)) : '';
   const { data: matchList } = useQuery({
@@ -336,9 +342,7 @@ export default function DashboardScreen() {
           onPress: openMyNext,
         }
       : { emoji: '🏁', title: t('dashboard.pickRace'), subtitle: t('dashboard.pickRaceSub'), onPress: () => router.push('/pick-race') },
-    relevantLive
-      ? { emoji: '🔴', title: t('dashboard.liveNow'), subtitle: placeOf(relevantLive), accent: true, onPress: () => openItem(relevantLive) }
-      : { emoji: '📅', title: t('quick.races'), subtitle: t('dashboard.calendarSub'), onPress: () => router.push('/events') },
+    { emoji: '📅', title: t('quick.races'), subtitle: t('dashboard.calendarSub'), onPress: () => router.push('/events') },
     ...(showMatch ? [{ emoji: '⭐', title: t('dashboard.proStartersShort'), subtitle: nameOf(nextBig), onPress: () => openItem(nextBig) }] : []),
     { emoji: '🏆', title: t('quick.ranking'), subtitle: 'WTCS', onPress: () => router.push('/standings') },
     { emoji: '🎟️', title: t('tabs.deals'), subtitle: t('dashboard.codesSub'), onPress: () => router.push('/deals') },
