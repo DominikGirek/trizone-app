@@ -109,7 +109,7 @@ export function NewsCard({ article, onPress }: { article: Article; onPress: () =
         )}
         <View style={styles.metaRow}>
           <View style={styles.meta}>
-            <ThemedText type="small" style={{ color: theme.primary, fontWeight: '700', fontSize: 12 }}>
+            <ThemedText type="small" themeColor="textSecondary" style={{ fontWeight: '700', fontSize: 12 }}>
               {article.source}
             </ThemedText>
             <ThemedText type="small" themeColor="textSecondary" style={{ fontSize: 12 }}>

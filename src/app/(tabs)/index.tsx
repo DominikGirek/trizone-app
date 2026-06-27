@@ -64,12 +64,12 @@ function Section({
   return (
     <View style={styles.section}>
       <View style={styles.sectionHead}>
-        <ThemedText type="smallBold" themeColor="textSecondary" style={styles.sectionTitle}>
-          {title.toUpperCase()}
+        <ThemedText type="smallBold" style={styles.sectionTitle}>
+          {title}
         </ThemedText>
         {actionLabel && onAction && (
           <Pressable onPress={onAction} hitSlop={8}>
-            <ThemedText type="smallBold" style={{ color: theme.primary }}>
+            <ThemedText type="smallBold" themeColor="textSecondary">
               {actionLabel} ›
             </ThemedText>
           </Pressable>
@@ -478,7 +478,7 @@ export default function DashboardScreen() {
                 {nextBig.kind === 'pro' ? (
                   <SeriesTag series={nextBig.race.series} />
                 ) : nextBig.event.series ? (
-                  <ThemedText type="small" style={[styles.matchSeries, { color: theme.primary }]}>
+                  <ThemedText type="small" style={[styles.matchSeries, { color: theme.textSecondary }]}>
                     {nextBig.event.series.toUpperCase()}
                   </ThemedText>
                 ) : (
@@ -515,7 +515,7 @@ export default function DashboardScreen() {
               {matchStarters.length > 0 && (
                 <View style={[styles.startersWrap, { borderColor: theme.border }]}>
                   <ThemedText type="small" themeColor="textSecondary" style={styles.startersLabel}>
-                    {t('dashboard.proStarters', { count: matchStarters.length }).toUpperCase()}
+                    {t('dashboard.proStarters', { count: matchStarters.length })}
                   </ThemedText>
                   <View style={styles.starterRow}>
                     {matchStarters.slice(0, 4).map((e) => (
@@ -567,7 +567,7 @@ export default function DashboardScreen() {
                   <ThemedText type="smallBold" numberOfLines={1} style={styles.starName}>
                     {a.name}
                   </ThemedText>
-                  <ThemedText type="small" numberOfLines={1} style={[styles.starTitle, { color: theme.primary }]}>
+                  <ThemedText type="small" numberOfLines={1} style={[styles.starTitle, { color: theme.textSecondary }]}>
                     {athleteTitle(a)}
                   </ThemedText>
                 </Pressable>
@@ -655,7 +655,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.three,
     paddingBottom: Spacing.two,
   },
-  sectionTitle: { letterSpacing: 0.5 },
+  sectionTitle: { fontSize: 15, fontWeight: '700', letterSpacing: -0.2 },
   hero: {
     margin: Spacing.three,
     marginBottom: 0,
@@ -705,7 +705,7 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
   },
   startersWrap: { marginTop: Spacing.three, paddingTop: Spacing.two + 2, borderTopWidth: StyleSheet.hairlineWidth },
-  startersLabel: { fontSize: 10, fontWeight: '800', letterSpacing: 0.5, marginBottom: Spacing.two },
+  startersLabel: { fontSize: 11, fontWeight: '700', letterSpacing: 0.2, marginBottom: Spacing.two },
   starterRow: { flexDirection: 'row', gap: Spacing.three },
   starter: { alignItems: 'center', width: 52 },
   miniAvatar: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center' },
