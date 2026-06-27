@@ -25,6 +25,7 @@ import { fameScore } from '@/lib/athleteFame';
 import { athleteTitle } from '@/lib/athleteTitle';
 import { avatarColor, initials } from '@/lib/avatar';
 import { countryFlag, formatDate, formatKm, timeAgo } from '@/lib/format';
+import { haptics } from '@/lib/haptics';
 import { hotAlerts } from '@/lib/hotNews';
 import { useHotNewsRead } from '@/store/hotNewsRead';
 import { mentionsAny, pickForYou } from '@/lib/newsTopics';
@@ -140,6 +141,17 @@ export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
   const [feed, setFeed] = useState<FeedTab>('foryou');
   const [hotExpanded, setHotExpanded] = useState(false);
+
+  // Switch the feed with a soft cross-fade + resize so sections don't hard-jump (the hero above
+  // the chips stays put). No-op on web; smooth on native.
+  const selectFeed = (id: FeedTab) => {
+    if (id === feed) return;
+    haptics.light();
+    LayoutAnimation.configureNext(
+      LayoutAnimation.create(220, LayoutAnimation.Types.easeInEaseOut, LayoutAnimation.Properties.opacity),
+    );
+    setFeed(id);
+  };
   const { coords } = useLocation();
   const { idsOf } = useFavorites();
   const { next: myNext, isMain, races: myRaces } = useMyRaces();
@@ -460,7 +472,7 @@ export default function DashboardScreen() {
               ['athletes', t('dashboard.feedAthletes')],
             ] as [FeedTab, string][]
           ).map(([id, label]) => (
-            <FeedChip key={id} label={label} active={feed === id} onPress={() => setFeed(id)} />
+            <FeedChip key={id} label={label} active={feed === id} onPress={() => selectFeed(id)} />
           ))}
         </ScrollView>
 
