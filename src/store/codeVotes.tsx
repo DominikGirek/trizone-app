@@ -3,10 +3,10 @@ import { createContext, useContext, useEffect, useMemo, useState, type ReactNode
 import { storage, StorageKeys } from '@/lib/storage';
 
 /**
- * The user's 👍/👎 on discount codes. v1 is local: a 👎 hides the code on this
- * device immediately. Real cross-user aggregation + the auto-cutoff (a code flies
- * out after CODE_DOWNVOTE_CUTOFF net down-votes across all users) is a backend
- * (Phase B) job — these per-device votes are kept to sync there later.
+ * The user's 👍/👎 on discount codes. A vote never hides the code — it just records
+ * this device's rating, which shows in the card's count so others can judge the code.
+ * Real cross-user aggregation (and the optional auto-cutoff for codes the crowd buries)
+ * is a backend (Phase B) job — these per-device votes are kept to sync there later.
  */
 export type Vote = 'up' | 'down';
 
@@ -15,8 +15,6 @@ interface CodeVotesValue {
   voteOf: (id: string) => Vote | undefined;
   /** Set 👍/👎, or clear it if the same direction is tapped again. */
   vote: (id: string, dir: Vote) => void;
-  /** Ids this device down-voted (hidden locally). */
-  downvoted: string[];
 }
 
 const CodeVotesContext = createContext<CodeVotesValue | null>(null);
@@ -45,7 +43,6 @@ export function CodeVotesProvider({ children }: { children: ReactNode }) {
         else next[id] = dir;
         persist(next);
       },
-      downvoted: Object.keys(votes).filter((id) => votes[id] === 'down'),
     }),
     [votes],
   );

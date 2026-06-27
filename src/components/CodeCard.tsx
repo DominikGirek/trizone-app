@@ -22,6 +22,10 @@ export function CodeCard({ code }: { code: DiscountCode }) {
   const { show } = useToast();
   const { vote, voteOf } = useCodeVotes();
   const myVote = voteOf(code.id);
+  // Community counts (server-fed once the backend aggregates votes) + this device's own vote,
+  // so a 👍/👎 shows up immediately and sums with everyone else's later.
+  const upCount = (code.thumbsUp ?? 0) + (myVote === 'up' ? 1 : 0);
+  const downCount = (code.thumbsDown ?? 0) + (myVote === 'down' ? 1 : 0);
   const athlete = codeAthleteName(code);
 
   const daysLeft = code.validUntil ? Math.ceil((+new Date(code.validUntil) - Date.now()) / 86400000) : null;
@@ -100,9 +104,9 @@ export function CodeCard({ code }: { code: DiscountCode }) {
               size={15}
               color={myVote === 'up' ? theme.primary : theme.textSecondary}
             />
-            {(code.thumbsUp ?? 0) > 0 && (
+            {upCount > 0 && (
               <ThemedText type="small" themeColor="textSecondary" style={styles.thumbCount}>
-                {code.thumbsUp}
+                {upCount}
               </ThemedText>
             )}
           </Pressable>
@@ -112,9 +116,9 @@ export function CodeCard({ code }: { code: DiscountCode }) {
               size={15}
               color={myVote === 'down' ? theme.primary : theme.textSecondary}
             />
-            {(code.thumbsDown ?? 0) > 0 && (
+            {downCount > 0 && (
               <ThemedText type="small" themeColor="textSecondary" style={styles.thumbCount}>
-                {code.thumbsDown}
+                {downCount}
               </ThemedText>
             )}
           </Pressable>

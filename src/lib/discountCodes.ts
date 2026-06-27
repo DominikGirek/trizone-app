@@ -7,11 +7,12 @@ import { athletesById } from '@/mocks/athletes';
  * Discount codes for the "Codes" tab.
  *
  * Model (influencercodes.de principle): codes are submitted/curated, then shown;
- * the community keeps them fresh via a 👍/👎 thumbs vote, and a code is
- * auto-hidden once net down-votes reach CODE_DOWNVOTE_CUTOFF — so nobody has to
- * manually review every report. NOTE: real cross-user vote aggregation + user
- * submissions require the backend (Phase B); until then `thumbsUp/thumbsDown`
- * are server-fed counts (0 here) and a local 👎 hides the code on that device.
+ * the community rates them with a 👍/👎 thumbs vote and everyone sees the up/down
+ * counts to judge a code — a vote never removes the code. As a backstop, a code
+ * the crowd overwhelmingly buries (net down-votes ≥ CODE_DOWNVOTE_CUTOFF) is hidden.
+ * NOTE: real cross-user vote aggregation + user submissions require the backend
+ * (Phase B); until then `thumbsUp/thumbsDown` are server-fed counts (0 here) and a
+ * vote is recorded per device (shown in the count, synced to the backend later).
  *
  * No real codes ship yet — fill DISCOUNT_CODES with REAL, verified codes
  * (affiliate/brand/athlete). A dead code at checkout burns trust.
