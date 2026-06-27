@@ -10,6 +10,13 @@
     "favorites": "Favorites",
     "more": "More"
   },
+  "hotNews": {
+    "label": "Breaking",
+    "cancelled": "Cancelled",
+    "shortened": "Shortened",
+    "postponed": "Postponed",
+    "delayed": "Delayed"
+  },
   "deals": {
     "title": "Discount codes",
     "search": "Brand, athlete or code …",

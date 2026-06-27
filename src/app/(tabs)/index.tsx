@@ -8,6 +8,7 @@ import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { Countdown } from '@/components/Countdown';
 import { LocalEventCard } from '@/components/LocalEventCard';
+import { HotNewsBanner } from '@/components/HotNewsBanner';
 import { NewsCard } from '@/components/NewsCard';
 import { Pill } from '@/components/Pill';
 import { SeriesTag } from '@/components/SeriesTag';
@@ -23,6 +24,7 @@ import { fameScore } from '@/lib/athleteFame';
 import { athleteTitle } from '@/lib/athleteTitle';
 import { avatarColor, initials } from '@/lib/avatar';
 import { countryFlag, formatDate, formatKm, timeAgo } from '@/lib/format';
+import { hotAlerts } from '@/lib/hotNews';
 import { pickForYou } from '@/lib/newsTopics';
 import { getAthletesByIds } from '@/services/athletes';
 import { getAllEvents, type FeedItem } from '@/services/events';
@@ -202,6 +204,20 @@ export default function DashboardScreen() {
   }, [news, uiLang, athleteNames.join('|'), seriesIds.join('|'), brandIds.join('|'), sessionSeed, newsBucket]);
 
   const openArticle = (link: string) => link && WebBrowser.openBrowserAsync(link);
+  // — Hot news: time-critical changes (cancel/shorten/postpone) to upcoming races. Stage-1, in-app
+  //   preview of what a push would later say. High-precision: race + impact word in the headline.
+  const hotList = useMemo(() => {
+    const now = Date.now();
+    const horizon = now + 21 * 24 * 60 * 60 * 1000;
+    const refs = (events ?? [])
+      .filter((i) => {
+        const status = i.kind === 'pro' ? i.race.status : i.event.status;
+        return (status === 'upcoming' || status === 'live') && +new Date(i.date) <= horizon;
+      })
+      .map((i) => ({ id: i.id, name: nameOf(i), place: placeOf(i), item: i }));
+    return hotAlerts(news ?? [], refs, now).slice(0, 3);
+  }, [events, news]);
+
   const openItem = (i: FeedItem) =>
     i.kind === 'pro' ? router.push(`/event/${i.id}`) : router.push(`/local/${i.id}`);
   const openMyNext = () =>
@@ -259,6 +275,15 @@ export default function DashboardScreen() {
         }
       />
       <ScrollView contentContainerStyle={styles.content}>
+        {/* Hot news — urgent race-status changes for upcoming races (preview of a future push). */}
+        {hotList.length > 0 && (
+          <View style={styles.hotStack}>
+            {hotList.map((h) => (
+              <HotNewsBanner key={h.race.id} alert={h} raceName={h.race.name} onPress={() => openItem(h.race.item)} />
+            ))}
+          </View>
+        )}
+
         {/* Smart hero — one prominent tile, red for the urgent states. */}
         {relevantLive ? (
           <Pressable
@@ -470,6 +495,7 @@ export default function DashboardScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   content: { paddingBottom: Spacing.six },
+  hotStack: { marginHorizontal: Spacing.three, marginTop: Spacing.three, gap: Spacing.two },
   section: { marginTop: Spacing.four },
   sectionHead: {
     flexDirection: 'row',

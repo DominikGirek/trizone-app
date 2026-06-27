@@ -10,6 +10,13 @@
     "favorites": "Favoriten",
     "more": "Mehr"
   },
+  "hotNews": {
+    "label": "Eilmeldung",
+    "cancelled": "Abgesagt",
+    "shortened": "Verkürzt",
+    "postponed": "Verschoben",
+    "delayed": "Verzögert"
+  },
   "deals": {
     "title": "Rabattcodes",
     "search": "Marke, Athlet:in oder Code …",
