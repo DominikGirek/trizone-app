@@ -18,19 +18,21 @@ export function PushSync() {
   const athletes = idsOf('athlete');
   const series = idsOf('series');
   const brands = idsOf('brand');
-  const raceIds = races.map((r) => r.id);
+  const raceSig = races.map((r) => `${r.id}:${r.name}`).join(',');
 
   useEffect(() => {
+    const mainRace = mainId ? races.find((r) => r.id === mainId) : undefined;
     const interests: PushInterest[] = [
       ...athletes.map((id) => ({ kind: 'athlete' as const, ref_id: id })),
       ...series.map((id) => ({ kind: 'series' as const, ref_id: id })),
       ...brands.map((id) => ({ kind: 'brand' as const, ref_id: id })),
-      ...raceIds.map((id) => ({ kind: 'race' as const, ref_id: id })),
-      ...(mainId ? [{ kind: 'main_race' as const, ref_id: mainId }] : []),
+      // Races carry their name so the backend can match headlines without the full calendar.
+      ...races.map((r) => ({ kind: 'race' as const, ref_id: r.id, name: r.name })),
+      ...(mainId ? [{ kind: 'main_race' as const, ref_id: mainId, name: mainRace?.name }] : []),
     ];
     syncPush(interests, i18n.language).catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [athletes.join(','), series.join(','), brands.join(','), raceIds.join(','), mainId, i18n.language]);
+  }, [athletes.join(','), series.join(','), brands.join(','), raceSig, mainId, i18n.language]);
 
   return null;
 }

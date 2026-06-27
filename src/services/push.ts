@@ -11,6 +11,7 @@ export type InterestKind = 'athlete' | 'series' | 'brand' | 'race' | 'main_race'
 export interface PushInterest {
   kind: InterestKind;
   ref_id: string;
+  name?: string; // race name, so the backend can match headlines without the full calendar
 }
 
 export const pushAvailable = (): boolean => !!SUPABASE_URL && !!ANON && Platform.OS !== 'web';
