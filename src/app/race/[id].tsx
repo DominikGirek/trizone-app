@@ -9,6 +9,7 @@ import { LayoutAnimation, Platform, Pressable, ScrollView, Share, StyleSheet, Vi
 import { Countdown } from '@/components/Countdown';
 import { FavoriteButton } from '@/components/FavoriteButton';
 import { NewsCard } from '@/components/NewsCard';
+import { RaceBriefingView } from '@/components/RaceBriefingView';
 import { ResultsList } from '@/components/ResultsList';
 import { StatusPill } from '@/components/StatusPill';
 import { EmptyState, LoadingState } from '@/components/States';
@@ -31,6 +32,7 @@ import {
   newsSaysCancelled,
   raceSearchQuery,
 } from '@/lib/newsTopics';
+import { getBriefing } from '@/data/raceBriefings';
 import { getLocalEventById, providerLabel } from '@/services/localEvents';
 import { fetchNews } from '@/services/news';
 import { getRaceById, getRaceStartList, getResults, raceKey, startPointFor } from '@/services/races';
@@ -46,7 +48,7 @@ type RaceVM = Omit<LocalEvent, 'lat' | 'lon'> & { lat?: number; lon?: number };
 
 /** Race Center hub tabs. Only those with content are shown (no empty tabs). More slot in later
  *  (Briefing, Startliste, Karte, Live). */
-type RaceTab = 'overview' | 'results';
+type RaceTab = 'overview' | 'briefing' | 'results';
 
 function openUrl(url?: string) {
   if (url) WebBrowser.openBrowserAsync(url);
@@ -328,9 +330,11 @@ export default function RaceScreen() {
 
   // Hub tabs — only those with content. Overview is the catch-all (weather + distances + news);
   // Ergebnisse splits out the pro results. Briefing/Startliste/Karte/Live slot in later.
+  const briefing = getBriefing(vm.id);
   const hasResultsTab = isPro && !!proRace?.hasResults && !!results && results.length > 0;
   const tabs: { id: RaceTab; label: string }[] = [
     { id: 'overview', label: t('raceTab.overview') },
+    ...(briefing ? [{ id: 'briefing' as RaceTab, label: t('raceTab.briefing') }] : []),
     ...(hasResultsTab ? [{ id: 'results' as RaceTab, label: t('raceTab.results') }] : []),
   ];
   const activeTab: RaceTab = tabs.some((x) => x.id === tab) ? tab : 'overview';
@@ -478,6 +482,9 @@ export default function RaceScreen() {
             )}
           </>
         )}
+
+        {/* Briefing — curated, verified race-day fan-guide */}
+        {activeTab === 'briefing' && briefing && <RaceBriefingView briefing={briefing} />}
 
         {/* Ergebnisse — pro results, in-app */}
         {activeTab === 'results' && hasResultsTab && (

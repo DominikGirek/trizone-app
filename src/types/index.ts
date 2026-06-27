@@ -153,6 +153,33 @@ export interface LocalEvent {
   proStartListUrl?: string;
 }
 
+/** A single line in a race-day Briefing (a schedule entry, side-event, fan zone or watch option). */
+export interface BriefingItem {
+  label: string; // e.g. "Start", "Helaba NightRun"
+  place?: string; // e.g. "Langener Waldsee"
+  time?: string; // free text, e.g. "06:20", "~11:15", "Do 19:00", "ab 06:10"
+  mapsUrl?: string; // a map deep-link (fan zones / venues)
+  url?: string; // an external link (e.g. where to watch live)
+}
+
+export interface BriefingSection {
+  title: string; // e.g. "Das Rennen", "Side-Events", "Fan-Zonen", "Live verfolgen"
+  items: BriefingItem[];
+}
+
+/** A curated, race-day "Fan-Guide" shown as the Race Center "Briefing" tab. Created only for
+ *  flagship races and ONLY from verified sources — volatile race-day figures carry a dated source
+ *  line (`updated` + `source`) and may change, so it stays honest. Never fabricated. */
+export interface RaceBriefing {
+  raceId: string; // matches the race/event id
+  note?: string; // status caveat, e.g. "Wegen Hitze verkürzt: 3,8 / 125 / 21 km"
+  source: string; // provenance, e.g. "tri-mag · IRONMAN"
+  updated: string; // ISO date the figures were last verified (→ "Stand DD.MM.")
+  hashtag?: string;
+  presentedBy?: string; // sponsor, e.g. "Mainova"
+  sections: BriefingSection[];
+}
+
 /** A favoritable entity reference. */
 export type FavoriteKind = 'athlete' | 'series' | 'brand';
 export interface Favorite {

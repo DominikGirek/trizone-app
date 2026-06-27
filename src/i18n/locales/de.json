@@ -358,7 +358,12 @@
   },
   "raceTab": {
     "overview": "Übersicht",
+    "briefing": "Briefing",
     "results": "Ergebnisse"
+  },
+  "briefing": {
+    "asOf": "Stand {{date}} · Quelle {{source}} · kann sich ändern",
+    "presentedBy": "präsentiert von"
   },
   "startlist": {
     "title": "Profi-Starterliste",

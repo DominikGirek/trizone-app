@@ -358,7 +358,12 @@
   },
   "raceTab": {
     "overview": "Overview",
+    "briefing": "Briefing",
     "results": "Results"
+  },
+  "briefing": {
+    "asOf": "As of {{date}} · Source {{source}} · may change",
+    "presentedBy": "presented by"
   },
   "startlist": {
     "title": "Pro start list",
