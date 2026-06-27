@@ -7,11 +7,11 @@ import { useTranslation } from 'react-i18next';
 import { LayoutAnimation, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Countdown } from '@/components/Countdown';
 import { LocalEventCard } from '@/components/LocalEventCard';
 import { HotNewsBanner } from '@/components/HotNewsBanner';
 import { NewsCard } from '@/components/NewsCard';
 import { Pill } from '@/components/Pill';
+import { RaceHero } from '@/components/RaceHero';
 import { SeriesTag } from '@/components/SeriesTag';
 import { NewsListSkeleton } from '@/components/Skeleton';
 import { ThemedText } from '@/components/themed-text';
@@ -312,24 +312,17 @@ export default function DashboardScreen() {
   // Shared red hero card for a race countdown — now with a faint sport glyph for depth.
   const renderRaceHero = (pillLabel: string) =>
     myNext && (
-      <Pressable
+      <RaceHero
+        variant="dark"
+        style={{ margin: Spacing.three, marginBottom: 0 }}
+        chips={[{ label: pillLabel }]}
+        title={myNext.name}
+        titleLines={2}
+        meta={`${countryFlag(myNext.country ?? 'DE')} ${myNext.location} · ${formatDate(myNext.date, lang)}`}
+        countdownDate={myNext.date}
+        glyph="walk"
         onPress={openMyNext}
-        style={({ pressed }) => [styles.hero, styles.heroNeutral, { backgroundColor: theme.backgroundSelected, borderColor: theme.border }, pressed && { opacity: 0.85 }]}>
-        <Ionicons name="walk" size={150} color={theme.border} style={styles.heroGlyph} />
-        <View style={styles.heroTop}>
-          <Pill label={pillLabel} color={theme.textSecondary} background={theme.background} />
-          <ThemedText type="small" themeColor="textSecondary">
-            {countryFlag(myNext.country ?? 'DE')} {myNext.location}
-          </ThemedText>
-        </View>
-        <ThemedText style={styles.heroName} numberOfLines={2}>
-          {myNext.name}
-        </ThemedText>
-        <ThemedText type="small" themeColor="textSecondary" style={{ marginBottom: Spacing.two }}>
-          {formatDate(myNext.date, lang)}
-        </ThemedText>
-        <Countdown date={myNext.date} color={theme.text} />
-      </Pressable>
+      />
     );
 
   // Smart, personalised story-shortcuts (adapt to your race / live state).
@@ -397,25 +390,20 @@ export default function DashboardScreen() {
 
         {/* Smart hero — one prominent tile, red for the urgent states. */}
         {relevantLive ? (
-          <Pressable
+          <RaceHero
+            variant="live"
+            style={{ margin: Spacing.three, marginBottom: 0 }}
+            chips={[{ label: t('dashboard.liveNow'), live: true }]}
+            title={nameOf(relevantLive)}
+            titleLines={2}
+            meta={`${countryFlag(ctryOf(relevantLive))} ${placeOf(relevantLive)} · ${t('dashboard.watchLive')}`}
+            glyph="radio"
             onPress={() =>
               relevantLive.kind !== 'pro' && relevantLive.event.raceresultEventId
                 ? router.push(`/live/${relevantLive.event.raceresultEventId}`)
                 : openItem(relevantLive)
             }
-            style={({ pressed }) => [styles.hero, { backgroundColor: theme.primary }, pressed && { opacity: 0.9 }]}>
-            <Ionicons name="radio" size={150} color="rgba(255,255,255,0.13)" style={styles.heroGlyph} />
-            <View style={styles.heroTop}>
-              <Pill label={t('dashboard.liveNow')} color={theme.primary} background={theme.onPrimary} dot />
-              <Ionicons name="radio-outline" size={20} color={theme.onPrimary} />
-            </View>
-            <ThemedText style={[styles.heroName, { color: theme.onPrimary }]} numberOfLines={2}>
-              {nameOf(relevantLive)}
-            </ThemedText>
-            <ThemedText type="small" style={{ color: theme.onPrimary, opacity: 0.9 }}>
-              {countryFlag(ctryOf(relevantLive))} {placeOf(relevantLive)} · {t('dashboard.watchLive')}
-            </ThemedText>
-          </Pressable>
+          />
         ) : raceWeek ? (
           renderRaceHero(t('dashboard.raceWeek'))
         ) : athleteMoment ? (

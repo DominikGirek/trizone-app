@@ -2,15 +2,14 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useQuery } from '@tanstack/react-query';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LayoutAnimation, Platform, Pressable, ScrollView, Share, StyleSheet, View } from 'react-native';
 
-import { Countdown } from '@/components/Countdown';
 import { FavoriteButton } from '@/components/FavoriteButton';
 import { NewsCard } from '@/components/NewsCard';
 import { RaceBriefingView } from '@/components/RaceBriefingView';
+import { RaceHero, type HeroChip } from '@/components/RaceHero';
 import { ResultsList } from '@/components/ResultsList';
 import { EmptyState, LoadingState } from '@/components/States';
 import { ThemedText } from '@/components/themed-text';
@@ -339,13 +338,13 @@ export default function RaceScreen() {
   ];
   const activeTab: RaceTab = tabs.some((x) => x.id === tab) ? tab : 'overview';
 
-  // Cinematic hero surface: bright red while live, a deep dark-maroon gradient otherwise (red stays
-  // for urgency; the dark gradient just gives the destination a premium "matchday" feel).
-  const heroColors =
-    vm.status === 'live' && !cancelled
-      ? (['#FF483D', '#8d140d'] as const)
-      : (['#3a1417', '#160a0b', '#0B0B0C'] as const);
+  const heroVariant: 'live' | 'dark' = vm.status === 'live' && !cancelled ? 'live' : 'dark';
   const heroGlyph = cancelled ? 'warning' : vm.status === 'live' ? 'radio' : vm.status === 'finished' ? 'trophy' : 'walk';
+  const heroChips: HeroChip[] = [
+    ...(vm.series ? [{ label: vm.series.toUpperCase() }] : []),
+    ...(vm.status === 'live' && !cancelled ? [{ label: t('dashboard.liveNow'), live: true }] : []),
+    ...(cancelled ? [{ label: t('status.cancelled').toUpperCase(), solid: true }] : []),
+  ];
   const selectTab = (id: RaceTab) => {
     if (id === activeTab) return;
     haptics.light();
@@ -359,74 +358,20 @@ export default function RaceScreen() {
     <ThemedView style={styles.container}>
       <Stack.Screen options={{ title: vm.town }} />
       <ScrollView contentContainerStyle={styles.content}>
-        <LinearGradient colors={heroColors} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
-          <Ionicons name={heroGlyph} size={150} color="rgba(255,255,255,0.10)" style={styles.heroGlyph} />
-          <View style={styles.heroTop}>
-            <View style={styles.chipsRow}>
-              {!!vm.series && (
-                <View style={styles.heroChip}>
-                  <ThemedText type="small" style={styles.heroChipText}>
-                    {vm.series.toUpperCase()}
-                  </ThemedText>
-                </View>
-              )}
-              {vm.status === 'live' && !cancelled && (
-                <View style={styles.heroChip}>
-                  <View style={styles.liveDotSm} />
-                  <ThemedText type="small" style={styles.heroChipText}>
-                    {t('dashboard.liveNow')}
-                  </ThemedText>
-                </View>
-              )}
-              {cancelled && (
-                <View style={[styles.heroChip, { backgroundColor: '#fff' }]}>
-                  <ThemedText type="small" style={[styles.heroChipText, { color: theme.primary }]}>
-                    {t('status.cancelled').toUpperCase()}
-                  </ThemedText>
-                </View>
-              )}
-            </View>
-            {isPro && proRace && <FavoriteButton kind="series" id={proRace.series} size={22} />}
-          </View>
-
-          {!!vm.region && (
-            <ThemedText type="small" style={styles.heroEyebrow}>
-              {vm.region}
-            </ThemedText>
-          )}
-          <ThemedText style={[styles.heroName, cancelled && styles.struck]} numberOfLines={3}>
-            {cleanName}
-          </ThemedText>
-          <ThemedText type="small" style={styles.heroMetaText}>
-            {countryFlag(vm.country)} {vm.town} · {formatDateTime(vm.date, lang)}
-          </ThemedText>
-
-          {vm.status === 'upcoming' && !cancelled && (
-            <View style={styles.heroCountdown}>
-              <Countdown date={vm.date} color="#fff" />
-            </View>
-          )}
-
-          {vm.distances.length === 1 && (
-            <View style={styles.discBand}>
-              {vm.distances[0].swim != null && (
-                <ThemedText type="small" style={styles.discText}>🏊 {vm.distances[0].swim} km</ThemedText>
-              )}
-              {vm.distances[0].bike != null && (
-                <ThemedText type="small" style={styles.discText}>🚴 {vm.distances[0].bike} km</ThemedText>
-              )}
-              {vm.distances[0].run != null && (
-                <ThemedText type="small" style={styles.discText}>🏃 {vm.distances[0].run} km</ThemedText>
-              )}
-            </View>
-          )}
-
-          {!!vm.organizer && (
-            <ThemedText type="small" style={[styles.heroMetaText, { marginTop: 4 }]}>
-              {t('local.organizer')}: {vm.organizer}
-            </ThemedText>
-          )}
-        </LinearGradient>
+        <RaceHero
+          variant={heroVariant}
+          style={{ marginHorizontal: Spacing.three, marginTop: Spacing.two }}
+          chips={heroChips}
+          eyebrow={vm.region}
+          title={cleanName}
+          strikethrough={cancelled}
+          meta={`${countryFlag(vm.country)} ${vm.town} · ${formatDateTime(vm.date, lang)}`}
+          countdownDate={vm.status === 'upcoming' && !cancelled ? vm.date : undefined}
+          distances={vm.distances.length === 1 ? vm.distances[0] : null}
+          glyph={heroGlyph}
+          footer={vm.organizer ? `${t('local.organizer')}: ${vm.organizer}` : undefined}
+          right={isPro && proRace ? <FavoriteButton kind="series" id={proRace.series} size={22} /> : undefined}
+        />
 
         {/* Primary CTA */}
         {primary && (
@@ -534,40 +479,6 @@ export default function RaceScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   content: { paddingBottom: Spacing.five },
-  hero: {
-    marginHorizontal: Spacing.three,
-    marginTop: Spacing.two,
-    padding: Spacing.four,
-    borderRadius: 20,
-    overflow: 'hidden',
-  },
-  heroGlyph: { position: 'absolute', right: -14, bottom: -18 },
-  heroTop: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    gap: Spacing.two,
-    marginBottom: Spacing.two,
-  },
-  chipsRow: { flexDirection: 'row', alignItems: 'center', gap: 7, flexWrap: 'wrap', flex: 1 },
-  heroChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    backgroundColor: 'rgba(255,255,255,0.16)',
-    paddingHorizontal: 9,
-    paddingVertical: 4,
-    borderRadius: 999,
-  },
-  heroChipText: { fontSize: 11, fontWeight: '700', color: '#fff', letterSpacing: 0.3 },
-  liveDotSm: { width: 7, height: 7, borderRadius: 999, backgroundColor: '#fff' },
-  heroEyebrow: { color: 'rgba(255,255,255,0.7)', fontSize: 12, marginBottom: 2 },
-  heroName: { fontSize: 25, fontWeight: '800', letterSpacing: -0.4, color: '#fff' },
-  heroMetaText: { color: 'rgba(255,255,255,0.82)' },
-  struck: { textDecorationLine: 'line-through', opacity: 0.6 },
-  heroCountdown: { marginTop: Spacing.three },
-  discBand: { flexDirection: 'row', gap: 16, marginTop: Spacing.three },
-  discText: { color: 'rgba(255,255,255,0.9)' },
   primary: {
     flexDirection: 'row',
     alignItems: 'center',
