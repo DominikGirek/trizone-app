@@ -15,7 +15,10 @@
     "cancelled": "Abgesagt",
     "shortened": "Verkürzt",
     "postponed": "Verschoben",
-    "delayed": "Verzögert"
+    "delayed": "Verzögert",
+    "markRead": "Als gelesen markieren",
+    "markedRead": "Als gelesen",
+    "undo": "Rückgängig"
   },
   "deals": {
     "title": "Rabattcodes",

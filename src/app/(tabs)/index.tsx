@@ -25,6 +25,7 @@ import { athleteTitle } from '@/lib/athleteTitle';
 import { avatarColor, initials } from '@/lib/avatar';
 import { countryFlag, formatDate, formatKm, timeAgo } from '@/lib/format';
 import { hotAlerts } from '@/lib/hotNews';
+import { useHotNewsRead } from '@/store/hotNewsRead';
 import { pickForYou } from '@/lib/newsTopics';
 import { getAthletesByIds } from '@/services/athletes';
 import { getAllEvents, type FeedItem } from '@/services/events';
@@ -96,7 +97,7 @@ export default function DashboardScreen() {
   const locale = lang === 'de' ? 'de-DE' : 'en-US';
   const theme = useTheme();
   const { coords } = useLocation();
-  const { idsOf, favorites } = useFavorites();
+  const { idsOf } = useFavorites();
   const { next: myNext, isMain, races: myRaces } = useMyRaces();
 
   const athleteIds = idsOf('athlete');
@@ -218,6 +219,11 @@ export default function DashboardScreen() {
     return hotAlerts(news ?? [], refs, now).slice(0, 3);
   }, [events, news]);
 
+  // Hide the ones the user marked read; key by race+category so an escalation re-surfaces.
+  const { isRead, markRead } = useHotNewsRead();
+  const hotKey = (h: (typeof hotList)[number]) => `${h.race.id}:${h.category}`;
+  const visibleHot = hotList.filter((h) => !isRead(hotKey(h)));
+
   const openItem = (i: FeedItem) =>
     i.kind === 'pro' ? router.push(`/event/${i.id}`) : router.push(`/local/${i.id}`);
   const openMyNext = () =>
@@ -246,9 +252,6 @@ export default function DashboardScreen() {
       </Pressable>
     );
 
-  const hour = new Date().getHours();
-  const today = new Date().toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long' });
-
   const quick: { icon: IoniconName; label: string; tint?: string; onPress: () => void }[] = [
     {
       icon: 'radio',
@@ -268,18 +271,20 @@ export default function DashboardScreen() {
   return (
     <ThemedView style={styles.container}>
       <TopBar
-        title={t(hour < 11 ? 'dashboard.greetingMorning' : hour < 18 ? 'dashboard.greetingDay' : 'dashboard.greetingEvening')}
-        eyebrow={today}
-        right={
-          <HeaderAvatar onPress={() => router.push('/following')} label={t('following.title')} badge={favorites.length} />
-        }
+        right={<HeaderAvatar onPress={() => router.push('/following')} label={t('following.title')} />}
       />
       <ScrollView contentContainerStyle={styles.content}>
         {/* Hot news — urgent race-status changes for upcoming races (preview of a future push). */}
-        {hotList.length > 0 && (
+        {visibleHot.length > 0 && (
           <View style={styles.hotStack}>
-            {hotList.map((h) => (
-              <HotNewsBanner key={h.race.id} alert={h} raceName={h.race.name} onPress={() => openItem(h.race.item)} />
+            {visibleHot.map((h) => (
+              <HotNewsBanner
+                key={hotKey(h)}
+                alert={h}
+                raceName={h.race.name}
+                onPress={() => openItem(h.race.item)}
+                onDismiss={() => markRead(hotKey(h))}
+              />
             ))}
           </View>
         )}

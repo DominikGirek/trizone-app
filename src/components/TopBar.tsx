@@ -120,7 +120,8 @@ export function TopBar({
   right,
   showSearch = true,
 }: {
-  title: string;
+  /** Optional — omit both title and eyebrow for a pure brand bar (logo + actions). */
+  title?: string;
   /** Small contextual line above the title (e.g. the date on the home screen). */
   eyebrow?: string;
   right?: ReactNode;
@@ -149,7 +150,7 @@ export function TopBar({
           {eyebrow}
         </ThemedText>
       )}
-      <ThemedText style={styles.title}>{title}</ThemedText>
+      {!!title && <ThemedText style={styles.title}>{title}</ThemedText>}
     </View>
   );
 }

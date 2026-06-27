@@ -21,6 +21,7 @@ import '@/i18n';
 import { BookmarksProvider } from '@/store/bookmarks';
 import { CodeVotesProvider } from '@/store/codeVotes';
 import { PushSync } from '@/components/PushSync';
+import { HotNewsReadProvider } from '@/store/hotNewsRead';
 import { NewsVotesProvider } from '@/store/newsVotes';
 import { FavoritesProvider } from '@/store/favorites';
 import { MyRacesProvider } from '@/store/myRaces';
@@ -99,10 +100,12 @@ export default function RootLayout() {
                   <MyRacesProvider>
                     <CodeVotesProvider>
                       <NewsVotesProvider>
-                        <ToastProvider>
-                          <PushSync />
-                          <NavigationStack />
-                        </ToastProvider>
+                        <HotNewsReadProvider>
+                          <ToastProvider>
+                            <PushSync />
+                            <NavigationStack />
+                          </ToastProvider>
+                        </HotNewsReadProvider>
                       </NewsVotesProvider>
                     </CodeVotesProvider>
                   </MyRacesProvider>

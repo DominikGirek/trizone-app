@@ -15,7 +15,10 @@
     "cancelled": "Cancelled",
     "shortened": "Shortened",
     "postponed": "Postponed",
-    "delayed": "Delayed"
+    "delayed": "Delayed",
+    "markRead": "Mark as read",
+    "markedRead": "Marked as read",
+    "undo": "Undo"
   },
   "deals": {
     "title": "Discount codes",
