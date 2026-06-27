@@ -20,6 +20,7 @@ import { Colors } from '@/constants/theme';
 import '@/i18n';
 import { BookmarksProvider } from '@/store/bookmarks';
 import { CodeVotesProvider } from '@/store/codeVotes';
+import { NewsVotesProvider } from '@/store/newsVotes';
 import { FavoritesProvider } from '@/store/favorites';
 import { MyRacesProvider } from '@/store/myRaces';
 import { RemindersProvider } from '@/store/reminders';
@@ -96,9 +97,11 @@ export default function RootLayout() {
                 <RemindersProvider>
                   <MyRacesProvider>
                     <CodeVotesProvider>
-                      <ToastProvider>
-                        <NavigationStack />
-                      </ToastProvider>
+                      <NewsVotesProvider>
+                        <ToastProvider>
+                          <NavigationStack />
+                        </ToastProvider>
+                      </NewsVotesProvider>
                     </CodeVotesProvider>
                   </MyRacesProvider>
                 </RemindersProvider>

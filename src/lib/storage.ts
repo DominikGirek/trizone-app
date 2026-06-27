@@ -35,4 +35,5 @@ export const StorageKeys = {
   reminders: 'trizone.reminders',
   myRaces: 'trizone.myRaces',
   codeVotes: 'trizone.codeVotes',
+  newsVotes: 'trizone.newsVotes',
 } as const;

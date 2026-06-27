@@ -23,6 +23,8 @@ export interface Article {
   link: string;
   publishedAt: string; // ISO date
   lang?: 'de' | 'en';
+  thumbsUp?: number; // server-fed aggregate (backend, Phase B)
+  thumbsDown?: number; // server-fed aggregate (backend, Phase B)
 }
 
 export interface AthleteLinks {

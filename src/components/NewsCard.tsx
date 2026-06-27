@@ -14,6 +14,7 @@ import { timeAgo } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { fetchOgImage } from '@/services/ogImage';
 import { useBookmarks } from '@/store/bookmarks';
+import { useNewsVotes } from '@/store/newsVotes';
 import type { Article } from '@/types';
 
 // Deterministic muted hue per source, so image-less cards look intentional (and varied)
@@ -29,8 +30,14 @@ export function NewsCard({ article, onPress }: { article: Article; onPress: () =
   const { t, i18n } = useTranslation();
   const { show } = useToast();
   const { isSaved, toggle } = useBookmarks();
+  const { vote, voteOf } = useNewsVotes();
   const lang = i18n.language as AppLanguage;
   const saved = isSaved(article.id);
+  const myVote = voteOf(article.id);
+  // Server-fed community counts (backend, Phase B) + this device's own vote, so a 👍/👎 shows
+  // immediately and sums with everyone else's later.
+  const upCount = (article.thumbsUp ?? 0) + (myVote === 'up' ? 1 : 0);
+  const downCount = (article.thumbsDown ?? 0) + (myVote === 'down' ? 1 : 0);
   const [primaryFailed, setPrimaryFailed] = useState(false);
   const [ogFailed, setOgFailed] = useState(false);
 
@@ -55,6 +62,11 @@ export function NewsCard({ article, onPress }: { article: Article; onPress: () =
   const onShare = () => {
     haptics.light();
     Share.share({ message: `${article.title}\n${article.link}` }).catch(() => {});
+  };
+
+  const onVote = (dir: 'up' | 'down') => {
+    haptics.light();
+    vote(article.id, dir);
   };
 
   return (
@@ -105,6 +117,30 @@ export function NewsCard({ article, onPress }: { article: Article; onPress: () =
             </ThemedText>
           </View>
           <View style={styles.actions}>
+            <Pressable onPress={() => onVote('up')} hitSlop={8} style={styles.voteBtn}>
+              <Ionicons
+                name={myVote === 'up' ? 'thumbs-up' : 'thumbs-up-outline'}
+                size={17}
+                color={myVote === 'up' ? theme.primary : theme.textSecondary}
+              />
+              {upCount > 0 && (
+                <ThemedText type="small" themeColor="textSecondary" style={styles.voteCount}>
+                  {upCount}
+                </ThemedText>
+              )}
+            </Pressable>
+            <Pressable onPress={() => onVote('down')} hitSlop={8} style={styles.voteBtn}>
+              <Ionicons
+                name={myVote === 'down' ? 'thumbs-down' : 'thumbs-down-outline'}
+                size={17}
+                color={myVote === 'down' ? theme.primary : theme.textSecondary}
+              />
+              {downCount > 0 && (
+                <ThemedText type="small" themeColor="textSecondary" style={styles.voteCount}>
+                  {downCount}
+                </ThemedText>
+              )}
+            </Pressable>
             <Pressable onPress={onSave} hitSlop={8}>
               <Ionicons
                 name={saved ? 'bookmark' : 'bookmark-outline'}
@@ -141,5 +177,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   meta: { flexDirection: 'row', alignItems: 'center', gap: 4, flexShrink: 1 },
-  actions: { flexDirection: 'row', alignItems: 'center', gap: Spacing.three },
+  actions: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two + 2 },
+  voteBtn: { flexDirection: 'row', alignItems: 'center', gap: 3 },
+  voteCount: { fontSize: 11 },
 });
