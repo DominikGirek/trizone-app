@@ -58,21 +58,31 @@ export function RaceBriefingView({ briefing }: { briefing: RaceBriefing }) {
 
   return (
     <View style={styles.wrap}>
-      {/* Honesty banner — dated source, may change. */}
-      {!!briefing.note && (
-        <View style={[styles.note, { backgroundColor: theme.primary + '1A', borderColor: theme.primary + '59' }]}>
-          <Ionicons name="flame" size={16} color={theme.primary} />
-          <ThemedText type="small" style={styles.noteText}>
+      {/* Honesty banner — always shows the dated source; a status caveat (note) tints it red. */}
+      <View
+        style={[
+          styles.note,
+          briefing.note
+            ? { backgroundColor: theme.primary + '1A', borderColor: theme.primary + '59' }
+            : { backgroundColor: theme.backgroundElement, borderColor: theme.border },
+        ]}>
+        <Ionicons
+          name={briefing.note ? 'flame' : 'information-circle-outline'}
+          size={16}
+          color={briefing.note ? theme.primary : theme.textSecondary}
+        />
+        <ThemedText type="small" style={styles.noteText}>
+          {!!briefing.note && (
             <ThemedText type="small" style={{ color: theme.primary }}>
               {briefing.note}
-            </ThemedText>
-            <ThemedText type="small" themeColor="textSecondary">
               {'  '}
-              {t('briefing.asOf', { date: stand, source: briefing.source })}
             </ThemedText>
+          )}
+          <ThemedText type="small" themeColor="textSecondary">
+            {t('briefing.asOf', { date: stand, source: briefing.source })}
           </ThemedText>
-        </View>
-      )}
+        </ThemedText>
+      </View>
 
       {briefing.sections.map((sec) => (
         <View key={sec.title} style={styles.section}>

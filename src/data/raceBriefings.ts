@@ -57,6 +57,43 @@ export const raceBriefings: Record<string, RaceBriefing> = {
       },
     ],
   },
+
+  // DATEV Challenge Roth — verified (challenge-roth.com · nordbayern.de): So 05.07.2026, swim start
+  // 06:30 (Main-Donau-Kanal), men's winner ~13:53, women's ~14:39 (full distance — not shortened).
+  'se-ch-roth': {
+    raceId: 'se-ch-roth',
+    source: 'challenge-roth.com · NN',
+    updated: '2026-06-28',
+    hashtag: '#ChallengeRoth',
+    presentedBy: 'DATEV',
+    sections: [
+      {
+        title: 'Das Rennen',
+        items: [
+          { label: 'Schwimmstart', place: 'Main-Donau-Kanal · Hilpoltstein', time: '06:30' },
+          { label: 'Sieger (Herren) im Ziel', place: 'Triathlon-Park Roth', time: 'ab 13:53' },
+          { label: 'Siegerin (Damen) im Ziel', place: 'Triathlon-Park Roth', time: 'ab 14:39' },
+        ],
+      },
+      {
+        title: 'Side-Events',
+        items: [
+          { label: 'Challenge-forAll · Junior-Challenge', place: 'Roth', time: 'Fr–Sa 03.–04.07.' },
+        ],
+      },
+      {
+        title: 'Fan-Zonen',
+        items: [
+          { label: 'Solarberg', place: 'Der legendäre Anstieg', mapsUrl: maps('Solarberg Challenge Roth Hilpoltstein') },
+          { label: 'Zielstadion', place: 'Triathlon-Park Roth', mapsUrl: maps('Triathlon-Park Roth Zielstadion') },
+        ],
+      },
+      {
+        title: 'Live verfolgen',
+        items: [{ label: 'Livestream · challenge-roth.com', url: 'https://www.challenge-roth.com/' }],
+      },
+    ],
+  },
 };
 
 export function getBriefing(raceId?: string): RaceBriefing | undefined {
