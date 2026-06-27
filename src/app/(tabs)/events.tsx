@@ -20,8 +20,10 @@ import { useLocation } from '@/hooks/use-location';
 import { useTheme } from '@/hooks/use-theme';
 import type { AppLanguage } from '@/i18n';
 import { continentOf, countryFlag, formatDate, formatKm, monthShort, type ContinentCode } from '@/lib/format';
-import { cleanRaceName, isCancelledName } from '@/lib/newsTopics';
+import { cleanRaceName, isCancelledName, newsSaysCancelled } from '@/lib/newsTopics';
 import { getAllEvents, type FeedItem } from '@/services/events';
+import { fetchNews } from '@/services/news';
+import type { Article } from '@/types';
 
 type Filter = 'all' | 'near' | 'past' | 'series' | 'pro';
 
@@ -99,6 +101,9 @@ export default function EventsScreen() {
     queryKey: ['allEvents', coords?.lat, coords?.lon],
     queryFn: () => getAllEvents(coords),
   });
+  // News powers cancellation detection in the LIST too (a race the headlines say is off shows
+  // "Abgesagt" before you even open it — e.g. IRONMAN Nice — not just name-flagged ones).
+  const { data: news } = useQuery({ queryKey: ['news'], queryFn: fetchNews });
 
   const setKindReset = (k: Filter) => {
     setKind(k);
@@ -318,7 +323,7 @@ export default function EventsScreen() {
             e.type === 'header' ? (
               <DayHeader date={e.date} />
             ) : (
-              <EventRow item={e.item} showDate={e.showDate} onPress={() => open(e.item)} />
+              <EventRow item={e.item} showDate={e.showDate} news={news} onPress={() => open(e.item)} />
             )
           }
           ListEmptyComponent={<EmptyState icon="calendar-outline" message={t('events.empty')} />}
@@ -357,10 +362,12 @@ function DayHeader({ date }: { date: string }) {
 function EventRow({
   item,
   showDate,
+  news,
   onPress,
 }: {
   item: FeedItem;
   showDate: boolean;
+  news?: Article[];
   onPress: () => void;
 }) {
   const theme = useTheme();
@@ -375,7 +382,8 @@ function EventRow({
   const distanceKm = item.kind === 'pro' ? null : item.event.distanceKm;
   const localSeries = item.kind !== 'pro' ? item.event.series : undefined;
   const distances = item.kind !== 'pro' ? item.event.distances : undefined;
-  const cancelled = isCancelledName(name);
+  const newsCancelled = useMemo(() => newsSaysCancelled(news ?? [], name, town), [news, name, town]);
+  const cancelled = isCancelledName(name) || newsCancelled;
   const displayName = cancelled ? cleanRaceName(name) : name;
   const accent = cancelled ? theme.primary : pro || localSeries ? theme.primary : theme.border;
 
