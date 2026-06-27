@@ -295,21 +295,21 @@ export default function DashboardScreen() {
     myNext && (
       <Pressable
         onPress={openMyNext}
-        style={({ pressed }) => [styles.hero, { backgroundColor: theme.primary }, pressed && { opacity: 0.9 }]}>
-        <Ionicons name="walk" size={150} color="rgba(255,255,255,0.13)" style={styles.heroGlyph} />
+        style={({ pressed }) => [styles.hero, styles.heroNeutral, { backgroundColor: theme.backgroundElement, borderColor: theme.border }, pressed && { opacity: 0.85 }]}>
+        <Ionicons name="walk" size={150} color={theme.border} style={styles.heroGlyph} />
         <View style={styles.heroTop}>
-          <Pill label={pillLabel} color={theme.primary} background={theme.onPrimary} dot={raceWeek} />
-          <ThemedText type="small" style={{ color: theme.onPrimary, opacity: 0.9 }}>
+          <Pill label={pillLabel} color={theme.textSecondary} background={theme.background} />
+          <ThemedText type="small" themeColor="textSecondary">
             {countryFlag(myNext.country ?? 'DE')} {myNext.location}
           </ThemedText>
         </View>
-        <ThemedText style={[styles.heroName, { color: theme.onPrimary }]} numberOfLines={2}>
+        <ThemedText style={styles.heroName} numberOfLines={2}>
           {myNext.name}
         </ThemedText>
-        <ThemedText type="small" style={{ color: theme.onPrimary, opacity: 0.9, marginBottom: Spacing.two }}>
+        <ThemedText type="small" themeColor="textSecondary" style={{ marginBottom: Spacing.two }}>
           {formatDate(myNext.date, lang)}
         </ThemedText>
-        <Countdown date={myNext.date} color={theme.onPrimary} />
+        <Countdown date={myNext.date} color={theme.text} />
       </Pressable>
     );
 
@@ -320,7 +320,6 @@ export default function DashboardScreen() {
           emoji: '🏁',
           title: t('quick.myRaces'),
           subtitle: nextDays != null && nextDays >= 0 ? t('dashboard.inDays', { count: nextDays }) : myNext.location,
-          accent: raceWeek,
           onPress: openMyNext,
         }
       : { emoji: '🏁', title: t('dashboard.pickRace'), subtitle: t('dashboard.pickRaceSub'), onPress: () => router.push('/pick-race') },
@@ -389,16 +388,16 @@ export default function DashboardScreen() {
         ) : athleteMoment ? (
           <Pressable
             onPress={() => openArticle(athleteMoment.article.link)}
-            style={({ pressed }) => [styles.hero, { backgroundColor: theme.primary }, pressed && { opacity: 0.9 }]}>
-            <Ionicons name="trophy" size={150} color="rgba(255,255,255,0.13)" style={styles.heroGlyph} />
+            style={({ pressed }) => [styles.hero, styles.heroNeutral, { backgroundColor: theme.backgroundElement, borderColor: theme.border }, pressed && { opacity: 0.85 }]}>
+            <Ionicons name="trophy" size={150} color={theme.border} style={styles.heroGlyph} />
             <View style={styles.heroTop}>
-              <Pill label={athleteMoment.name} color={theme.primary} background={theme.onPrimary} />
-              <Ionicons name="trophy-outline" size={20} color={theme.onPrimary} />
+              <Pill label={athleteMoment.name} color={theme.textSecondary} background={theme.background} />
+              <Ionicons name="trophy-outline" size={20} color={theme.textSecondary} />
             </View>
-            <ThemedText style={[styles.heroName, { color: theme.onPrimary, fontSize: 19 }]} numberOfLines={3}>
+            <ThemedText style={[styles.heroName, { fontSize: 19 }]} numberOfLines={3}>
               {athleteMoment.article.title}
             </ThemedText>
-            <ThemedText type="small" style={{ color: theme.onPrimary, opacity: 0.9 }}>
+            <ThemedText type="small" themeColor="textSecondary">
               {athleteMoment.article.source} · {timeAgo(athleteMoment.article.publishedAt, lang)}
             </ThemedText>
           </Pressable>
@@ -409,11 +408,11 @@ export default function DashboardScreen() {
             onPress={() => router.push('/pick-race')}
             style={({ pressed }) => [
               styles.prompt,
-              { borderColor: theme.primary, backgroundColor: theme.backgroundElement },
+              { borderColor: theme.border, backgroundColor: theme.backgroundElement },
               pressed && { opacity: 0.85 },
             ]}>
-            <View style={[styles.promptIcon, { backgroundColor: theme.primary }]}>
-              <Ionicons name="flag" size={20} color={theme.onPrimary} />
+            <View style={[styles.promptIcon, { backgroundColor: theme.background }]}>
+              <Ionicons name="flag" size={20} color={theme.primary} />
             </View>
             <View style={{ flex: 1 }}>
               <ThemedText type="smallBold" style={{ fontSize: 16 }}>
@@ -423,7 +422,7 @@ export default function DashboardScreen() {
                 {t('dashboard.askSubtitle')}
               </ThemedText>
             </View>
-            <Ionicons name="chevron-forward" size={20} color={theme.primary} />
+            <Ionicons name="chevron-forward" size={20} color={theme.textSecondary} />
           </Pressable>
         )}
 
@@ -639,6 +638,7 @@ const styles = StyleSheet.create({
     gap: Spacing.one,
     overflow: 'hidden',
   },
+  heroNeutral: { borderWidth: StyleSheet.hairlineWidth },
   heroGlyph: { position: 'absolute', right: -14, bottom: -18 },
   heroTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: Spacing.one },
   heroName: { fontSize: 22, fontWeight: '800', letterSpacing: -0.3 },
