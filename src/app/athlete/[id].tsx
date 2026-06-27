@@ -239,7 +239,7 @@ export default function AthleteScreen() {
             {history.map(({ race, result }) => (
               <Pressable
                 key={race.id}
-                onPress={() => router.push(`/event/${race.id}`)}
+                onPress={() => router.push(`/race/${race.id}?kind=pro`)}
                 style={({ pressed }) => [
                   styles.resultRow,
                   { borderColor: theme.border },

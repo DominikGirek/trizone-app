@@ -191,7 +191,7 @@ export default function EventsScreen() {
   }, [list, kind]);
 
   const open = (item: FeedItem) =>
-    item.kind === 'pro' ? router.push(`/event/${item.id}`) : router.push(`/local/${item.id}`);
+    router.push(`/race/${item.id}?kind=${item.kind === 'pro' ? 'pro' : 'local'}`);
 
   const finderHeader =
     kind === 'series' ? (

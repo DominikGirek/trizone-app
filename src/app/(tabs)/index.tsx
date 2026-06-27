@@ -287,9 +287,9 @@ export default function DashboardScreen() {
   const visibleHot = hotList.filter((h) => !isRead(hotKey(h)));
 
   const openItem = (i: FeedItem) =>
-    i.kind === 'pro' ? router.push(`/event/${i.id}`) : router.push(`/local/${i.id}`);
+    router.push(`/race/${i.id}?kind=${i.kind === 'pro' ? 'pro' : 'local'}`);
   const openMyNext = () =>
-    myNext && (myNext.kind === 'pro' ? router.push(`/event/${myNext.id}`) : router.push(`/local/${myNext.id}`));
+    myNext && router.push(`/race/${myNext.id}?kind=${myNext.kind === 'pro' ? 'pro' : 'local'}`);
 
   // Shared red hero card for a race countdown — now with a faint sport glyph for depth.
   const renderRaceHero = (pillLabel: string) =>

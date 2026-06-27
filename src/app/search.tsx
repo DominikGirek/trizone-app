@@ -64,7 +64,7 @@ export default function SearchScreen() {
     if (router.canGoBack()) router.back();
     router.push(path);
   };
-  const openEvent = (i: FeedItem) => go(i.kind === 'pro' ? `/event/${i.id}` : `/local/${i.id}`);
+  const openEvent = (i: FeedItem) => go(`/race/${i.id}?kind=${i.kind === 'pro' ? 'pro' : 'local'}`);
 
   return (
     <ThemedView style={[styles.container, { paddingTop: insets.top + Spacing.two }]}>
