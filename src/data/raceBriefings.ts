@@ -18,7 +18,6 @@ export const raceBriefings: Record<string, RaceBriefing> = {
     source: 'tri-mag · IRONMAN',
     updated: '2026-06-28',
     hashtag: '#IMFrankfurt',
-    presentedBy: 'Mainova',
     sections: [
       {
         title: 'Das Rennen',
@@ -65,7 +64,6 @@ export const raceBriefings: Record<string, RaceBriefing> = {
     source: 'challenge-roth.com · NN',
     updated: '2026-06-28',
     hashtag: '#ChallengeRoth',
-    presentedBy: 'DATEV',
     sections: [
       {
         title: 'Das Rennen',
