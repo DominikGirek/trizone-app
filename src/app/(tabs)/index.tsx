@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { useMemo, useState, type ComponentProps, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { LayoutAnimation, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Countdown } from '@/components/Countdown';
@@ -139,6 +139,7 @@ export default function DashboardScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const [feed, setFeed] = useState<FeedTab>('foryou');
+  const [hotExpanded, setHotExpanded] = useState(false);
   const { coords } = useLocation();
   const { idsOf } = useFavorites();
   const { next: myNext, isMain, races: myRaces } = useMyRaces();
@@ -350,7 +351,7 @@ export default function DashboardScreen() {
         {/* Hot news — urgent race-status changes for upcoming races (preview of a future push). */}
         {visibleHot.length > 0 && (
           <View style={styles.hotStack}>
-            {visibleHot.map((h) => (
+            {(hotExpanded ? visibleHot : visibleHot.slice(0, 1)).map((h) => (
               <HotNewsBanner
                 key={hotKey(h)}
                 alert={h}
@@ -359,6 +360,23 @@ export default function DashboardScreen() {
                 onDismiss={() => markRead(hotKey(h))}
               />
             ))}
+            {visibleHot.length > 1 && (
+              <Pressable
+                onPress={() => {
+                  LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+                  setHotExpanded((v) => !v);
+                }}
+                style={({ pressed }) => [
+                  styles.hotMore,
+                  { backgroundColor: theme.backgroundElement, borderColor: theme.border },
+                  pressed && { opacity: 0.7 },
+                ]}>
+                <ThemedText type="smallBold" themeColor="textSecondary">
+                  {hotExpanded ? t('dashboard.lessAlerts') : t('dashboard.moreAlerts', { count: visibleHot.length - 1 })}
+                </ThemedText>
+                <Ionicons name={hotExpanded ? 'chevron-up' : 'chevron-down'} size={15} color={theme.textSecondary} />
+              </Pressable>
+            )}
           </View>
         )}
 
@@ -605,6 +623,15 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   content: { paddingBottom: Spacing.six },
   hotStack: { marginHorizontal: Spacing.three, marginTop: Spacing.three, gap: Spacing.two },
+  hotMore: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: Spacing.two,
+    borderRadius: 12,
+    borderWidth: StyleSheet.hairlineWidth,
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
