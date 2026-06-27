@@ -5,6 +5,7 @@ import * as WebBrowser from 'expo-web-browser';
 import { useMemo, useState, type ComponentProps, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Countdown } from '@/components/Countdown';
 import { LocalEventCard } from '@/components/LocalEventCard';
@@ -15,7 +16,7 @@ import { SeriesTag } from '@/components/SeriesTag';
 import { NewsListSkeleton } from '@/components/Skeleton';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { HeaderAvatar, TopBar } from '@/components/TopBar';
+import { HeaderIconButton, Wordmark } from '@/components/TopBar';
 import { Spacing } from '@/constants/theme';
 import { useLocation } from '@/hooks/use-location';
 import { useTheme } from '@/hooks/use-theme';
@@ -26,7 +27,7 @@ import { avatarColor, initials } from '@/lib/avatar';
 import { countryFlag, formatDate, formatKm, timeAgo } from '@/lib/format';
 import { hotAlerts } from '@/lib/hotNews';
 import { useHotNewsRead } from '@/store/hotNewsRead';
-import { pickForYou } from '@/lib/newsTopics';
+import { mentionsAny, pickForYou } from '@/lib/newsTopics';
 import { getAthletesByIds } from '@/services/athletes';
 import { getAllEvents, type FeedItem } from '@/services/events';
 import { fetchNews } from '@/services/news';
@@ -45,6 +46,8 @@ type IoniconName = ComponentProps<typeof Ionicons>['name'];
 
 // A followed athlete with a result/win in a fresh headline → red "athlete moment".
 const RESULT_RE = /\b(gewinnt|siegt|sieg|sieger|weltmeister|holt|triumph|champion|wins?|victory|podium|titel|rekord)\b/i;
+
+type FeedTab = 'foryou' | 'news' | 'races' | 'athletes';
 
 function Section({
   title,
@@ -77,14 +80,52 @@ function Section({
   );
 }
 
-function QuickTile({ icon, label, tint, onPress }: { icon: IoniconName; label: string; tint?: string; onPress: () => void }) {
+/** Horizontal "story" shortcut — a smart, personalised entry point (OneFootball-style). */
+function ShortcutCard({
+  emoji,
+  title,
+  subtitle,
+  accent,
+  onPress,
+}: {
+  emoji: string;
+  title: string;
+  subtitle?: string;
+  accent?: boolean;
+  onPress: () => void;
+}) {
   const theme = useTheme();
   return (
-    <Pressable onPress={onPress} style={styles.quickTile} hitSlop={4}>
-      <View style={[styles.quickIcon, { backgroundColor: theme.backgroundElement }]}>
-        <Ionicons name={icon} size={21} color={tint ?? theme.text} />
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.shortcut,
+        { backgroundColor: accent ? theme.primary : theme.backgroundElement, borderColor: accent ? theme.primary : theme.border },
+        pressed && { opacity: 0.85 },
+      ]}>
+      <View style={[styles.shortcutEmoji, { backgroundColor: accent ? 'rgba(255,255,255,0.22)' : theme.background }]}>
+        <ThemedText style={{ fontSize: 17 }}>{emoji}</ThemedText>
       </View>
-      <ThemedText type="small" themeColor="textSecondary" style={styles.quickLabel} numberOfLines={1}>
+      <ThemedText type="smallBold" numberOfLines={1} style={[styles.shortcutTitle, accent && { color: theme.onPrimary }]}>
+        {title}
+      </ThemedText>
+      {!!subtitle && (
+        <ThemedText type="small" numberOfLines={1} style={{ fontSize: 11, color: accent ? 'rgba(255,255,255,0.85)' : theme.textSecondary }}>
+          {subtitle}
+        </ThemedText>
+      )}
+    </Pressable>
+  );
+}
+
+/** Feed filter pill. Active = outlined (OneFootball look). */
+function FeedChip({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
+  const theme = useTheme();
+  return (
+    <Pressable
+      onPress={onPress}
+      style={[styles.chip, active ? { borderColor: theme.text, borderWidth: 1.5 } : { backgroundColor: theme.backgroundElement }]}>
+      <ThemedText type="smallBold" style={{ color: active ? theme.text : theme.textSecondary }}>
         {label}
       </ThemedText>
     </Pressable>
@@ -96,6 +137,8 @@ export default function DashboardScreen() {
   const lang = i18n.language as AppLanguage;
   const locale = lang === 'de' ? 'de-DE' : 'en-US';
   const theme = useTheme();
+  const insets = useSafeAreaInsets();
+  const [feed, setFeed] = useState<FeedTab>('foryou');
   const { coords } = useLocation();
   const { idsOf } = useFavorites();
   const { next: myNext, isMain, races: myRaces } = useMyRaces();
@@ -204,6 +247,24 @@ export default function DashboardScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [news, uiLang, athleteNames.join('|'), seriesIds.join('|'), brandIds.join('|'), sessionSeed, newsBucket]);
 
+  // The switchable bottom feed — one news list per chip.
+  const recentNews = useMemo(() => {
+    const arr = (news ?? []).filter((a) => a.lang === uiLang);
+    return [...(arr.length ? arr : (news ?? []))]
+      .sort((a, b) => +new Date(b.publishedAt) - +new Date(a.publishedAt))
+      .slice(0, 14);
+  }, [news, uiLang]);
+  const athleteNewsList = useMemo(() => {
+    const toks = athleteNames.flatMap((n) => [n, n.split(/\s+/).pop() ?? '']).filter((tk) => tk.length >= 4);
+    return toks.length ? (news ?? []).filter((a) => mentionsAny(`${a.title} ${a.summary}`, toks)).slice(0, 12) : [];
+  }, [news, athleteNames]);
+  const raceNewsList = useMemo(() => {
+    const toks = myRaces.flatMap((r) => r.name.split(/[^\p{L}\p{N}]+/u)).filter((w) => w.length >= 4);
+    return toks.length ? (news ?? []).filter((a) => mentionsAny(`${a.title} ${a.summary}`, toks)).slice(0, 12) : [];
+  }, [news, myRaces]);
+  const feedNews =
+    feed === 'news' ? recentNews : feed === 'athletes' ? athleteNewsList : feed === 'races' ? raceNewsList : topNews;
+
   const openArticle = (link: string) => link && WebBrowser.openBrowserAsync(link);
   // — Hot news: time-critical changes (cancel/shorten/postpone) to upcoming races. Stage-1, in-app
   //   preview of what a push would later say. High-precision: race + impact word in the headline.
@@ -252,27 +313,40 @@ export default function DashboardScreen() {
       </Pressable>
     );
 
-  const quick: { icon: IoniconName; label: string; tint?: string; onPress: () => void }[] = [
-    {
-      icon: 'radio',
-      label: t('quick.live'),
-      tint: relevantLive ? theme.primary : undefined,
-      onPress: () => (relevantLive ? openItem(relevantLive) : router.push('/events')),
-    },
-    { icon: 'calendar-outline', label: t('quick.races'), onPress: () => router.push('/events') },
-    {
-      icon: 'flag-outline',
-      label: t('quick.myRaces'),
-      onPress: () => router.push(myRaces.length ? '/my-races' : '/pick-race'),
-    },
-    { icon: 'podium-outline', label: t('quick.ranking'), onPress: () => router.push('/standings') },
+  // Smart, personalised story-shortcuts (adapt to your race / live state).
+  const shortcuts: { emoji: string; title: string; subtitle?: string; accent?: boolean; onPress: () => void }[] = [
+    myNext
+      ? {
+          emoji: '🏁',
+          title: t('quick.myRaces'),
+          subtitle: nextDays != null && nextDays >= 0 ? t('dashboard.inDays', { count: nextDays }) : myNext.location,
+          accent: raceWeek,
+          onPress: openMyNext,
+        }
+      : { emoji: '🏁', title: t('dashboard.pickRace'), subtitle: t('dashboard.pickRaceSub'), onPress: () => router.push('/pick-race') },
+    relevantLive
+      ? { emoji: '🔴', title: t('dashboard.liveNow'), subtitle: placeOf(relevantLive), accent: true, onPress: () => openItem(relevantLive) }
+      : { emoji: '📅', title: t('quick.races'), subtitle: t('dashboard.calendarSub'), onPress: () => router.push('/events') },
+    ...(showMatch ? [{ emoji: '⭐', title: t('dashboard.proStartersShort'), subtitle: nameOf(nextBig), onPress: () => openItem(nextBig) }] : []),
+    { emoji: '🏆', title: t('quick.ranking'), subtitle: 'WTCS', onPress: () => router.push('/standings') },
+    { emoji: '🎟️', title: t('tabs.deals'), subtitle: t('dashboard.codesSub'), onPress: () => router.push('/deals') },
   ];
 
   return (
     <ThemedView style={styles.container}>
-      <TopBar
-        right={<HeaderAvatar onPress={() => router.push('/following')} label={t('following.title')} />}
-      />
+      <View style={[styles.header, { paddingTop: insets.top + Spacing.two, borderColor: theme.border }]}>
+        <Pressable
+          onPress={() => router.push('/following')}
+          accessibilityRole="button"
+          accessibilityLabel={t('following.title')}
+          style={({ pressed }) => [styles.avatar, { backgroundColor: theme.backgroundElement, borderColor: theme.primary }, pressed && { opacity: 0.7 }]}>
+          <Ionicons name="person" size={18} color={theme.text} />
+        </Pressable>
+        <Wordmark size={22} />
+        <View style={{ flex: 1 }} />
+        <HeaderIconButton icon="search" onPress={() => router.push('/search')} label={t('search.placeholder')} />
+        <HeaderIconButton icon="heart-outline" onPress={() => router.push('/favorites')} label={t('tabs.favorites')} />
+      </View>
       <ScrollView contentContainerStyle={styles.content}>
         {/* Hot news — urgent race-status changes for upcoming races (preview of a future push). */}
         {visibleHot.length > 0 && (
@@ -353,15 +427,29 @@ export default function DashboardScreen() {
           </Pressable>
         )}
 
-        {/* Quick access */}
-        <View style={styles.quickRow}>
-          {quick.map((q) => (
-            <QuickTile key={q.label} icon={q.icon} label={q.label} tint={q.tint} onPress={q.onPress} />
+        {/* Smart shortcut cards (horizontal, personalised) */}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.shortcutRow}>
+          {shortcuts.map((s) => (
+            <ShortcutCard key={s.title} emoji={s.emoji} title={s.title} subtitle={s.subtitle} accent={s.accent} onPress={s.onPress} />
           ))}
-        </View>
+        </ScrollView>
+
+        {/* Feed filter chips */}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipRow}>
+          {(
+            [
+              ['foryou', t('dashboard.feedForYou')],
+              ['news', t('dashboard.feedTopNews')],
+              ['races', t('dashboard.feedMyRaces')],
+              ['athletes', t('dashboard.feedAthletes')],
+            ] as [FeedTab, string][]
+          ).map(([id, label]) => (
+            <FeedChip key={id} label={label} active={feed === id} onPress={() => setFeed(id)} />
+          ))}
+        </ScrollView>
 
         {/* Next highlight — matchday card */}
-        {showMatch && (
+        {(feed === 'foryou' || feed === 'races') && showMatch && (
           <Section title={t('dashboard.nextHighlight')} actionLabel={t('dashboard.seeAll')} onAction={() => router.push('/events')}>
             <Pressable
               onPress={() => openItem(nextBig)}
@@ -432,7 +520,7 @@ export default function DashboardScreen() {
         )}
 
         {/* Near you */}
-        {nearby.length > 0 && (
+        {(feed === 'foryou' || feed === 'races') && nearby.length > 0 && (
           <Section title={t('local.nearby')} actionLabel={t('dashboard.seeAll')} onAction={() => router.push('/events')}>
             {nearby.map((i) => (
               <LocalEventCard key={i.id} event={i.event} onPress={() => openItem(i)} />
@@ -441,10 +529,11 @@ export default function DashboardScreen() {
         )}
 
         {/* Your stars */}
-        <Section
-          title={t('dashboard.yourStars')}
-          actionLabel={athleteIds.length ? t('dashboard.seeAll') : undefined}
-          onAction={athleteIds.length ? () => router.push('/favorites') : undefined}>
+        {(feed === 'foryou' || feed === 'athletes') && (
+          <Section
+            title={t('dashboard.yourStars')}
+            actionLabel={athleteIds.length ? t('dashboard.seeAll') : undefined}
+            onAction={athleteIds.length ? () => router.push('/favorites') : undefined}>
           {athleteIds.length > 0 ? (
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.starsRow}>
               {(favAthletes ?? []).map((a) => (
@@ -483,13 +572,29 @@ export default function DashboardScreen() {
             </Pressable>
           )}
         </Section>
+        )}
 
-        {/* Top news */}
-        <Section title={t('dashboard.topNews')} actionLabel={t('dashboard.seeAll')} onAction={() => router.push('/news')}>
+        {/* Switchable news feed (driven by the chips) */}
+        <Section
+          title={
+            feed === 'news'
+              ? t('dashboard.feedTopNews')
+              : feed === 'athletes'
+                ? t('dashboard.feedAthletes')
+                : feed === 'races'
+                  ? t('dashboard.feedMyRaces')
+                  : t('dashboard.topNews')
+          }
+          actionLabel={t('dashboard.seeAll')}
+          onAction={() => router.push('/news')}>
           {newsLoading ? (
             <NewsListSkeleton />
+          ) : feedNews.length > 0 ? (
+            feedNews.map((a) => <NewsCard key={a.id} article={a} onPress={() => openArticle(a.link)} />)
           ) : (
-            topNews.map((a) => <NewsCard key={a.id} article={a} onPress={() => openArticle(a.link)} />)
+            <ThemedText type="small" themeColor="textSecondary" style={styles.feedEmpty}>
+              {t('dashboard.feedEmpty')}
+            </ThemedText>
           )}
         </Section>
       </ScrollView>
@@ -501,6 +606,22 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   content: { paddingBottom: Spacing.six },
   hotStack: { marginHorizontal: Spacing.three, marginTop: Spacing.three, gap: Spacing.two },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+    paddingHorizontal: Spacing.three,
+    paddingBottom: Spacing.two,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  avatar: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', borderWidth: 2 },
+  shortcutRow: { gap: Spacing.two, paddingHorizontal: Spacing.three, paddingTop: Spacing.three },
+  shortcut: { width: 134, padding: Spacing.three, borderRadius: 14, borderWidth: StyleSheet.hairlineWidth, gap: 5 },
+  shortcutEmoji: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center', marginBottom: 2 },
+  shortcutTitle: { fontSize: 13 },
+  chipRow: { gap: Spacing.two, paddingHorizontal: Spacing.three, paddingTop: Spacing.three },
+  chip: { paddingHorizontal: Spacing.three, paddingVertical: Spacing.one + 2, borderRadius: 999 },
+  feedEmpty: { paddingHorizontal: Spacing.three, paddingVertical: Spacing.three },
   section: { marginTop: Spacing.four },
   sectionHead: {
     flexDirection: 'row',
