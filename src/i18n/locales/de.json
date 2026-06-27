@@ -356,6 +356,10 @@
     "incompleteTitle": "Angaben unvollständig?",
     "incompleteHint": "Schick uns Infos zu diesem Athleten – wir ergänzen sie."
   },
+  "raceTab": {
+    "overview": "Übersicht",
+    "results": "Ergebnisse"
+  },
   "startlist": {
     "title": "Profi-Starterliste",
     "open": "Profi-Starterliste",

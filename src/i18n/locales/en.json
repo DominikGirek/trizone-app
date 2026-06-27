@@ -356,6 +356,10 @@
     "incompleteTitle": "Something missing?",
     "incompleteHint": "Send us info on this athlete – we'll fill it in."
   },
+  "raceTab": {
+    "overview": "Overview",
+    "results": "Results"
+  },
   "startlist": {
     "title": "Pro start list",
     "open": "Pro start list",

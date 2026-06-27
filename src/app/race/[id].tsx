@@ -2,8 +2,9 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useQuery } from '@tanstack/react-query';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Platform, Pressable, ScrollView, Share, StyleSheet, View } from 'react-native';
+import { LayoutAnimation, Platform, Pressable, ScrollView, Share, StyleSheet, View } from 'react-native';
 
 import { Countdown } from '@/components/Countdown';
 import { FavoriteButton } from '@/components/FavoriteButton';
@@ -42,6 +43,10 @@ import type { DistanceOption, LocalEvent, Race } from '@/types';
 /** Unified race view-model. A pro `Race` is normalised onto the (richer) local shape; lat/lon
  *  become optional because pro races may lack coordinates. */
 type RaceVM = Omit<LocalEvent, 'lat' | 'lon'> & { lat?: number; lon?: number };
+
+/** Race Center hub tabs. Only those with content are shown (no empty tabs). More slot in later
+ *  (Briefing, Startliste, Karte, Live). */
+type RaceTab = 'overview' | 'results';
 
 function openUrl(url?: string) {
   if (url) WebBrowser.openBrowserAsync(url);
@@ -92,6 +97,36 @@ function DistanceRow({ d }: { d: DistanceOption }) {
   );
 }
 
+/** Swipeable hub-top-nav. Renders only when there are ≥2 tabs (no lonely single tab). */
+function RaceTabBar({
+  tabs,
+  active,
+  onSelect,
+}: {
+  tabs: { id: RaceTab; label: string }[];
+  active: RaceTab;
+  onSelect: (id: RaceTab) => void;
+}) {
+  const theme = useTheme();
+  return (
+    <View style={[styles.tabBar, { borderColor: theme.border }]}>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabRow}>
+        {tabs.map((tb) => {
+          const on = active === tb.id;
+          return (
+            <Pressable key={tb.id} onPress={() => onSelect(tb.id)} style={styles.tab}>
+              <ThemedText type="smallBold" style={{ color: on ? theme.text : theme.textSecondary }}>
+                {tb.label}
+              </ThemedText>
+              <View style={[styles.tabUnderline, { backgroundColor: on ? theme.primary : 'transparent' }]} />
+            </Pressable>
+          );
+        })}
+      </ScrollView>
+    </View>
+  );
+}
+
 export default function RaceScreen() {
   const { id, kind } = useLocalSearchParams<{ id: string; kind?: string }>();
   const isPro = kind === 'pro';
@@ -101,6 +136,7 @@ export default function RaceScreen() {
   const { show } = useToast();
   const { hasReminder, toggle: toggleReminder } = useReminders();
   const { isRacing, toggle: toggleRace } = useMyRaces();
+  const [tab, setTab] = useState<RaceTab>('overview');
 
   const { data: proRace, isLoading: proLoading } = useQuery({
     queryKey: ['race', id],
@@ -290,6 +326,23 @@ export default function RaceScreen() {
         ? `https://www.google.com/maps/search/?api=1&query=${vm.lat},${vm.lon}`
         : undefined;
 
+  // Hub tabs — only those with content. Overview is the catch-all (weather + distances + news);
+  // Ergebnisse splits out the pro results. Briefing/Startliste/Karte/Live slot in later.
+  const hasResultsTab = isPro && !!proRace?.hasResults && !!results && results.length > 0;
+  const tabs: { id: RaceTab; label: string }[] = [
+    { id: 'overview', label: t('raceTab.overview') },
+    ...(hasResultsTab ? [{ id: 'results' as RaceTab, label: t('raceTab.results') }] : []),
+  ];
+  const activeTab: RaceTab = tabs.some((x) => x.id === tab) ? tab : 'overview';
+  const selectTab = (id: RaceTab) => {
+    if (id === activeTab) return;
+    haptics.light();
+    LayoutAnimation.configureNext(
+      LayoutAnimation.create(200, LayoutAnimation.Types.easeInEaseOut, LayoutAnimation.Properties.opacity),
+    );
+    setTab(id);
+  };
+
   return (
     <ThemedView style={styles.container}>
       <Stack.Screen options={{ title: vm.town }} />
@@ -394,37 +447,43 @@ export default function RaceScreen() {
           <ActionChip icon="share-outline" label={t('actions.share')} onPress={onShare} />
         </View>
 
-        {/* Weather */}
-        {vm.lat != null && vm.lon != null && <WeatherCard lat={vm.lat} lon={vm.lon} date={vm.date} />}
+        {/* Hub tabs (only when there's more than one) */}
+        {tabs.length >= 2 && <RaceTabBar tabs={tabs} active={activeTab} onSelect={selectTab} />}
 
-        {/* Pro results (in-app) */}
-        {isPro && proRace?.hasResults && results && results.length > 0 && (
+        {/* Übersicht — weather + distances + race news */}
+        {activeTab === 'overview' && (
+          <>
+            {vm.lat != null && vm.lon != null && <WeatherCard lat={vm.lat} lon={vm.lon} date={vm.date} />}
+
+            {vm.distances.length > 0 && (
+              <>
+                <ThemedText type="smallBold" themeColor="textSecondary" style={styles.sectionHeader}>
+                  {t('local.distances').toUpperCase()}
+                </ThemedText>
+                {vm.distances.map((d) => (
+                  <DistanceRow key={d.label} d={d} />
+                ))}
+              </>
+            )}
+
+            {raceNews.length > 0 && (
+              <>
+                <ThemedText type="smallBold" themeColor="textSecondary" style={styles.sectionHeader}>
+                  {t('news.aboutRace').toUpperCase()}
+                </ThemedText>
+                {raceNews.map((a) => (
+                  <NewsCard key={a.id} article={a} onPress={() => openUrl(a.link)} />
+                ))}
+              </>
+            )}
+          </>
+        )}
+
+        {/* Ergebnisse — pro results, in-app */}
+        {activeTab === 'results' && hasResultsTab && (
           <View style={styles.results}>
-            <ResultsList results={results} onSelectAthlete={(aid) => router.push(`/athlete/${aid}`)} />
+            <ResultsList results={results!} onSelectAthlete={(aid) => router.push(`/athlete/${aid}`)} />
           </View>
-        )}
-
-        {/* Distances (local, only when known) */}
-        {vm.distances.length > 0 && (
-          <>
-            <ThemedText type="smallBold" themeColor="textSecondary" style={styles.sectionHeader}>
-              {t('local.distances').toUpperCase()}
-            </ThemedText>
-            {vm.distances.map((d) => (
-              <DistanceRow key={d.label} d={d} />
-            ))}
-          </>
-        )}
-
-        {raceNews.length > 0 && (
-          <>
-            <ThemedText type="smallBold" themeColor="textSecondary" style={styles.sectionHeader}>
-              {t('news.aboutRace').toUpperCase()}
-            </ThemedText>
-            {raceNews.map((a) => (
-              <NewsCard key={a.id} article={a} onPress={() => openUrl(a.link)} />
-            ))}
-          </>
         )}
       </ScrollView>
     </ThemedView>
@@ -480,6 +539,10 @@ const styles = StyleSheet.create({
     borderRadius: 999,
   },
   results: { marginTop: Spacing.two },
+  tabBar: { borderBottomWidth: StyleSheet.hairlineWidth, marginTop: Spacing.three },
+  tabRow: { paddingHorizontal: Spacing.three, gap: Spacing.four, alignItems: 'flex-end' },
+  tab: { paddingTop: Spacing.two, gap: 7 },
+  tabUnderline: { height: 2.5, borderRadius: 2 },
   sectionHeader: {
     paddingHorizontal: Spacing.three,
     paddingTop: Spacing.four,
