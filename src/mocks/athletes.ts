@@ -38,6 +38,7 @@ export const athletes: Athlete[] = [
   { id: 'laura-philipp', name: 'Laura Philipp', country: 'DE', gender: 'women', series: ['ironman', 'ironman703', 't100'], bio: 'Ironman-Weltmeisterin 2024.', achievements: ['Ironman-Weltmeisterin 2024'] },
   { id: 'daniela-bleymehl', name: 'Daniela Bleymehl', country: 'DE', gender: 'women', series: ['ironman'] },
   { id: 'svenja-thoes', name: 'Svenja Thoes', country: 'DE', gender: 'women', series: ['ironman703'] },
+  { id: 'merle-brunnee', name: 'Merle Brunnée', country: 'DE', gender: 'women', series: ['ironman', 'ironman703'], birthYear: 1994, bio: 'Mitteldistanz- & IRONMAN-Spezialistin (14. bei der IRONMAN-WM 2025 in Nizza); mehrfache Duathlon-Mitteldistanz-Weltmeisterin.', achievements: ['Duathlon-Weltmeisterin Mitteldistanz 2025', 'Duathlon-Europameisterin Mitteldistanz 2026'], links: { website: 'https://merle-brunnee.de/' } },
   // — Deutsche Frauen: Kurzdistanz —
   { id: 'laura-lindemann', name: 'Laura Lindemann', country: 'DE', gender: 'women', series: ['wtcs'], bio: 'Deutschlands Topstar auf der Kurzdistanz.' },
   { id: 'lisa-tertsch', name: 'Lisa Tertsch', country: 'DE', gender: 'women', series: ['wtcs'], bio: 'Kurzdistanz-Weltmeisterin 2025.' },

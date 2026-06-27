@@ -1,4 +1,5 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -10,9 +11,10 @@ import { ThemedView } from '@/components/themed-view';
 import { Wordmark } from '@/components/TopBar';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { countryFlag } from '@/lib/format';
+import { fameScore } from '@/lib/athleteFame';
+import { countryFlag, fold } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
-import { athletes } from '@/mocks/athletes';
+import { bundledAthletes, getAthletes } from '@/services/athletes';
 import type { Favorite, SeriesId } from '@/types';
 import { useFavorites } from '@/store/favorites';
 import { useSettings } from '@/store/settings';
@@ -31,11 +33,19 @@ export default function OnboardingScreen() {
   const [picked, setPicked] = useState<Set<string>>(new Set());
   const [query, setQuery] = useState('');
 
+  // Full roster (curated + every generated pro) so onboarding search finds anyone; with no
+  // query we show the best-known names first as suggestions.
+  const { data: roster } = useQuery({
+    queryKey: ['athletes'],
+    queryFn: getAthletes,
+    placeholderData: bundledAthletes(),
+  });
   const filteredAthletes = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return athletes;
-    return athletes.filter((a) => a.name.toLowerCase().includes(q));
-  }, [query]);
+    const all = (roster ?? []).slice().sort((a, b) => fameScore(b) - fameScore(a));
+    const q = fold(query.trim());
+    if (!q) return all.slice(0, 30);
+    return all.filter((a) => fold(a.name).includes(q)).slice(0, 40);
+  }, [query, roster]);
 
   const reportAthlete = () => {
     haptics.light();

@@ -1,5 +1,9 @@
 import type { AppLanguage } from '@/i18n';
 
+/** Lower-case + strip diacritics, so a "brunnee" query still matches "Brunnée". */
+export const fold = (s: string): string =>
+  s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+
 /** Continent code for an ISO-2 country (used for the events filter). */
 export type ContinentCode = 'EU' | 'NA' | 'SA' | 'AS' | 'OC' | 'AF' | 'OT';
 

@@ -15,8 +15,9 @@ import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { useLocation } from '@/hooks/use-location';
 import { useTheme } from '@/hooks/use-theme';
-import { countryFlag } from '@/lib/format';
-import { athletes } from '@/mocks/athletes';
+import { fameScore } from '@/lib/athleteFame';
+import { countryFlag, fold } from '@/lib/format';
+import { bundledAthletes, getAthletes } from '@/services/athletes';
 import { getAllEvents, type FeedItem } from '@/services/events';
 
 const nameOf = (i: FeedItem) => (i.kind === 'pro' ? i.race.name : i.event.name);
@@ -34,17 +35,28 @@ export default function SearchScreen() {
     queryKey: ['allEvents', coords?.lat, coords?.lon],
     queryFn: () => getAllEvents(coords),
   });
+  // The FULL roster (curated + every generated pro from the start-list sources), so search
+  // finds athletes like Ruben Zepuntke who only come in via a race start list. bundledAthletes()
+  // renders instantly; getAthletes() refreshes from the hosted data.
+  const { data: allAthletes } = useQuery({
+    queryKey: ['athletes'],
+    queryFn: getAthletes,
+    placeholderData: bundledAthletes(),
+  });
 
-  const q = query.trim().toLowerCase();
+  const q = fold(query.trim());
   const { foundAthletes, foundRaces } = useMemo(() => {
     if (!q) return { foundAthletes: [], foundRaces: [] };
     return {
-      foundAthletes: athletes.filter((a) => a.name.toLowerCase().includes(q)),
+      foundAthletes: (allAthletes ?? [])
+        .filter((a) => fold(a.name).includes(q))
+        .sort((a, b) => fameScore(b) - fameScore(a))
+        .slice(0, 40),
       foundRaces: (feed ?? [])
-        .filter((i) => `${nameOf(i)} ${placeOf(i) ?? ''} ${ctryOf(i) ?? ''}`.toLowerCase().includes(q))
+        .filter((i) => fold(`${nameOf(i)} ${placeOf(i) ?? ''} ${ctryOf(i) ?? ''}`).includes(q))
         .slice(0, 40),
     };
-  }, [q, feed]);
+  }, [q, feed, allAthletes]);
 
   const hasResults = foundAthletes.length > 0 || foundRaces.length > 0;
 

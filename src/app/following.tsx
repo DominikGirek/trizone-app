@@ -1,4 +1,5 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
@@ -11,8 +12,9 @@ import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { BRANDS } from '@/lib/brands';
 import { countryFlag } from '@/lib/format';
+import { fameScore } from '@/lib/athleteFame';
 import { haptics } from '@/lib/haptics';
-import { athletes as ALL_ATHLETES } from '@/mocks/athletes';
+import { bundledAthletes, getAthletes } from '@/services/athletes';
 import { useFavorites } from '@/store/favorites';
 import type { FavoriteKind, SeriesId } from '@/types';
 
@@ -68,12 +70,20 @@ export default function FollowingScreen() {
   const insets = useSafeAreaInsets();
   const { isFavorite, toggle, idsOf } = useFavorites();
   const athleteIds = idsOf('athlete');
-  // Show followed athletes first, then top suggestions from the curated list.
-  const followedAthletes = ALL_ATHLETES.filter((a) => athleteIds.includes(a.id));
-  const suggestions = ALL_ATHLETES.filter((a) => !athleteIds.includes(a.id)).slice(
-    0,
-    Math.max(0, 21 - followedAthletes.length),
-  );
+  // Full roster (curated + every generated pro) so a followed athlete always resolves —
+  // even one picked up only from a race start list. bundledAthletes() renders instantly.
+  const { data: roster } = useQuery({
+    queryKey: ['athletes'],
+    queryFn: getAthletes,
+    placeholderData: bundledAthletes(),
+  });
+  const all = roster ?? [];
+  // Show followed athletes first, then top suggestions ranked by fame (best-known first).
+  const followedAthletes = all.filter((a) => athleteIds.includes(a.id));
+  const suggestions = all
+    .filter((a) => !athleteIds.includes(a.id))
+    .sort((a, b) => fameScore(b) - fameScore(a))
+    .slice(0, Math.max(0, 21 - followedAthletes.length));
   const athleteTiles = [...followedAthletes, ...suggestions];
 
   const onToggle = (kind: FavoriteKind, id: string) => {
