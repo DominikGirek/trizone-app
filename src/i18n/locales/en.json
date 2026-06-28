@@ -433,6 +433,13 @@
     "loading": "Loading …",
     "foot": "Tip on races — your tip counts automatically across all your groups."
   },
+  "result": {
+    "yourScore": "Your score: {{points}} pts",
+    "breakdown": "Men {{men}} · Women {{women}}",
+    "noTip": "You didn't tip this race",
+    "noTipHint": "Here's the official result:",
+    "source": "Result verified · source: {{source}}"
+  },
   "auth": {
     "title": "Sign in",
     "intro": "Sign in to play, see leaderboards and join groups.",

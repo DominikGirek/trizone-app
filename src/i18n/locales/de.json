@@ -433,6 +433,13 @@
     "loading": "Lädt …",
     "foot": "Tippe bei Rennen mit — dein Tipp zählt automatisch in allen deinen Gruppen."
   },
+  "result": {
+    "yourScore": "Deine Wertung: {{points}} Pkt",
+    "breakdown": "Männer {{men}} · Frauen {{women}}",
+    "noTip": "Du hast hier nicht getippt",
+    "noTipHint": "So lief das Rennen offiziell:",
+    "source": "Ergebnis verifiziert · Quelle: {{source}}"
+  },
   "auth": {
     "title": "Anmelden",
     "intro": "Melde dich an, um zu tippen, Ranglisten zu sehen und Gruppen beizutreten.",
