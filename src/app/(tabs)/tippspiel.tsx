@@ -1,6 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useQuery } from '@tanstack/react-query';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
@@ -12,7 +13,7 @@ import { useTheme } from '@/hooks/use-theme';
 import type { AppLanguage } from '@/i18n';
 import { countryFlag, formatDate } from '@/lib/format';
 import { isTipLocked, TIP_SIZE } from '@/lib/tippspiel';
-import { fetchLeaderboard } from '@/services/tippspielSync';
+import { fetchGroupGlobalLeaderboard, fetchLeaderboard, fetchMyGroups } from '@/services/tippspielSync';
 import { useAuth } from '@/store/auth';
 import { useTips } from '@/store/tips';
 
@@ -23,6 +24,11 @@ export default function TippspielScreen() {
   const { list } = useTips();
   const { signedIn, displayName } = useAuth();
   const { data: board = [] } = useQuery({ queryKey: ['leaderboard'], queryFn: () => fetchLeaderboard() });
+  const { data: myGroups = [], refetch: refetchGroups } = useQuery({ queryKey: ['myGroups'], queryFn: fetchMyGroups });
+  const { data: groupGlobal = [] } = useQuery({ queryKey: ['groupGlobal'], queryFn: () => fetchGroupGlobalLeaderboard() });
+
+  // Refresh "my groups" whenever the hub regains focus (e.g. after creating/joining one).
+  useFocusEffect(useCallback(() => { refetchGroups(); }, [refetchGroups]));
 
   const myTips = list();
 
@@ -131,12 +137,63 @@ export default function TippspielScreen() {
           </View>
         )}
 
-        <View style={[styles.soon, { borderColor: theme.border }]}>
-          <Ionicons name="people-outline" size={18} color={theme.textSecondary} />
-          <ThemedText type="small" themeColor="textSecondary" style={styles.flex}>
-            {t('tippspiel.groupsSoon')}
+        {/* Gruppen */}
+        <View style={styles.sectionRow}>
+          <ThemedText type="smallBold" style={styles.section}>
+            {t('group.myGroups')}
           </ThemedText>
+          <Pressable onPress={() => router.push('/group/new')} hitSlop={8} style={styles.addRow}>
+            <Ionicons name="add" size={16} color={theme.primary} />
+            <ThemedText type="small" style={{ color: theme.primary }}>{t('group.add')}</ThemedText>
+          </Pressable>
         </View>
+        {myGroups.length > 0 ? (
+          myGroups.map((g) => (
+            <Pressable
+              key={g.id}
+              onPress={() => router.push(`/group/${g.id}`)}
+              style={({ pressed }) => [styles.tipCard, { backgroundColor: theme.backgroundElement }, pressed && { opacity: 0.8 }]}>
+              <Ionicons name="people" size={20} color={theme.primary} />
+              <View style={styles.flex}>
+                <ThemedText type="smallBold" numberOfLines={1}>{g.name}</ThemedText>
+                <ThemedText type="small" themeColor="textSecondary">
+                  {t('group.memberCount', { count: g.members ?? 1 })}
+                  {g.is_public ? ` · ${t('group.public')}` : ''}
+                </ThemedText>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color={theme.textSecondary} />
+            </Pressable>
+          ))
+        ) : (
+          <Pressable
+            onPress={() => router.push('/group/new')}
+            style={({ pressed }) => [styles.empty, { borderColor: theme.border }, pressed && { opacity: 0.7 }]}>
+            <Ionicons name="people-outline" size={22} color={theme.primary} />
+            <View style={styles.flex}>
+              <ThemedText type="smallBold">{t('group.emptyTitle')}</ThemedText>
+              <ThemedText type="small" themeColor="textSecondary">{t('group.emptyHint')}</ThemedText>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={theme.textSecondary} />
+          </Pressable>
+        )}
+
+        {/* Globale Gruppen — opt-in */}
+        {groupGlobal.length > 0 && (
+          <>
+            <ThemedText type="smallBold" style={styles.section}>{t('group.globalTitle')}</ThemedText>
+            <View style={[styles.board, { borderColor: theme.border }]}>
+              {groupGlobal.slice(0, 5).map((g, i) => (
+                <View key={g.group_id} style={[styles.boardRow, i > 0 && { borderTopColor: theme.border, borderTopWidth: StyleSheet.hairlineWidth }]}>
+                  <ThemedText type="smallBold" style={styles.rank}>{i + 1}</ThemedText>
+                  <ThemedText type="small" style={styles.flex} numberOfLines={1}>{g.name}</ThemedText>
+                  <ThemedText type="small" themeColor="textSecondary">
+                    {t('group.avgPoints', { pts: Math.round(Number(g.avg_points)) })}
+                  </ThemedText>
+                </View>
+              ))}
+            </View>
+          </>
+        )}
       </ScrollView>
     </ThemedView>
   );
@@ -150,6 +207,7 @@ const styles = StyleSheet.create({
   account: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, padding: Spacing.three, borderRadius: 14 },
   section: { fontSize: 15, fontWeight: '700', letterSpacing: -0.2, marginTop: Spacing.three, marginBottom: Spacing.one },
   sectionRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  addRow: { flexDirection: 'row', alignItems: 'center', gap: 2, marginTop: Spacing.three },
   empty: {
     flexDirection: 'row',
     alignItems: 'center',

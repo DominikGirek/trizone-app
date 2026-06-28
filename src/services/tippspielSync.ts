@@ -50,3 +50,73 @@ export async function fetchLeaderboard(limit = 100): Promise<LeaderboardRow[]> {
   if (error || !data) return [];
   return data as LeaderboardRow[];
 }
+
+// ── Groups (P4) ───────────────────────────────────────────────────────────────
+export interface Group {
+  id: string;
+  name: string;
+  invite_code: string;
+  is_public: boolean;
+  members?: number;
+}
+export interface GlobalGroupRow {
+  group_id: string;
+  name: string;
+  members: number;
+  avg_points: number;
+}
+
+/** Create a group; the caller becomes owner + first member. Throws on error so the UI can show it. */
+export async function createGroup(name: string): Promise<Group> {
+  if (!authConfigured) throw new Error('auth not configured');
+  const uid = await ensureSession();
+  if (!uid) throw new Error('sign-in failed');
+  const { data, error } = await supabase.rpc('create_group', { p_name: name });
+  if (error) throw error;
+  return (data as Group[])[0];
+}
+
+/** Join a group by invite code. Throws if the code is unknown. */
+export async function joinGroup(code: string): Promise<{ id: string; name: string }> {
+  if (!authConfigured) throw new Error('auth not configured');
+  const uid = await ensureSession();
+  if (!uid) throw new Error('sign-in failed');
+  const { data, error } = await supabase.rpc('join_group', { p_code: code });
+  if (error) throw error;
+  return (data as { id: string; name: string }[])[0];
+}
+
+/** The caller's groups (with member counts). */
+export async function fetchMyGroups(): Promise<Group[]> {
+  if (!authConfigured) return [];
+  const uid = await ensureSession();
+  if (!uid) return [];
+  const { data, error } = await supabase.rpc('my_groups');
+  if (error || !data) return [];
+  return data as Group[];
+}
+
+/** A group's member leaderboard (members only; points, never picks). */
+export async function fetchGroupLeaderboard(groupId: string): Promise<LeaderboardRow[]> {
+  if (!authConfigured) return [];
+  const uid = await ensureSession();
+  if (!uid) return [];
+  const { data, error } = await supabase.rpc('group_leaderboard', { p_group: groupId });
+  if (error || !data) return [];
+  return data as LeaderboardRow[];
+}
+
+/** Owner opt-in: show this group in the global group ranking (default off). */
+export async function setGroupPublic(groupId: string, isPublic: boolean): Promise<void> {
+  if (!authConfigured) return;
+  await ensureSession();
+  await supabase.rpc('set_group_public', { p_group: groupId, p_public: isPublic });
+}
+
+/** Global ranking of opt-in public groups (by avg points/member). Browsable without an account. */
+export async function fetchGroupGlobalLeaderboard(limit = 100): Promise<GlobalGroupRow[]> {
+  if (!authConfigured) return [];
+  const { data, error } = await supabase.rpc('group_global_leaderboard', { limit_n: limit });
+  if (error || !data) return [];
+  return data as GlobalGroupRow[];
+}
