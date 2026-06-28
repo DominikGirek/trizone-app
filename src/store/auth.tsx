@@ -1,7 +1,5 @@
 import type { User } from '@supabase/supabase-js';
-import * as AppleAuthentication from 'expo-apple-authentication';
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { Platform } from 'react-native';
 
 import { authConfigured, supabase } from '@/lib/supabase';
 
@@ -26,7 +24,8 @@ const AuthContext = createContext<AuthValue | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [ready, setReady] = useState(false);
-  const [appleAvailable, setAppleAvailable] = useState(false);
+  // Apple sign-in is disabled this release (anonymous-first; package removed). Re-enable when activating B.
+  const appleAvailable = false;
 
   useEffect(() => {
     if (!authConfigured) {
@@ -39,10 +38,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => setUser(session?.user ?? null));
     return () => sub.subscription.unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    if (Platform.OS === 'ios') AppleAuthentication.isAvailableAsync().then(setAppleAvailable).catch(() => {});
   }, []);
 
   const value = useMemo<AuthValue>(() => {
@@ -63,24 +58,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const { error } = await supabase.auth.verifyOtp({ email: email.trim(), token: token.trim(), type: 'email' });
         return error ? fail(error) : { ok: true };
       },
-      signInWithApple: async () => {
-        try {
-          const credential = await AppleAuthentication.signInAsync({
-            requestedScopes: [
-              AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
-              AppleAuthentication.AppleAuthenticationScope.EMAIL,
-            ],
-          });
-          if (!credential.identityToken) return { ok: false, error: 'no-identity-token' };
-          const { error } = await supabase.auth.signInWithIdToken({ provider: 'apple', token: credential.identityToken });
-          return error ? fail(error) : { ok: true };
-        } catch (e) {
-          if (e instanceof Error && 'code' in e && (e as { code?: string }).code === 'ERR_REQUEST_CANCELED') {
-            return { ok: false, error: 'canceled' };
-          }
-          return fail(e);
-        }
-      },
+      // Disabled this release (anonymous-first). Restored when B is activated (re-add expo-apple-authentication).
+      signInWithApple: async (): Promise<AuthResult> => ({ ok: false, error: 'unavailable' }),
       signOut: async () => {
         await supabase.auth.signOut();
       },

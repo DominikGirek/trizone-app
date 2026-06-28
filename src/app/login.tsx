@@ -1,5 +1,4 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import * as AppleAuthentication from 'expo-apple-authentication';
 import { router, Stack } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -17,7 +16,7 @@ export default function LoginScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
   const { show } = useToast();
-  const { signedIn, displayName, appleAvailable, sendEmailCode, verifyEmailCode, signInWithApple, signOut } = useAuth();
+  const { signedIn, displayName, sendEmailCode, verifyEmailCode, signOut } = useAuth();
 
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
@@ -50,12 +49,6 @@ export default function LoginScreen() {
     setBusy(false);
     if (res.ok) done();
     else show(t('auth.codeWrong'), 'alert-circle');
-  };
-
-  const onApple = async () => {
-    const res = await signInWithApple();
-    if (res.ok) done();
-    else if (res.error !== 'canceled') show(t('auth.errorGeneric'), 'alert-circle');
   };
 
   return (
@@ -91,27 +84,6 @@ export default function LoginScreen() {
           <ThemedText type="small" themeColor="textSecondary" style={styles.intro}>
             {t('auth.intro')}
           </ThemedText>
-
-          {appleAvailable && (
-            <>
-              <AppleAuthentication.AppleAuthenticationButton
-                buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
-                buttonStyle={
-                  theme.background === '#FFFFFF'
-                    ? AppleAuthentication.AppleAuthenticationButtonStyle.BLACK
-                    : AppleAuthentication.AppleAuthenticationButtonStyle.WHITE
-                }
-                cornerRadius={12}
-                style={styles.appleBtn}
-                onPress={onApple}
-              />
-              <View style={styles.orRow}>
-                <View style={[styles.line, { backgroundColor: theme.border }]} />
-                <ThemedText type="small" themeColor="textSecondary">{t('auth.or')}</ThemedText>
-                <View style={[styles.line, { backgroundColor: theme.border }]} />
-              </View>
-            </>
-          )}
 
           {stage === 'email' ? (
             <>
