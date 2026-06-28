@@ -10,6 +10,7 @@ import { FavoriteButton } from '@/components/FavoriteButton';
 import { NewsCard } from '@/components/NewsCard';
 import { RaceBriefingView } from '@/components/RaceBriefingView';
 import { RaceHero, type HeroChip } from '@/components/RaceHero';
+import { RaceTipPicker } from '@/components/RaceTipPicker';
 import { ResultsList } from '@/components/ResultsList';
 import { EmptyState, LoadingState } from '@/components/States';
 import { ThemedText } from '@/components/themed-text';
@@ -47,7 +48,7 @@ type RaceVM = Omit<LocalEvent, 'lat' | 'lon'> & { lat?: number; lon?: number };
 
 /** Race Center hub tabs. Only those with content are shown (no empty tabs). More slot in later
  *  (Briefing, Startliste, Karte, Live). */
-type RaceTab = 'overview' | 'briefing' | 'results';
+type RaceTab = 'overview' | 'tip' | 'briefing' | 'results';
 
 function openUrl(url?: string) {
   if (url) WebBrowser.openBrowserAsync(url);
@@ -333,6 +334,7 @@ export default function RaceScreen() {
   const hasResultsTab = isPro && !!proRace?.hasResults && !!results && results.length > 0;
   const tabs: { id: RaceTab; label: string }[] = [
     { id: 'overview', label: t('raceTab.overview') },
+    ...(hasStartList ? [{ id: 'tip' as RaceTab, label: t('raceTab.tip') }] : []),
     ...(briefing ? [{ id: 'briefing' as RaceTab, label: t('raceTab.briefing') }] : []),
     ...(hasResultsTab ? [{ id: 'results' as RaceTab, label: t('raceTab.results') }] : []),
   ];
@@ -460,6 +462,11 @@ export default function RaceScreen() {
               </>
             )}
           </>
+        )}
+
+        {/* Tipp — predict the top 5 (local prototype) */}
+        {activeTab === 'tip' && startList && (
+          <RaceTipPicker raceId={vm.id} raceDate={vm.date} entries={startList.entries} />
         )}
 
         {/* Briefing — curated, verified race-day fan-guide */}

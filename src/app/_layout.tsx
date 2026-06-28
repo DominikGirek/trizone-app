@@ -26,6 +26,7 @@ import { NewsVotesProvider } from '@/store/newsVotes';
 import { FavoritesProvider } from '@/store/favorites';
 import { MyRacesProvider } from '@/store/myRaces';
 import { RemindersProvider } from '@/store/reminders';
+import { TipsProvider } from '@/store/tips';
 import { SettingsProvider, useResolvedScheme } from '@/store/settings';
 
 const queryClient = new QueryClient({
@@ -102,10 +103,12 @@ export default function RootLayout() {
                     <CodeVotesProvider>
                       <NewsVotesProvider>
                         <HotNewsReadProvider>
-                          <ToastProvider>
-                            <PushSync />
-                            <NavigationStack />
-                          </ToastProvider>
+                          <TipsProvider>
+                            <ToastProvider>
+                              <PushSync />
+                              <NavigationStack />
+                            </ToastProvider>
+                          </TipsProvider>
                         </HotNewsReadProvider>
                       </NewsVotesProvider>
                     </CodeVotesProvider>

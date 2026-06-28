@@ -358,12 +358,21 @@
   },
   "raceTab": {
     "overview": "Übersicht",
+    "tip": "Tipp",
     "briefing": "Briefing",
     "results": "Ergebnisse"
   },
   "briefing": {
     "asOf": "Stand {{date}} · Quelle {{source}} · kann sich ändern",
     "presentedBy": "präsentiert von"
+  },
+  "tip": {
+    "title": "Tippe die Top 5",
+    "openHint": "Offen bis zum Start",
+    "locked": "Gesperrt — Start läuft",
+    "men": "Männer",
+    "women": "Frauen",
+    "pick": "Tippen"
   },
   "startlist": {
     "title": "Profi-Starterliste",
