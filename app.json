@@ -3,7 +3,7 @@
     "name": "TriZone",
     "slug": "trizone",
     "owner": "trizone-app",
-    "version": "1.2.0",
+    "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "trizone",
@@ -11,7 +11,6 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "app.trizone.mobile",
-      "usesAppleSignIn": true,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
