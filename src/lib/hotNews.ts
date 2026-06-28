@@ -27,19 +27,33 @@ const IMPACT: { re: RegExp; severity: HotSeverity; category: HotCategory }[] = [
 ];
 
 const RANK: Record<HotSeverity, number> = { critical: 3, major: 2, minor: 1 };
-const FRESH_MS = 14 * 24 * 60 * 60 * 1000;
+
+const HOUR = 60 * 60 * 1000;
+const DAY = 24 * HOUR;
+/**
+ * How long a status change stays a breaking "Eilmeldung" — it must expire on its own. Operational
+ * race-day changes age out fast (a "verkürzt" is only news for about a day); cancellations and
+ * postponements stay relevant longer (until roughly when the race would have happened). After this,
+ * it's just regular news, not an alert.
+ */
+const MAX_AGE_MS: Record<HotCategory, number> = {
+  cancelled: 4 * DAY,
+  postponed: 4 * DAY,
+  shortened: 36 * HOUR,
+  delayed: 24 * HOUR,
+};
 
 /** The strongest race-status impact a recent headline reports for this race, or null. */
 export function hotAlertFor(articles: Article[], name: string, place?: string, now = Date.now()): HotAlert | null {
   const kws = raceNewsKeywords(name, place);
   if (!kws.length) return null;
-  const cutoff = now - FRESH_MS;
   let best: HotAlert | null = null;
   for (const a of articles) {
-    if (+new Date(a.publishedAt) < cutoff) continue;
     if (!mentionsAny(a.title, kws)) continue; // the race itself must be named in the headline
     for (const imp of IMPACT) {
       if (!imp.re.test(a.title)) continue;
+      // Per-category freshness: the alert stops being "breaking" once it's older than its window.
+      if (now - +new Date(a.publishedAt) > MAX_AGE_MS[imp.category]) break;
       const better =
         !best ||
         RANK[imp.severity] > RANK[best.severity] ||
