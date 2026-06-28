@@ -13,6 +13,7 @@ import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { getRaceResult } from '@/data/raceResults';
+import { getTippableField } from '@/data/tippableFields';
 import { getPrize } from '@/data/tippspielPrizes';
 import { countryFlag, formatDate } from '@/lib/format';
 import type { AppLanguage } from '@/i18n';
@@ -47,6 +48,7 @@ export default function TipScreen() {
 
   const tipResult = getRaceResult(vm.id);
   const prize = getPrize(vm.id);
+  const field = getTippableField(vm.id);
 
   return (
     <ThemedView style={styles.container}>
@@ -66,14 +68,24 @@ export default function TipScreen() {
         {tipResult ? (
           <RaceTipResult raceId={vm.id} result={tipResult} />
         ) : entries && entries.length ? (
-          <RaceTipPicker
-            raceId={vm.id}
-            raceName={vm.name}
-            raceDate={vm.date}
-            raceKind="local"
-            raceCountry={vm.country}
-            entries={entries}
-          />
+          <>
+            {field?.provisional && (
+              <View style={[styles.provisional, { borderColor: theme.border }]}>
+                <Ionicons name="information-circle-outline" size={16} color={theme.textSecondary} />
+                <ThemedText type="small" themeColor="textSecondary" style={styles.flex}>
+                  {t('tip.provisional')}
+                </ThemedText>
+              </View>
+            )}
+            <RaceTipPicker
+              raceId={vm.id}
+              raceName={vm.name}
+              raceDate={vm.date}
+              raceKind="local"
+              raceCountry={vm.country}
+              entries={entries}
+            />
+          </>
         ) : (
           <View style={[styles.soon, { borderColor: theme.border }]}>
             <Ionicons name="hourglass-outline" size={22} color={theme.textSecondary} />
@@ -94,6 +106,16 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   title: { paddingHorizontal: Spacing.three, paddingTop: Spacing.two },
   meta: { paddingHorizontal: Spacing.three, marginTop: 2 },
+  provisional: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+    marginHorizontal: Spacing.three,
+    marginTop: Spacing.two,
+    padding: Spacing.two + 2,
+    borderRadius: 10,
+    borderWidth: StyleSheet.hairlineWidth,
+  },
   soon: {
     flexDirection: 'row',
     alignItems: 'center',

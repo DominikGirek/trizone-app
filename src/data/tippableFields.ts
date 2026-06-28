@@ -14,9 +14,27 @@ export interface TippableField {
   women: string[];
   source: string;
   verifiedAt: string;
+  /** True if the field is a pre-race provisional/tentative start list (may still change). */
+  provisional?: boolean;
 }
 
-export const tippableFields: TippableField[] = [];
+export const tippableFields: TippableField[] = [
+  {
+    // T100 Vancouver is a WOMEN-only pro race in 2026; this is the published *tentative* field (refresh
+    // closer to the race / via Tobi). Withdrawals just score 0; the podium contenders are all on it.
+    raceId: 'se-t100-vancouver',
+    men: [],
+    women: [
+      'alanis-siffert', 'nicole-van-der-kaay', 'taylor-spivey', 'sara-perez-sala', 'holly-lawrence',
+      'lotte-wilms', 'daniela-kleiser', 'lizzie-rayner', 'ellie-salthouse', 'hanne-de-vet',
+      'audrey-merle', 'hannah-berry', 'lisa-perterer', 'marjolaine-pierre', 'rebecca-anderbury',
+      'leana-bissig', 'grace-alexander',
+    ],
+    source: 'stats.protriathletes.org/race/vancouver-t100/2026/participants (tentative)',
+    verifiedAt: '2026-06-28',
+    provisional: true,
+  },
+];
 
 const byId: Record<string, TippableField> = Object.fromEntries(tippableFields.map((f) => [f.raceId, f]));
 

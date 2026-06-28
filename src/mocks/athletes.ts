@@ -137,6 +137,22 @@ export const athletes: Athlete[] = [
   { id: 'casper-stornes', name: 'Casper Stornes', country: 'NO', gender: 'men', series: ['ironman', 'wtcs'], bio: 'Sieger IRONMAN European Championship Frankfurt 2026.' },
   { id: 'antonio-benito-lopez', name: 'Antonio Benito López', country: 'ES', gender: 'men', series: ['ironman', 'ironman703'] },
   { id: 'kacper-stepniak', name: 'Kacper Stępniak', country: 'PL', gender: 'men', series: ['ironman', 'ironman703'] },
+
+  // — T100-Frauen ergänzt für die kuratierte Startliste (T100 Vancouver; Nationalität verifiziert) —
+  { id: 'alanis-siffert', name: 'Alanis Siffert', country: 'CH', gender: 'women', series: ['t100'] },
+  { id: 'nicole-van-der-kaay', name: 'Nicole van der Kaay', country: 'NZ', gender: 'women', series: ['t100', 'wtcs'] },
+  { id: 'taylor-spivey', name: 'Taylor Spivey', country: 'US', gender: 'women', series: ['t100', 'wtcs'] },
+  { id: 'sara-perez-sala', name: 'Sara Pérez Sala', country: 'ES', gender: 'women', series: ['t100'] },
+  { id: 'holly-lawrence', name: 'Holly Lawrence', country: 'GB', gender: 'women', series: ['t100', 'ironman703'] },
+  { id: 'lotte-wilms', name: 'Lotte Wilms', country: 'NL', gender: 'women', series: ['t100'] },
+  { id: 'daniela-kleiser', name: 'Daniela Kleiser', country: 'DE', gender: 'women', series: ['t100'] },
+  { id: 'lizzie-rayner', name: 'Lizzie Rayner', country: 'GB', gender: 'women', series: ['t100'] },
+  { id: 'ellie-salthouse', name: 'Ellie Salthouse', country: 'AU', gender: 'women', series: ['t100', 'ironman703'] },
+  { id: 'audrey-merle', name: 'Audrey Merle', country: 'FR', gender: 'women', series: ['t100', 'wtcs'] },
+  { id: 'hannah-berry', name: 'Hannah Berry', country: 'NZ', gender: 'women', series: ['t100'] },
+  { id: 'rebecca-anderbury', name: 'Rebecca Anderbury', country: 'CA', gender: 'women', series: ['t100'] },
+  { id: 'leana-bissig', name: 'Leana Bissig', country: 'CH', gender: 'women', series: ['t100'] },
+  { id: 'grace-alexander', name: 'Grace Alexander', country: 'GB', gender: 'women', series: ['t100'] },
 ];
 
 export const athletesById: Record<string, Athlete> = Object.fromEntries(
