@@ -374,7 +374,9 @@
     "locked": "Gesperrt — Start läuft",
     "men": "Männer",
     "women": "Frauen",
-    "pick": "Tippen"
+    "pick": "Tippen",
+    "noListTitle": "Startliste folgt",
+    "noListHint": "Die Startliste ist noch nicht da — schau kurz vor dem Rennen wieder rein."
   },
   "tippspiel": {
     "title": "Tippspiel",
@@ -398,6 +400,7 @@
     "globalEmpty": "Noch keine Wertung — sobald Ergebnisse vorliegen, zählt jeder Tipp hier.",
     "openTitle": "Offene Tipprunden",
     "openTip": "Tippen",
+    "openSoon": "Startliste folgt",
     "tipped": "getippt",
     "lockHours_one": "noch {{count}} Std",
     "lockHours_other": "noch {{count}} Std",
@@ -445,6 +448,8 @@
     "standings": "Rangliste",
     "standingsEmpty": "Noch keine Punkte — sobald getippt + gewertet wird, erscheint sie hier.",
     "loading": "Lädt …",
+    "created": "Gruppe erstellt!",
+    "toGroup": "Zur Gruppe",
     "foot": "Tippe bei Rennen mit — dein Tipp zählt automatisch in allen deinen Gruppen."
   },
   "result": {

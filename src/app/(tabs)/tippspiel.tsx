@@ -17,6 +17,7 @@ import { getPrize, SEASON } from '@/data/tippspielPrizes';
 import { storage, StorageKeys } from '@/lib/storage';
 import { isTipLocked, TIP_SIZE } from '@/lib/tippspiel';
 import { getAllEvents, openTippableRaces } from '@/services/events';
+import { getStartListKeys, raceKey } from '@/services/races';
 import { fetchGroupGlobalLeaderboard, fetchLeaderboard, fetchMyGroups, fetchMyHandle, fetchSecured } from '@/services/tippspielSync';
 import { useTips } from '@/store/tips';
 
@@ -27,6 +28,7 @@ export default function TippspielScreen() {
   const { list, hasTip } = useTips();
   const { data: events = [] } = useQuery({ queryKey: ['events'], queryFn: () => getAllEvents() });
   const openRaces = openTippableRaces(events);
+  const { data: startKeys = [] } = useQuery({ queryKey: ['startKeys'], queryFn: () => getStartListKeys() });
   const seasonPrize = getPrize(SEASON);
   const { data: board = [] } = useQuery({ queryKey: ['leaderboard'], queryFn: () => fetchLeaderboard() });
   const { data: myGroups = [], refetch: refetchGroups } = useQuery({ queryKey: ['myGroups'], queryFn: fetchMyGroups });
@@ -104,10 +106,11 @@ export default function TippspielScreen() {
             </ThemedText>
             {openRaces.slice(0, 5).map((i) => {
               const tipped = hasTip(i.id);
+              const hasList = startKeys.includes(raceKey(i.event.name, i.date));
               return (
                 <Pressable
                   key={i.id}
-                  onPress={() => router.push(`/race/${i.id}?kind=local`)}
+                  onPress={() => router.push(`/tip/${i.id}`)}
                   style={({ pressed }) => [styles.tipCard, { backgroundColor: theme.backgroundElement }, pressed && { opacity: 0.8 }]}>
                   <View style={styles.flex}>
                     <ThemedText type="smallBold" numberOfLines={1}>
@@ -123,9 +126,13 @@ export default function TippspielScreen() {
                       <Ionicons name="checkmark-circle" size={14} color={theme.textSecondary} />
                       <ThemedText type="small" themeColor="textSecondary">{t('tippspiel.tipped')}</ThemedText>
                     </View>
-                  ) : (
+                  ) : hasList ? (
                     <View style={[styles.openChip, { backgroundColor: theme.primary }]}>
                       <ThemedText type="small" style={{ color: theme.onPrimary }}>{t('tippspiel.openTip')}</ThemedText>
+                    </View>
+                  ) : (
+                    <View style={[styles.openChip, { backgroundColor: theme.background }]}>
+                      <ThemedText type="small" themeColor="textSecondary">{t('tippspiel.openSoon')}</ThemedText>
                     </View>
                   )}
                 </Pressable>

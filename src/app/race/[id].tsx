@@ -122,7 +122,7 @@ function RaceTabBar({
           const on = active === tb.id;
           return (
             <Pressable key={tb.id} onPress={() => onSelect(tb.id)} style={styles.tab}>
-              <ThemedText type="smallBold" style={{ color: on ? theme.text : theme.textSecondary }}>
+              <ThemedText type="smallBold" style={{ fontSize: 15, color: on ? theme.text : theme.textSecondary }}>
                 {tb.label}
               </ThemedText>
               <View style={[styles.tabUnderline, { backgroundColor: on ? theme.primary : 'transparent' }]} />

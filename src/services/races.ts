@@ -129,6 +129,18 @@ export interface RaceStartList {
   entries: StartListEntry[];
 }
 
+/** The set of raceKeys that currently have a start list (≥1 athlete starting). Cheap funnel check. */
+export async function getStartListKeys(now = Date.now()): Promise<string[]> {
+  const athletes = await getAthletes();
+  const keys = new Set<string>();
+  for (const a of athletes) {
+    for (const s of a.upcomingStarts ?? []) {
+      if (+new Date(s.date) >= now - 86400000) keys.add(raceKey(s.event, s.date));
+    }
+  }
+  return [...keys];
+}
+
 /** All athletes we believe are starting the race identified by `key`. */
 export async function getRaceStartList(key: string, now = Date.now()): Promise<RaceStartList | null> {
   const athletes = await getAthletes();

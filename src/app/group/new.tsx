@@ -1,25 +1,29 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { useQueryClient } from '@tanstack/react-query';
 import { router, Stack } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, Share, StyleSheet, TextInput, View } from 'react-native';
 
+import { InviteCode } from '@/components/InviteCode';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useToast } from '@/components/Toast';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { haptics } from '@/lib/haptics';
-import { createGroup, joinGroup } from '@/services/tippspielSync';
+import { createGroup, joinGroup, type Group } from '@/services/tippspielSync';
 
 export default function NewGroupScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
   const { show } = useToast();
+  const qc = useQueryClient();
 
   const [name, setName] = useState('');
   const [code, setCode] = useState('');
   const [busy, setBusy] = useState<'create' | 'join' | null>(null);
+  const [created, setCreated] = useState<Group | null>(null); // success step shows the code in-flow
 
   const onCreate = async () => {
     if (name.trim().length < 2 || busy) return;
@@ -27,7 +31,9 @@ export default function NewGroupScreen() {
     try {
       const g = await createGroup(name.trim());
       haptics.success();
-      router.replace(`/group/${g.id}`);
+      qc.invalidateQueries({ queryKey: ['myGroups'] });
+      setBusy(null);
+      setCreated(g); // stay here and show the invite code right away
     } catch {
       setBusy(null);
       show(t('group.createError'), 'alert-circle');
@@ -40,12 +46,44 @@ export default function NewGroupScreen() {
     try {
       const g = await joinGroup(code.trim());
       haptics.success();
+      qc.invalidateQueries({ queryKey: ['myGroups'] });
       router.replace(`/group/${g.id}`);
     } catch {
       setBusy(null);
       show(t('group.joinError'), 'alert-circle');
     }
   };
+
+  const onShare = (g: Group) => {
+    haptics.light();
+    Share.share({ message: t('group.shareMsg', { name: g.name, code: g.invite_code }) }).catch(() => {});
+  };
+
+  // Success step — the group exists; show its code prominently before moving on.
+  if (created) {
+    return (
+      <ThemedView style={styles.container}>
+        <Stack.Screen options={{ headerShown: false, presentation: 'modal' }} />
+        <View style={styles.head}>
+          <ThemedText type="subtitle">{t('group.created')}</ThemedText>
+          <Pressable onPress={() => router.back()} hitSlop={10}>
+            <Ionicons name="close" size={26} color={theme.text} />
+          </Pressable>
+        </View>
+        <View style={styles.body}>
+          <ThemedText type="smallBold" style={styles.createdName} numberOfLines={1}>
+            {created.name}
+          </ThemedText>
+          <InviteCode code={created.invite_code} onShare={() => onShare(created)} />
+          <Pressable
+            onPress={() => router.replace(`/group/${created.id}`)}
+            style={({ pressed }) => [styles.secondary, { borderColor: theme.border }, pressed && { opacity: 0.7 }]}>
+            <ThemedText type="smallBold">{t('group.toGroup')}</ThemedText>
+          </Pressable>
+        </View>
+      </ThemedView>
+    );
+  }
 
   return (
     <ThemedView style={styles.container}>
@@ -126,6 +164,7 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   head: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: Spacing.three },
   body: { paddingHorizontal: Spacing.three, gap: Spacing.three },
+  createdName: { fontSize: 17, textAlign: 'center' },
   card: { borderRadius: 16, padding: Spacing.three, gap: Spacing.two },
   cardHead: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
   hint: { lineHeight: 18 },

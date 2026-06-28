@@ -374,7 +374,9 @@
     "locked": "Locked — race started",
     "men": "Men",
     "women": "Women",
-    "pick": "Pick"
+    "pick": "Pick",
+    "noListTitle": "Start list coming",
+    "noListHint": "The start list isn't out yet — check back closer to race day."
   },
   "tippspiel": {
     "title": "Picks",
@@ -398,6 +400,7 @@
     "globalEmpty": "No standings yet — once results are in, every tip counts here.",
     "openTitle": "Open to tip",
     "openTip": "Tip",
+    "openSoon": "Start list soon",
     "tipped": "tipped",
     "lockHours_one": "{{count}} h left",
     "lockHours_other": "{{count}} h left",
@@ -445,6 +448,8 @@
     "standings": "Standings",
     "standingsEmpty": "No points yet — once tips are scored, they show up here.",
     "loading": "Loading …",
+    "created": "Group created!",
+    "toGroup": "Open group",
     "foot": "Tip on races — your tip counts automatically across all your groups."
   },
   "result": {

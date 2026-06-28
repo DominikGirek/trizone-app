@@ -2,8 +2,9 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView, Share, StyleSheet, Switch, View } from 'react-native';
+import { ScrollView, Share, StyleSheet, Switch, View } from 'react-native';
 
+import { InviteCode } from '@/components/InviteCode';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useToast } from '@/components/Toast';
@@ -19,7 +20,13 @@ export default function GroupScreen() {
   const { show } = useToast();
   const qc = useQueryClient();
 
-  const { data: groups = [] } = useQuery({ queryKey: ['myGroups'], queryFn: fetchMyGroups });
+  // Always refetch on entry: a freshly created/joined group may not be in any cached list yet.
+  const { data: groups = [] } = useQuery({
+    queryKey: ['myGroups'],
+    queryFn: fetchMyGroups,
+    staleTime: 0,
+    refetchOnMount: 'always',
+  });
   const group = groups.find((g) => g.id === id);
   const { data: board = [], isLoading } = useQuery({
     queryKey: ['groupBoard', id],
@@ -46,20 +53,14 @@ export default function GroupScreen() {
     <ThemedView style={styles.container}>
       <Stack.Screen options={{ title: group?.name ?? t('group.fallbackTitle'), headerBackTitle: '' }} />
       <ScrollView contentContainerStyle={styles.content}>
-        {/* Invite */}
-        <View style={[styles.invite, { backgroundColor: theme.backgroundElement }]}>
-          <ThemedText type="small" themeColor="textSecondary">{t('group.inviteLabel')}</ThemedText>
-          <ThemedText style={styles.code}>{group?.invite_code ?? '······'}</ThemedText>
-          <ThemedText type="small" themeColor="textSecondary" style={styles.inviteHint}>
-            {t('group.inviteHint')}
-          </ThemedText>
-          <Pressable
-            onPress={onShare}
-            style={({ pressed }) => [styles.shareBtn, { backgroundColor: theme.primary }, pressed && { opacity: 0.85 }]}>
-            <Ionicons name="share-outline" size={18} color={theme.onPrimary} />
-            <ThemedText type="smallBold" style={{ color: theme.onPrimary }}>{t('group.invite')}</ThemedText>
-          </Pressable>
-        </View>
+        {/* Invite code (clean, never clipped) */}
+        {group ? (
+          <InviteCode code={group.invite_code} onShare={onShare} />
+        ) : (
+          <View style={[styles.invite, { backgroundColor: theme.backgroundElement }]}>
+            <ThemedText type="small" themeColor="textSecondary">{t('group.loading')}</ThemedText>
+          </View>
+        )}
 
         {/* Opt-in to the global group ranking */}
         <View style={[styles.optRow, { borderColor: theme.border }]}>
