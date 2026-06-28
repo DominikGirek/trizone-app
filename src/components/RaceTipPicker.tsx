@@ -1,7 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
@@ -38,6 +38,7 @@ export function RaceTipPicker({
   const { t } = useTranslation();
   const { getTip, setPick } = useTips();
   const [active, setActive] = useState<ActiveSlot>(null);
+  const [q, setQ] = useState(''); // chooser search (for big fields like Kona)
   const meta = { name: raceName, date: raceDate, kind: raceKind, country: raceCountry };
 
   const locked = isTipLocked(raceDate);
@@ -74,6 +75,7 @@ export function RaceTipPicker({
                     onPress={() => {
                       if (locked) return;
                       haptics.light();
+                      setQ('');
                       setActive(open ? null : { gender: g, index: i });
                     }}
                     style={({ pressed }) => [
@@ -111,11 +113,22 @@ export function RaceTipPicker({
                   </Pressable>
 
                   {open && !locked && (
-                    <ScrollView
-                      style={[styles.chooser, { borderColor: theme.border, backgroundColor: theme.background }]}
-                      nestedScrollEnabled
-                      keyboardShouldPersistTaps="handled">
-                      {pool.map((e) => {
+                    <View style={[styles.chooser, { borderColor: theme.border, backgroundColor: theme.background }]}>
+                      {pool.length > 8 && (
+                        <TextInput
+                          value={q}
+                          onChangeText={setQ}
+                          placeholder={t('tip.search')}
+                          placeholderTextColor={theme.textSecondary}
+                          autoCorrect={false}
+                          autoCapitalize="none"
+                          style={[styles.search, { color: theme.text, borderColor: theme.border }]}
+                        />
+                      )}
+                      <ScrollView nestedScrollEnabled keyboardShouldPersistTaps="handled" style={styles.chooserScroll}>
+                      {pool
+                        .filter((e) => !q || e.athlete.name.toLowerCase().includes(q.toLowerCase()))
+                        .map((e) => {
                         const taken = used.has(e.athlete.id) && pid !== e.athlete.id;
                         return (
                           <Pressable
@@ -137,7 +150,8 @@ export function RaceTipPicker({
                           </Pressable>
                         );
                       })}
-                    </ScrollView>
+                      </ScrollView>
+                    </View>
                   )}
                 </View>
               );
@@ -168,10 +182,17 @@ const styles = StyleSheet.create({
   av: { width: 30, height: 30, borderRadius: 15, alignItems: 'center', justifyContent: 'center' },
   avText: { fontSize: 11, fontWeight: '800', color: '#fff' },
   chooser: {
-    maxHeight: 260,
     marginTop: 4,
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
+    overflow: 'hidden',
+  },
+  chooserScroll: { maxHeight: 240 },
+  search: {
+    paddingHorizontal: Spacing.two + 2,
+    paddingVertical: Spacing.two,
+    fontSize: 15,
+    borderBottomWidth: StyleSheet.hairlineWidth,
   },
   choice: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, paddingHorizontal: Spacing.two, paddingVertical: Spacing.two },
   avSm: { width: 26, height: 26, borderRadius: 13, alignItems: 'center', justifyContent: 'center' },
