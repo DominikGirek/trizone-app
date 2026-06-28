@@ -128,6 +128,15 @@ export const athletes: Athlete[] = [
   { id: 'marjolaine-pierre', name: 'Marjolaine Pierré', country: 'FR', gender: 'women', series: ['t100'] },
   { id: 'hanne-de-vet', name: 'Hanne De Vet', country: 'BE', gender: 'women', series: ['t100'] },
   { id: 'rebecca-clarke', name: 'Rebecca Clarke', country: 'NZ', gender: 'women', series: ['ironman703'] },
+
+  // — 2026 Pros ergänzt für die Ergebnis-Pipeline (echte Podestplätze; Nationalität verifiziert) —
+  { id: 'solveig-lovseth', name: 'Solveig Løvseth', country: 'NO', gender: 'women', series: ['ironman', 'ironman703'], bio: 'IRONMAN-Weltmeisterin 2025; Siegerin IRONMAN Hamburg (EM Frauen) 2026.' },
+  { id: 'katrine-graesboll-christensen', name: 'Katrine Græsbøll Christensen', country: 'DK', gender: 'women', series: ['ironman', 'ironman703'] },
+  { id: 'samuel-dickinson', name: 'Samuel Dickinson', country: 'GB', gender: 'men', series: ['wtcs', 't100'] },
+  { id: 'menno-koolhaas', name: 'Menno Koolhaas', country: 'NL', gender: 'men', series: ['t100', 'ironman703'] },
+  { id: 'casper-stornes', name: 'Casper Stornes', country: 'NO', gender: 'men', series: ['ironman', 'wtcs'], bio: 'Sieger IRONMAN European Championship Frankfurt 2026.' },
+  { id: 'antonio-benito-lopez', name: 'Antonio Benito López', country: 'ES', gender: 'men', series: ['ironman', 'ironman703'] },
+  { id: 'kacper-stepniak', name: 'Kacper Stępniak', country: 'PL', gender: 'men', series: ['ironman', 'ironman703'] },
 ];
 
 export const athletesById: Record<string, Athlete> = Object.fromEntries(

@@ -1,3 +1,25 @@
 {
-  "results": []
+  "results": [
+    {
+      "raceId": "se-im-frankfurt",
+      "men": ["casper-stornes", "gustav-iden", "antonio-benito-lopez", "kacper-stepniak", "vincent-luis"],
+      "women": [],
+      "source": "stats.protriathletes.org/race/im-germany/2026/results (men's European Championship; heat-shortened)",
+      "verifiedAt": "2026-06-28"
+    },
+    {
+      "raceId": "se-im-hamburg",
+      "men": [],
+      "women": ["solveig-lovseth", "laura-philipp", "katrine-graesboll-christensen", "marjolaine-pierre", "lisa-perterer"],
+      "source": "stats.protriathletes.org/race/im-hamburg/2026/results (women's European Championship)",
+      "verifiedAt": "2026-06-28"
+    },
+    {
+      "raceId": "se-t100-singapore",
+      "men": ["hayden-wilde", "samuel-dickinson", "mika-noodt", "menno-koolhaas", "matthew-hauser"],
+      "women": [],
+      "source": "stats.protriathletes.org/race/singapore-t100/2026/results",
+      "verifiedAt": "2026-06-28"
+    }
+  ]
 }
