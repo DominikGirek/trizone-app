@@ -128,6 +128,8 @@ export function providerLabel(provider?: TimingProvider): string | undefined {
       return 'raceresult';
     case 'racepedia':
       return 'Racepedia';
+    case 'challengefamily':
+      return 'Challenge Family';
     default:
       return undefined;
   }

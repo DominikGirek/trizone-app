@@ -270,7 +270,7 @@ export default function RaceScreen() {
   // A *real* ticker = the native RACE RESULT ticker, or a timing-provider link from THIS event's
   // own page. We never guess/hardcode tickers — without one we link honestly to the organizer.
   const nativeTicker = !!vm.raceresultEventId;
-  const isTimingUrl = (u?: string) => !!u && /racepedia|raceresult|mikatiming/i.test(u);
+  const isTimingUrl = (u?: string) => !!u && /racepedia|raceresult|mikatiming|challenge-family/i.test(u);
   const timingUrl = [vm.liveUrl, vm.resultsUrl].find(isTimingUrl);
 
   type Primary = {

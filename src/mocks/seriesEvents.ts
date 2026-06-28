@@ -134,11 +134,18 @@ const seed: Seed[] = [
   },
 ];
 
-export const seriesEvents: LocalEvent[] = seed.map((e) => ({
-  ...e,
-  provider: 'other',
-  status: eventStatusFromDate(e.date),
-}));
+// Challenge Family runs ONE central live-timing portal for all its races (live + results).
+const CHALLENGE_FAMILY_LIVE = 'https://live.challenge-family.com/';
+
+export const seriesEvents: LocalEvent[] = seed.map((e) => {
+  const challengeFamily = e.organizer === 'Challenge Family';
+  return {
+    ...e,
+    provider: challengeFamily ? ('challengefamily' as const) : ('other' as const),
+    liveUrl: e.liveUrl ?? (challengeFamily ? CHALLENGE_FAMILY_LIVE : undefined),
+    status: eventStatusFromDate(e.date),
+  };
+});
 
 export const seriesEventsById: Record<string, LocalEvent> = Object.fromEntries(
   seriesEvents.map((e) => [e.id, e]),

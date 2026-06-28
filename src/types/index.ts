@@ -110,7 +110,7 @@ export interface RankingTable {
 }
 
 /** A timing/results provider behind a local event. */
-export type TimingProvider = 'raceresult' | 'racepedia' | 'other';
+export type TimingProvider = 'raceresult' | 'racepedia' | 'challengefamily' | 'other';
 
 /** One distance option offered at a local event (km). */
 export interface DistanceOption {
