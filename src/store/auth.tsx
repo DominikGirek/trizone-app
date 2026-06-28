@@ -51,11 +51,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       appleAvailable,
       sendEmailCode: async (email) => {
         if (!authConfigured) return { ok: false, error: 'auth-unconfigured' };
-        const { error } = await supabase.auth.signInWithOtp({ email: email.trim(), options: { shouldCreateUser: true } });
+        const e = email.trim();
+        // RELEASE-GATE: never lose an anonymous user's tips. If we already have an
+        // anonymous account, LINK the email to that SAME account (email change) so the
+        // user_id — and all their predictions — survive. Only a fresh user signs in anew.
+        if (user?.is_anonymous) {
+          const { error } = await supabase.auth.updateUser({ email: e });
+          return error ? fail(error) : { ok: true };
+        }
+        const { error } = await supabase.auth.signInWithOtp({ email: e, options: { shouldCreateUser: true } });
         return error ? fail(error) : { ok: true };
       },
       verifyEmailCode: async (email, token) => {
-        const { error } = await supabase.auth.verifyOtp({ email: email.trim(), token: token.trim(), type: 'email' });
+        // Upgrading an anonymous account confirms an email *change*; a fresh login
+        // confirms an email sign-in. Same code, different verify type.
+        const type = user?.is_anonymous ? 'email_change' : 'email';
+        const { error } = await supabase.auth.verifyOtp({ email: email.trim(), token: token.trim(), type });
         return error ? fail(error) : { ok: true };
       },
       // Disabled this release (anonymous-first). Restored when B is activated (re-add expo-apple-authentication).
