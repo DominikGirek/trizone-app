@@ -10,6 +10,7 @@ import { FavoriteButton } from '@/components/FavoriteButton';
 import { NewsCard } from '@/components/NewsCard';
 import { RaceBriefingView } from '@/components/RaceBriefingView';
 import { RaceHero, type HeroChip } from '@/components/RaceHero';
+import { PrizeStrip } from '@/components/PrizeStrip';
 import { RaceTipPicker } from '@/components/RaceTipPicker';
 import { RaceTipResult } from '@/components/RaceTipResult';
 import { ResultsList } from '@/components/ResultsList';
@@ -35,6 +36,7 @@ import {
 } from '@/lib/newsTopics';
 import { getBriefing } from '@/data/raceBriefings';
 import { getRaceResult } from '@/data/raceResults';
+import { getPrize } from '@/data/tippspielPrizes';
 import { isTippableRace } from '@/lib/tippable';
 import { getLocalEventById, providerLabel } from '@/services/localEvents';
 import { fetchNews } from '@/services/news';
@@ -338,6 +340,7 @@ export default function RaceScreen() {
   // Tipp tab: only the curated, risk-minimised set (IM Pro Series · Roth · T100 · Kona) — and only
   // when there's a start list to pick from OR a verified result to show.
   const tipResult = getRaceResult(vm.id);
+  const racePrize = getPrize(vm.id);
   const tippable = isTippableRace(vm);
   const showTip = tippable && (hasStartList || !!tipResult);
   const tabs: { id: RaceTab; label: string }[] = [
@@ -473,19 +476,25 @@ export default function RaceScreen() {
         )}
 
         {/* Tipp — after the race: verified result + your score; before: predict the top 5 */}
-        {activeTab === 'tip' &&
-          (tipResult ? (
-            <RaceTipResult raceId={vm.id} result={tipResult} />
-          ) : startList ? (
-            <RaceTipPicker
-              raceId={vm.id}
-              raceName={cleanName}
-              raceDate={vm.date}
-              raceKind={isPro ? 'pro' : 'local'}
-              raceCountry={vm.country}
-              entries={startList.entries}
-            />
-          ) : null)}
+        {activeTab === 'tip' && (
+          <>
+            {racePrize && (
+              <PrizeStrip prize={racePrize} style={{ marginHorizontal: Spacing.three, marginTop: Spacing.three }} />
+            )}
+            {tipResult ? (
+              <RaceTipResult raceId={vm.id} result={tipResult} />
+            ) : startList ? (
+              <RaceTipPicker
+                raceId={vm.id}
+                raceName={cleanName}
+                raceDate={vm.date}
+                raceKind={isPro ? 'pro' : 'local'}
+                raceCountry={vm.country}
+                entries={startList.entries}
+              />
+            ) : null}
+          </>
+        )}
 
         {/* Briefing — curated, verified race-day fan-guide */}
         {activeTab === 'briefing' && briefing && <RaceBriefingView briefing={briefing} />}

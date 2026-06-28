@@ -404,7 +404,12 @@
     "lockDays_one": "noch {{count}} Tag",
     "lockDays_other": "noch {{count}} Tage",
     "openCount_one": "{{count}} Rennen offen",
-    "openCount_other": "{{count}} Rennen offen"
+    "openCount_other": "{{count}} Rennen offen",
+    "seasonNote": "Saison 2026 · über alle getippten Rennen"
+  },
+  "prize": {
+    "win": "Zu gewinnen",
+    "by": "von {{sponsor}}"
   },
   "group": {
     "myGroups": "Meine Gruppen",

@@ -5,6 +5,7 @@ import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
+import { PrizeStrip } from '@/components/PrizeStrip';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { TopBar } from '@/components/TopBar';
@@ -12,6 +13,7 @@ import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import type { AppLanguage } from '@/i18n';
 import { countryFlag, formatDate } from '@/lib/format';
+import { getPrize, SEASON } from '@/data/tippspielPrizes';
 import { isTipLocked, TIP_SIZE } from '@/lib/tippspiel';
 import { getAllEvents, openTippableRaces } from '@/services/events';
 import { fetchGroupGlobalLeaderboard, fetchLeaderboard, fetchMyGroups, fetchMyHandle } from '@/services/tippspielSync';
@@ -24,6 +26,7 @@ export default function TippspielScreen() {
   const { list, hasTip } = useTips();
   const { data: events = [] } = useQuery({ queryKey: ['events'], queryFn: () => getAllEvents() });
   const openRaces = openTippableRaces(events);
+  const seasonPrize = getPrize(SEASON);
   const { data: board = [] } = useQuery({ queryKey: ['leaderboard'], queryFn: () => fetchLeaderboard() });
   const { data: myGroups = [], refetch: refetchGroups } = useQuery({ queryKey: ['myGroups'], queryFn: fetchMyGroups });
   const { data: groupGlobal = [] } = useQuery({ queryKey: ['groupGlobal'], queryFn: () => fetchGroupGlobalLeaderboard() });
@@ -153,10 +156,14 @@ export default function TippspielScreen() {
           })
         )}
 
-        {/* Globale Rangliste — live (points only) */}
+        {/* Globale Rangliste — season-long, live (points only) */}
         <ThemedText type="smallBold" style={styles.section}>
           {t('tippspiel.global')}
         </ThemedText>
+        <ThemedText type="small" themeColor="textSecondary" style={styles.seasonNote}>
+          {t('tippspiel.seasonNote')}
+        </ThemedText>
+        {seasonPrize && <PrizeStrip prize={seasonPrize} style={{ marginBottom: Spacing.two }} />}
         {board.length > 0 ? (
           <View style={[styles.board, { borderColor: theme.border }]}>
             {board.map((r, i) => (
@@ -253,6 +260,7 @@ const styles = StyleSheet.create({
   section: { fontSize: 15, fontWeight: '700', letterSpacing: -0.2, marginTop: Spacing.three, marginBottom: Spacing.one },
   sectionRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   addRow: { flexDirection: 'row', alignItems: 'center', gap: 2, marginTop: Spacing.three },
+  seasonNote: { marginBottom: Spacing.two, lineHeight: 16 },
   empty: {
     flexDirection: 'row',
     alignItems: 'center',

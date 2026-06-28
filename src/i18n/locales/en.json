@@ -404,7 +404,12 @@
     "lockDays_one": "{{count}} day left",
     "lockDays_other": "{{count}} days left",
     "openCount_one": "{{count}} race open",
-    "openCount_other": "{{count}} races open"
+    "openCount_other": "{{count}} races open",
+    "seasonNote": "2026 season · across all races you tip"
+  },
+  "prize": {
+    "win": "Up for grabs",
+    "by": "by {{sponsor}}"
   },
   "group": {
     "myGroups": "My groups",
