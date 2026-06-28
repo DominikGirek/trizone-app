@@ -10,6 +10,14 @@ const anon = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 /** Only the PUBLIC anon key is ever shipped — never the service_role key. */
 export const authConfigured = !!url && !!anon;
 
+/**
+ * Whether email/Apple account-securing ("B") is live. Stays false until the owner has set up the Resend
+ * SMTP + Apple provider in Supabase (and a fresh build). While false, the app is anonymous-only and the
+ * "secure your account" CTA shows an honest "coming soon" instead of a broken login. Flip via
+ * EXPO_PUBLIC_LOGIN_ENABLED=true.
+ */
+export const loginEnabled = process.env.EXPO_PUBLIC_LOGIN_ENABLED === 'true';
+
 // Expo Router statically renders the web build in Node, where there's no window/localStorage. During
 // that pass we must NOT touch persistent storage (it crashes "window is not defined"). Native and the
 // real browser keep full session persistence; only the SSR pass runs storage-less.

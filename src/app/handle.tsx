@@ -11,6 +11,7 @@ import { useToast } from '@/components/Toast';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { haptics } from '@/lib/haptics';
+import { loginEnabled } from '@/lib/supabase';
 import { setMyHandle } from '@/services/tippspielSync';
 
 const MIN = 2;
@@ -83,10 +84,30 @@ export default function HandleScreen() {
           </ThemedText>
         </Pressable>
 
-        <Pressable onPress={() => router.replace('/login')} hitSlop={8} style={styles.secureRow}>
-          <Ionicons name="shield-checkmark-outline" size={16} color={theme.textSecondary} />
-          <ThemedText type="small" themeColor="textSecondary">{t('handle.secure')}</ThemedText>
-        </Pressable>
+        {/* Honest, privacy-first framing: no account needed, minimal data, device-only without securing. */}
+        <View style={[styles.infoCard, { borderColor: theme.border }]}>
+          <ThemedText type="small" themeColor="textSecondary" style={styles.infoLine}>
+            {t('handle.privacy')}
+          </ThemedText>
+          <View style={styles.warnRow}>
+            <Ionicons name="information-circle-outline" size={16} color={theme.textSecondary} />
+            <ThemedText type="small" themeColor="textSecondary" style={styles.flex}>
+              {t('handle.deviceWarn')}
+            </ThemedText>
+          </View>
+        </View>
+
+        {loginEnabled ? (
+          <Pressable onPress={() => router.replace('/login')} hitSlop={8} style={styles.secureRow}>
+            <Ionicons name="shield-checkmark-outline" size={16} color={theme.primary} />
+            <ThemedText type="small" style={{ color: theme.primary }}>{t('handle.secure')}</ThemedText>
+          </Pressable>
+        ) : (
+          <View style={styles.secureRow}>
+            <Ionicons name="shield-outline" size={16} color={theme.textSecondary} />
+            <ThemedText type="small" themeColor="textSecondary">{t('handle.secureSoon')}</ThemedText>
+          </View>
+        )}
       </KeyboardAvoidingView>
     </ThemedView>
   );
@@ -105,5 +126,9 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   primary: { alignItems: 'center', justifyContent: 'center', paddingVertical: Spacing.three, borderRadius: 14 },
+  flex: { flex: 1 },
+  infoCard: { borderWidth: StyleSheet.hairlineWidth, borderRadius: 12, padding: Spacing.three, gap: Spacing.two },
+  infoLine: { lineHeight: 18 },
+  warnRow: { flexDirection: 'row', alignItems: 'flex-start', gap: Spacing.two },
   secureRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: Spacing.one + 2, paddingVertical: Spacing.two },
 });

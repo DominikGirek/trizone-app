@@ -62,6 +62,14 @@ export async function fetchMyHandle(): Promise<string | null> {
   return row?.handle ?? null;
 }
 
+/** True only if the current session is a SECURED (non-anonymous, email/Apple) account. False while anonymous. */
+export async function fetchSecured(): Promise<boolean> {
+  if (!authConfigured) return false;
+  const { data } = await supabase.auth.getSession();
+  const u = data.session?.user;
+  return !!u && u.is_anonymous === false;
+}
+
 /** Set the public name. Creates an (anonymous) identity if needed. `taken` if the name is in use. */
 export async function setMyHandle(handle: string): Promise<{ ok: boolean; error?: 'taken' | 'failed' }> {
   if (!authConfigured) return { ok: false, error: 'failed' };

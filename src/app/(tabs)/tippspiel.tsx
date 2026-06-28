@@ -1,7 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useQuery } from '@tanstack/react-query';
 import { router, useFocusEffect } from 'expo-router';
-import { useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
@@ -14,9 +14,10 @@ import { useTheme } from '@/hooks/use-theme';
 import type { AppLanguage } from '@/i18n';
 import { countryFlag, formatDate } from '@/lib/format';
 import { getPrize, SEASON } from '@/data/tippspielPrizes';
+import { storage, StorageKeys } from '@/lib/storage';
 import { isTipLocked, TIP_SIZE } from '@/lib/tippspiel';
 import { getAllEvents, openTippableRaces } from '@/services/events';
-import { fetchGroupGlobalLeaderboard, fetchLeaderboard, fetchMyGroups, fetchMyHandle } from '@/services/tippspielSync';
+import { fetchGroupGlobalLeaderboard, fetchLeaderboard, fetchMyGroups, fetchMyHandle, fetchSecured } from '@/services/tippspielSync';
 import { useTips } from '@/store/tips';
 
 export default function TippspielScreen() {
@@ -31,9 +32,15 @@ export default function TippspielScreen() {
   const { data: myGroups = [], refetch: refetchGroups } = useQuery({ queryKey: ['myGroups'], queryFn: fetchMyGroups });
   const { data: groupGlobal = [] } = useQuery({ queryKey: ['groupGlobal'], queryFn: () => fetchGroupGlobalLeaderboard() });
   const { data: myHandle, refetch: refetchHandle } = useQuery({ queryKey: ['myHandle'], queryFn: fetchMyHandle });
+  const { data: secured, refetch: refetchSecured } = useQuery({ queryKey: ['secured'], queryFn: fetchSecured });
 
   // Refresh identity + groups whenever the hub regains focus (e.g. after setting a name / joining a group).
-  useFocusEffect(useCallback(() => { refetchGroups(); refetchHandle(); }, [refetchGroups, refetchHandle]));
+  useFocusEffect(useCallback(() => { refetchGroups(); refetchHandle(); refetchSecured(); }, [refetchGroups, refetchHandle, refetchSecured]));
+
+  // One-time, dismissible "your tips live only on this device" hint (anonymous-first, honest, not nagging).
+  const [hintDismissed, setHintDismissed] = useState(true);
+  useEffect(() => { storage.get<boolean>(StorageKeys.accountHint).then((v) => setHintDismissed(!!v)); }, []);
+  const dismissHint = () => { setHintDismissed(true); void storage.set(StorageKeys.accountHint, true); };
 
   // Time until a race locks (its start) — fed into the funnel rows.
   const lockLabel = (iso: string) => {
@@ -60,7 +67,9 @@ export default function TippspielScreen() {
             {myHandle ? (
               <>
                 <ThemedText type="smallBold" numberOfLines={1}>{t('handle.playingAs', { name: myHandle })}</ThemedText>
-                <ThemedText type="small" themeColor="textSecondary">{t('handle.tapToEdit')}</ThemedText>
+                <ThemedText type="small" themeColor="textSecondary">
+                  {secured ? t('handle.securedLabel') : t('handle.deviceLabel')}
+                </ThemedText>
               </>
             ) : (
               <>
@@ -71,6 +80,21 @@ export default function TippspielScreen() {
           </View>
           <Ionicons name="chevron-forward" size={18} color={theme.textSecondary} />
         </Pressable>
+
+        {/* One-time, dismissible honesty nudge: tips are device-only until secured (optional) */}
+        {!hintDismissed && !secured && myTips.length > 0 && (
+          <View style={[styles.hint, { backgroundColor: theme.backgroundElement }]}>
+            <Ionicons name="phone-portrait-outline" size={18} color={theme.textSecondary} />
+            <Pressable
+              style={styles.flex}
+              onPress={() => router.push(myHandle ? `/handle?current=${encodeURIComponent(myHandle)}` : '/handle')}>
+              <ThemedText type="small" themeColor="textSecondary">{t('handle.deviceHint')}</ThemedText>
+            </Pressable>
+            <Pressable onPress={dismissHint} hitSlop={10}>
+              <Ionicons name="close" size={16} color={theme.textSecondary} />
+            </Pressable>
+          </View>
+        )}
 
         {/* Offene Tipprunden — discovery funnel */}
         {openRaces.length > 0 && (
@@ -257,6 +281,7 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   intro: { lineHeight: 19, marginBottom: Spacing.two },
   account: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, padding: Spacing.three, borderRadius: 14 },
+  hint: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, padding: Spacing.three, borderRadius: 12, marginTop: Spacing.one },
   section: { fontSize: 15, fontWeight: '700', letterSpacing: -0.2, marginTop: Spacing.three, marginBottom: Spacing.one },
   sectionRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   addRow: { flexDirection: 'row', alignItems: 'center', gap: 2, marginTop: Spacing.three },
