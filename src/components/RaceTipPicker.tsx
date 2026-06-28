@@ -21,17 +21,24 @@ const GENDERS: Gender[] = ['men', 'women'];
  */
 export function RaceTipPicker({
   raceId,
+  raceName,
   raceDate,
+  raceKind,
+  raceCountry,
   entries,
 }: {
   raceId: string;
+  raceName: string;
   raceDate: string;
+  raceKind: 'pro' | 'local';
+  raceCountry?: string;
   entries: StartListEntry[];
 }) {
   const theme = useTheme();
   const { t } = useTranslation();
   const { getTip, setPick } = useTips();
   const [active, setActive] = useState<ActiveSlot>(null);
+  const meta = { name: raceName, date: raceDate, kind: raceKind, country: raceCountry };
 
   const locked = isTipLocked(raceDate);
   const tip = getTip(raceId);
@@ -86,7 +93,7 @@ export function RaceTipPicker({
                           {nameById.get(pid) ?? pid}
                         </ThemedText>
                         {!locked && (
-                          <Pressable onPress={() => setPick(raceId, g, i, null)} hitSlop={10}>
+                          <Pressable onPress={() => setPick(raceId, g, i, null, meta)} hitSlop={10}>
                             <Ionicons name="close-circle" size={20} color={theme.textSecondary} />
                           </Pressable>
                         )}
@@ -116,7 +123,7 @@ export function RaceTipPicker({
                             disabled={taken}
                             onPress={() => {
                               haptics.light();
-                              setPick(raceId, g, i, e.athlete.id);
+                              setPick(raceId, g, i, e.athlete.id, meta);
                               setActive(null);
                             }}
                             style={({ pressed }) => [styles.choice, taken && { opacity: 0.35 }, pressed && { backgroundColor: theme.backgroundElement }]}>

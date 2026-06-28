@@ -40,10 +40,10 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="standings"
+        name="tippspiel"
         options={{
-          title: t('tabs.standings'),
-          tabBarIcon: ({ color, size }) => <Ionicons name="podium-outline" size={size} color={color} />,
+          title: t('tabs.tippspiel'),
+          tabBarIcon: ({ color, size }) => <Ionicons name="trophy-outline" size={size} color={color} />,
         }}
       />
       <Tabs.Screen
@@ -54,10 +54,19 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="standings"
+        options={{
+          title: t('tabs.standings'),
+          // Moved out of the bottom bar (5 lean tabs) — reachable via the "Mehr" hub.
+          href: null,
+        }}
+      />
+      <Tabs.Screen
         name="favorites"
         options={{
           title: t('tabs.favorites'),
-          tabBarIcon: ({ color, size }) => <Ionicons name="star-outline" size={size} color={color} />,
+          // Moved out of the bottom bar — reachable via the header avatar + "Mehr".
+          href: null,
         }}
       />
       <Tabs.Screen

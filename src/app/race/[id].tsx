@@ -466,7 +466,14 @@ export default function RaceScreen() {
 
         {/* Tipp — predict the top 5 (local prototype) */}
         {activeTab === 'tip' && startList && (
-          <RaceTipPicker raceId={vm.id} raceDate={vm.date} entries={startList.entries} />
+          <RaceTipPicker
+            raceId={vm.id}
+            raceName={cleanName}
+            raceDate={vm.date}
+            raceKind={isPro ? 'pro' : 'local'}
+            raceCountry={vm.country}
+            entries={startList.entries}
+          />
         )}
 
         {/* Briefing — curated, verified race-day fan-guide */}

@@ -5,6 +5,7 @@
     "events": "Events",
     "standings": "Standings",
     "deals": "Codes",
+    "tippspiel": "Picks",
     "calendar": "Calendar",
     "results": "Results",
     "favorites": "Favorites",
@@ -236,6 +237,7 @@
   },
   "more": {
     "title": "More",
+    "navTitle": "Sections",
     "settings": "Settings",
     "language": "Language",
     "languageSystem": "System language",
@@ -373,6 +375,23 @@
     "men": "Men",
     "women": "Women",
     "pick": "Pick"
+  },
+  "tippspiel": {
+    "title": "Picks",
+    "cardSub": "Tip the top 5",
+    "intro": "Tip the top 5 of every race — one entry counts globally and in your groups.",
+    "myTips": "My tips",
+    "emptyTitle": "No tips yet",
+    "emptyHint": "Open a race and tip the top 5.",
+    "aRace": "Race",
+    "picked": "{{count}}/{{total}} picked",
+    "open": "Open",
+    "locked": "Locked",
+    "global": "Global leaderboard",
+    "preview": "Preview",
+    "previewNote": "Example view. Once accounts are live, every tip counts here — globally and in your groups.",
+    "points": "pts",
+    "groupsSoon": "Groups & clubs coming soon"
   },
   "startlist": {
     "title": "Pro start list",

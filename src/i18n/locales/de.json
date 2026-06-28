@@ -5,6 +5,7 @@
     "events": "Events",
     "standings": "Tabellen",
     "deals": "Codes",
+    "tippspiel": "Tippspiel",
     "calendar": "Kalender",
     "results": "Ergebnisse",
     "favorites": "Favoriten",
@@ -236,6 +237,7 @@
   },
   "more": {
     "title": "Mehr",
+    "navTitle": "Bereiche",
     "settings": "Einstellungen",
     "language": "Sprache",
     "languageSystem": "Systemsprache",
@@ -373,6 +375,23 @@
     "men": "Männer",
     "women": "Frauen",
     "pick": "Tippen"
+  },
+  "tippspiel": {
+    "title": "Tippspiel",
+    "cardSub": "Tippe die Top 5",
+    "intro": "Tippe die Top 5 jedes Rennens — eine Abgabe zählt global und in deinen Gruppen.",
+    "myTips": "Meine Tipps",
+    "emptyTitle": "Noch keine Tipps",
+    "emptyHint": "Öffne ein Rennen und tippe die Top 5.",
+    "aRace": "Rennen",
+    "picked": "{{count}}/{{total}} getippt",
+    "open": "Offen",
+    "locked": "Gesperrt",
+    "global": "Globale Rangliste",
+    "preview": "Vorschau",
+    "previewNote": "Beispiel-Ansicht. Sobald Accounts da sind, zählt jeder Tipp hier — global und in deinen Gruppen.",
+    "points": "Pkt",
+    "groupsSoon": "Gruppen & Vereine kommen bald"
   },
   "startlist": {
     "title": "Profi-Starterliste",

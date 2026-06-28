@@ -1,6 +1,8 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
 import Constants from 'expo-constants';
+import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { ThemedText } from '@/components/themed-text';
@@ -23,6 +25,27 @@ function Card({ title, children }: { title: string; children: React.ReactNode })
   );
 }
 
+function NavRow({
+  href,
+  icon,
+  label,
+}: {
+  href: string;
+  icon: React.ComponentProps<typeof Ionicons>['name'];
+  label: string;
+}) {
+  const theme = useTheme();
+  return (
+    <Pressable onPress={() => router.push(href)} style={({ pressed }) => [styles.navRow, pressed && { opacity: 0.6 }]}>
+      <Ionicons name={icon} size={20} color={theme.text} />
+      <ThemedText type="default" style={styles.navLabel}>
+        {label}
+      </ThemedText>
+      <Ionicons name="chevron-forward" size={18} color={theme.textSecondary} />
+    </Pressable>
+  );
+}
+
 export default function MoreScreen() {
   const { t } = useTranslation();
   const { language, setLanguage, themePref, setThemePref } = useSettings();
@@ -31,6 +54,12 @@ export default function MoreScreen() {
     <ThemedView style={styles.container}>
       <TopBar title={t('more.title')} />
       <ScrollView contentContainerStyle={styles.content}>
+        <Card title={t('more.navTitle')}>
+          <NavRow href="/standings" icon="podium-outline" label={t('tabs.standings')} />
+          <NavRow href="/favorites" icon="star-outline" label={t('tabs.favorites')} />
+          <NavRow href="/following" icon="people-outline" label={t('following.title')} />
+        </Card>
+
         <Card title={t('more.language')}>
           <SegmentedControl<AppLanguage>
             value={language}
@@ -77,6 +106,8 @@ const styles = StyleSheet.create({
   cardWrap: { gap: Spacing.two },
   cardTitle: { letterSpacing: 0.5, paddingHorizontal: Spacing.one },
   card: { borderRadius: 14, padding: Spacing.three, gap: Spacing.two },
+  navRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, paddingVertical: Spacing.one },
+  navLabel: { flex: 1, fontWeight: '600' },
   aboutText: { lineHeight: 20 },
   dataNote: { lineHeight: 18 },
   version: { textAlign: 'center', marginTop: Spacing.three },

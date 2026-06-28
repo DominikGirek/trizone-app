@@ -1,0 +1,165 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { router } from 'expo-router';
+import { useTranslation } from 'react-i18next';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+
+import { ThemedText } from '@/components/themed-text';
+import { ThemedView } from '@/components/themed-view';
+import { TopBar } from '@/components/TopBar';
+import { Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
+import type { AppLanguage } from '@/i18n';
+import { countryFlag, formatDate } from '@/lib/format';
+import { isTipLocked, TIP_SIZE } from '@/lib/tippspiel';
+import { useTips } from '@/store/tips';
+
+// Clearly-labelled PREVIEW standings — illustrative only (the real list goes live with accounts in P3).
+const PREVIEW_ROWS = [
+  { handle: 'tri_lena', pts: 128 },
+  { handle: 'kona_ben', pts: 121 },
+  { handle: 'wattbiker', pts: 119 },
+  { handle: 'swimbikeklaus', pts: 112 },
+];
+
+export default function TippspielScreen() {
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language as AppLanguage;
+  const theme = useTheme();
+  const { list } = useTips();
+
+  const myTips = list();
+
+  return (
+    <ThemedView style={styles.container}>
+      <TopBar title={t('tippspiel.title')} />
+      <ScrollView contentContainerStyle={styles.content}>
+        <ThemedText type="small" themeColor="textSecondary" style={styles.intro}>
+          {t('tippspiel.intro')}
+        </ThemedText>
+
+        {/* Meine Tipps */}
+        <ThemedText type="smallBold" style={styles.section}>
+          {t('tippspiel.myTips')}
+        </ThemedText>
+        {myTips.length === 0 ? (
+          <Pressable
+            onPress={() => router.push('/events')}
+            style={({ pressed }) => [styles.empty, { borderColor: theme.border }, pressed && { opacity: 0.7 }]}>
+            <Ionicons name="flag-outline" size={22} color={theme.primary} />
+            <View style={styles.flex}>
+              <ThemedText type="smallBold">{t('tippspiel.emptyTitle')}</ThemedText>
+              <ThemedText type="small" themeColor="textSecondary">
+                {t('tippspiel.emptyHint')}
+              </ThemedText>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={theme.textSecondary} />
+          </Pressable>
+        ) : (
+          myTips.map((tp) => {
+            const count = [...tp.men, ...tp.women].filter(Boolean).length;
+            const locked = tp.date ? isTipLocked(tp.date) : false;
+            return (
+              <Pressable
+                key={tp.raceId}
+                onPress={() => router.push(`/race/${tp.raceId}?kind=${tp.kind ?? 'local'}`)}
+                style={({ pressed }) => [styles.tipCard, { backgroundColor: theme.backgroundElement }, pressed && { opacity: 0.8 }]}>
+                <View style={styles.flex}>
+                  <ThemedText type="smallBold" numberOfLines={1}>
+                    {tp.country ? `${countryFlag(tp.country)} ` : ''}
+                    {tp.name ?? t('tippspiel.aRace')}
+                  </ThemedText>
+                  <ThemedText type="small" themeColor="textSecondary">
+                    {tp.date ? `${formatDate(tp.date, lang)} · ` : ''}
+                    {t('tippspiel.picked', { count, total: TIP_SIZE * 2 })}
+                  </ThemedText>
+                </View>
+                <View style={[styles.statusChip, { backgroundColor: theme.background }]}>
+                  <ThemedText type="small" style={{ color: locked ? theme.textSecondary : theme.primary }}>
+                    {locked ? t('tippspiel.locked') : t('tippspiel.open')}
+                  </ThemedText>
+                </View>
+              </Pressable>
+            );
+          })
+        )}
+
+        {/* Globale Rangliste — Vorschau */}
+        <View style={styles.sectionRow}>
+          <ThemedText type="smallBold" style={styles.section}>
+            {t('tippspiel.global')}
+          </ThemedText>
+          <View style={[styles.previewChip, { backgroundColor: theme.backgroundElement }]}>
+            <ThemedText type="small" themeColor="textSecondary">
+              {t('tippspiel.preview')}
+            </ThemedText>
+          </View>
+        </View>
+        <View style={[styles.board, { borderColor: theme.border }]}>
+          {PREVIEW_ROWS.map((r, i) => (
+            <View key={r.handle} style={[styles.boardRow, i > 0 && { borderTopColor: theme.border, borderTopWidth: StyleSheet.hairlineWidth }]}>
+              <ThemedText type="smallBold" style={styles.rank}>
+                {i + 1}
+              </ThemedText>
+              <ThemedText type="small" themeColor="textSecondary" style={styles.flex} numberOfLines={1}>
+                {r.handle}
+              </ThemedText>
+              <ThemedText type="small" themeColor="textSecondary">
+                {r.pts} {t('tippspiel.points')}
+              </ThemedText>
+            </View>
+          ))}
+        </View>
+        <ThemedText type="small" themeColor="textSecondary" style={styles.note}>
+          {t('tippspiel.previewNote')}
+        </ThemedText>
+
+        <View style={[styles.soon, { borderColor: theme.border }]}>
+          <Ionicons name="people-outline" size={18} color={theme.textSecondary} />
+          <ThemedText type="small" themeColor="textSecondary" style={styles.flex}>
+            {t('tippspiel.groupsSoon')}
+          </ThemedText>
+        </View>
+      </ScrollView>
+    </ThemedView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1 },
+  content: { padding: Spacing.three, paddingBottom: Spacing.five, gap: Spacing.one },
+  flex: { flex: 1 },
+  intro: { lineHeight: 19, marginBottom: Spacing.two },
+  section: { fontSize: 15, fontWeight: '700', letterSpacing: -0.2, marginTop: Spacing.three, marginBottom: Spacing.one },
+  sectionRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  empty: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.three,
+    padding: Spacing.three,
+    borderRadius: 14,
+    borderWidth: 1,
+  },
+  tipCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+    padding: Spacing.three,
+    borderRadius: 12,
+    marginBottom: Spacing.one + 2,
+  },
+  statusChip: { paddingHorizontal: Spacing.two, paddingVertical: 3, borderRadius: 999 },
+  previewChip: { paddingHorizontal: Spacing.two, paddingVertical: 3, borderRadius: 999, marginTop: Spacing.three },
+  board: { borderRadius: 12, borderWidth: StyleSheet.hairlineWidth, overflow: 'hidden' },
+  boardRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.three, paddingHorizontal: Spacing.three, paddingVertical: Spacing.two + 2 },
+  rank: { width: 18, textAlign: 'center' },
+  note: { lineHeight: 18, marginTop: Spacing.two },
+  soon: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+    padding: Spacing.three,
+    borderRadius: 12,
+    borderWidth: StyleSheet.hairlineWidth,
+    marginTop: Spacing.four,
+  },
+});

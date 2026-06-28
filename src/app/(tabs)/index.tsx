@@ -335,6 +335,7 @@ export default function DashboardScreen() {
           onPress: openMyNext,
         }
       : { emoji: '🏁', title: t('dashboard.pickRace'), subtitle: t('dashboard.pickRaceSub'), onPress: () => router.push('/pick-race') },
+    { emoji: '🎯', title: t('tabs.tippspiel'), subtitle: t('tippspiel.cardSub'), onPress: () => router.push('/tippspiel') },
     { emoji: '📅', title: t('quick.races'), subtitle: t('dashboard.calendarSub'), onPress: () => router.push('/events') },
     ...(showMatch ? [{ emoji: '⭐', title: t('dashboard.proStartersShort'), subtitle: nameOf(nextBig), onPress: () => openItem(nextBig) }] : []),
     { emoji: '🏆', title: t('quick.ranking'), subtitle: 'WTCS', onPress: () => router.push('/standings') },
@@ -345,9 +346,9 @@ export default function DashboardScreen() {
     <ThemedView style={styles.container}>
       <View style={[styles.header, { paddingTop: insets.top + Spacing.two, borderColor: theme.border }]}>
         <Pressable
-          onPress={() => router.push('/following')}
+          onPress={() => router.push('/favorites')}
           accessibilityRole="button"
-          accessibilityLabel={t('following.title')}
+          accessibilityLabel={t('tabs.favorites')}
           style={({ pressed }) => [styles.avatar, { backgroundColor: theme.backgroundElement, borderColor: theme.primary }, pressed && { opacity: 0.7 }]}>
           <Ionicons name="person" size={18} color={theme.text} />
         </Pressable>
