@@ -394,7 +394,8 @@
     "groupsSoon": "Gruppen & Vereine kommen bald",
     "signInCta": "Anmelden zum Mittippen",
     "signInSub": "E-Mail oder Apple — in Sekunden",
-    "account": "Angemeldet als {{name}}"
+    "account": "Angemeldet als {{name}}",
+    "globalEmpty": "Noch keine Wertung — sobald Ergebnisse vorliegen, zählt jeder Tipp hier."
   },
   "auth": {
     "title": "Anmelden",

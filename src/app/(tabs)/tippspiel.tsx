@@ -1,4 +1,5 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
@@ -11,16 +12,9 @@ import { useTheme } from '@/hooks/use-theme';
 import type { AppLanguage } from '@/i18n';
 import { countryFlag, formatDate } from '@/lib/format';
 import { isTipLocked, TIP_SIZE } from '@/lib/tippspiel';
+import { fetchLeaderboard } from '@/services/tippspielSync';
 import { useAuth } from '@/store/auth';
 import { useTips } from '@/store/tips';
-
-// Clearly-labelled PREVIEW standings — illustrative only (the real list goes live with accounts in P3).
-const PREVIEW_ROWS = [
-  { handle: 'tri_lena', pts: 128 },
-  { handle: 'kona_ben', pts: 121 },
-  { handle: 'wattbiker', pts: 119 },
-  { handle: 'swimbikeklaus', pts: 112 },
-];
 
 export default function TippspielScreen() {
   const { t, i18n } = useTranslation();
@@ -28,6 +22,7 @@ export default function TippspielScreen() {
   const theme = useTheme();
   const { list } = useTips();
   const { signedIn, displayName } = useAuth();
+  const { data: board = [] } = useQuery({ queryKey: ['leaderboard'], queryFn: () => fetchLeaderboard() });
 
   const myTips = list();
 
@@ -107,35 +102,34 @@ export default function TippspielScreen() {
           })
         )}
 
-        {/* Globale Rangliste — Vorschau */}
-        <View style={styles.sectionRow}>
-          <ThemedText type="smallBold" style={styles.section}>
-            {t('tippspiel.global')}
-          </ThemedText>
-          <View style={[styles.previewChip, { backgroundColor: theme.backgroundElement }]}>
-            <ThemedText type="small" themeColor="textSecondary">
-              {t('tippspiel.preview')}
+        {/* Globale Rangliste — live (points only) */}
+        <ThemedText type="smallBold" style={styles.section}>
+          {t('tippspiel.global')}
+        </ThemedText>
+        {board.length > 0 ? (
+          <View style={[styles.board, { borderColor: theme.border }]}>
+            {board.map((r, i) => (
+              <View key={r.user_id} style={[styles.boardRow, i > 0 && { borderTopColor: theme.border, borderTopWidth: StyleSheet.hairlineWidth }]}>
+                <ThemedText type="smallBold" style={styles.rank}>
+                  {i + 1}
+                </ThemedText>
+                <ThemedText type="small" style={styles.flex} numberOfLines={1}>
+                  {r.handle}
+                </ThemedText>
+                <ThemedText type="smallBold">
+                  {r.points} {t('tippspiel.points')}
+                </ThemedText>
+              </View>
+            ))}
+          </View>
+        ) : (
+          <View style={[styles.empty, { borderColor: theme.border }]}>
+            <Ionicons name="trophy-outline" size={20} color={theme.textSecondary} />
+            <ThemedText type="small" themeColor="textSecondary" style={styles.flex}>
+              {t('tippspiel.globalEmpty')}
             </ThemedText>
           </View>
-        </View>
-        <View style={[styles.board, { borderColor: theme.border }]}>
-          {PREVIEW_ROWS.map((r, i) => (
-            <View key={r.handle} style={[styles.boardRow, i > 0 && { borderTopColor: theme.border, borderTopWidth: StyleSheet.hairlineWidth }]}>
-              <ThemedText type="smallBold" style={styles.rank}>
-                {i + 1}
-              </ThemedText>
-              <ThemedText type="small" themeColor="textSecondary" style={styles.flex} numberOfLines={1}>
-                {r.handle}
-              </ThemedText>
-              <ThemedText type="small" themeColor="textSecondary">
-                {r.pts} {t('tippspiel.points')}
-              </ThemedText>
-            </View>
-          ))}
-        </View>
-        <ThemedText type="small" themeColor="textSecondary" style={styles.note}>
-          {t('tippspiel.previewNote')}
-        </ThemedText>
+        )}
 
         <View style={[styles.soon, { borderColor: theme.border }]}>
           <Ionicons name="people-outline" size={18} color={theme.textSecondary} />

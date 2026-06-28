@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useState, type ReactNode
 
 import { storage, StorageKeys } from '@/lib/storage';
 import { TIP_SIZE, type Gender, type Picks } from '@/lib/tippspiel';
+import { syncPrediction } from '@/services/tippspielSync';
 
 /**
  * The user's own prediction per race — ONE tip, stored locally for now (P1 prototype; moves to the
@@ -63,6 +64,7 @@ export function TipsProvider({ children }: { children: ReactNode }) {
           picks[index] = athleteId;
           const next = { ...prev, [raceId]: { ...cur, ...meta, [gender]: picks } };
           storage.set(StorageKeys.tips, next);
+          void syncPrediction(raceId, next[raceId]); // best-effort backend mirror (local stays source of truth)
           return next;
         }),
     }),

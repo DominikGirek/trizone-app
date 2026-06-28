@@ -394,7 +394,8 @@
     "groupsSoon": "Groups & clubs coming soon",
     "signInCta": "Sign in to play",
     "signInSub": "Email or Apple — in seconds",
-    "account": "Signed in as {{name}}"
+    "account": "Signed in as {{name}}",
+    "globalEmpty": "No standings yet — once results are in, every tip counts here."
   },
   "auth": {
     "title": "Sign in",
