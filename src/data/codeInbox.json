@@ -1,7 +1,161 @@
 {
-  "generatedAt": "2026-06-23T10:04:41.497Z",
+  "generatedAt": "2026-06-28T08:31:07.642Z",
   "note": "All code candidates the Code-Radar robot found (transparency/debug log). The publishable subset is written to autoCodes.json and shown live in the app.",
   "candidates": [
+    {
+      "id": "cand-richie-tobi-inr1saa",
+      "code": "INR1SAA",
+      "shopUrl": "https://www.insta360.com/sal/x5?utm_term=INR1SAA",
+      "source": "Richie & Tobi",
+      "sourceType": "youtube",
+      "episode": "Wir haben KEINE neue Technik auf der Eurobike gesucht",
+      "date": "2026-06-28",
+      "url": "https://youtu.be/zCl0Yxtra2Y",
+      "snippet": "0 🎥 https://www.insta360.com/sal/x5?utm_term=INR1SAA Unser Affiliate-Code: INR1SAA ⛑️🔒 @Abusgroup ⛑️🔒 Unsere Helme und Fahrradschlösser https://",
+      "status": "pending"
+    },
+    {
+      "id": "cand-schnellerwerden-schneller10",
+      "code": "SCHNELLER10",
+      "brand": "BLACKROLL",
+      "brandId": "blackroll",
+      "percent": 10,
+      "shopUrl": "https://blackroll.com/de/products/blackroll-recovery-pillow?sku=A001168&utm_source=podcast&utm_medium=paid&utm_campaign=recovery_pillow&utm_term=schnellerwerden&utm_content=audio&voucher=SCHNELLER10",
+      "source": "Schnellerwerden",
+      "sourceType": "podcast",
+      "episode": "10 Dinge, die ich gerne früher über Lauftraining gewusst hätte",
+      "date": "2026-06-27",
+      "url": "https://schnellerwerden.podcaster.de/schnellerwerden-der-laufpodcast/10-dinge-die-ich-gerne-frueher-ueber-lauftraining-gewusst-haette/",
+      "snippet": "10 Prozent Rabatt auf das BLACKROLL Recovery Pillow mit Code SCHNELLER10: https://blackroll.com/de/products/blackroll-recovery-pillow?sku",
+      "status": "pending"
+    },
+    {
+      "id": "cand-laufen-ist-einfach-laufenisteinfach20",
+      "code": "LAUFENISTEINFACH20",
+      "shopUrl": "https://geni.us/laufenisteinfach-pod",
+      "source": "Laufen ist einfach",
+      "sourceType": "podcast",
+      "episode": "Zugspitz Ultratrail Special mit Sabine Heinrich und 107km-Siegerin Joanna Tallmann #302",
+      "date": "2026-06-27",
+      "url": "https://podcasters.spotify.com/pod/show/laufenisteinfach/episodes/Zugspitz-Ultratrail-Special-mit-Sabine-Heinrich-und-107km-Siegerin-Joanna-Tallmann-302-e3laj8d",
+      "snippet": "em auch mit extra Trail-Workout: https://geni.us/laufenisteinfach-pod Code LAUFENISTEINFACH20 Viel Spaß und danke für eure wunderschönen Rückmeldungen immer w",
+      "status": "pending"
+    },
+    {
+      "id": "cand-pace-der-ausdauerpodcast-pace",
+      "code": "PACE",
+      "source": "PACE - der Ausdauerpodcast",
+      "sourceType": "podcast",
+      "episode": "Salz: Tipps zur Aufnahme & zum Verlust, VO2max & Schwimmtricks (Triathlon/Laufen) | Trainer Q&A #8 | #191",
+      "date": "2026-06-26",
+      "url": "https://podcasters.spotify.com/pod/show/marvin-neumann7/episodes/Salz-Tipps-zur-Aufnahme--zum-Verlust--VO2max--Schwimmtricks-TriathlonLaufen--Trainer-QA-8--191-e3l9kf8",
+      "snippet": "Code „PACE10“⁠ 🛏️ ⁠⁠Eight Sleep: Hol dir 350€ Rabatt auf den Pod 5 (Code: PACE) 🏃‍♂️ ⁠⁠⁠⁠⁠⁠⁠⁠⁠⁠⁠⁠Exakt jetzt ausprobieren 🏋 ⁠⁠⁠⁠⁠⁠⁠⁠⁠⁠⁠⁠⁠⁠⁠⁠",
+      "status": "pending"
+    },
+    {
+      "id": "cand-klartext-triathlon-klartext10",
+      "code": "KLARTEXT10",
+      "brand": "feels.like",
+      "brandId": "feelslike",
+      "shopUrl": "https://schneider-piecha.de/",
+      "source": "Klartext Triathlon",
+      "sourceType": "podcast",
+      "episode": "Auf einen Plausch mit Dani Kleiser",
+      "date": "2026-06-25",
+      "url": "https://redcircle.com/shows/baa4ab11-3bd2-4e04-97d6-dfce70f2c37b/episodes/0b35df9a-eca8-4a09-ba73-0da497bac6e2",
+      "snippet": "athletes. (@feelslike.sport) • Instagram-Fotos und -Videos</a></p><p>RABATTCODE: KLARTEXT10</p><p><strong>Schneider und Piecha</strong></p><p><a href",
+      "status": "pending"
+    },
+    {
+      "id": "cand-that-triathlon-show-tts",
+      "code": "TTS",
+      "source": "That Triathlon Show",
+      "sourceType": "podcast",
+      "episode": "Kolie Moore - Overrated and Underrated Factors for Cycling Performance",
+      "date": "2026-06-25",
+      "url": "https://scientifictriathlon.com/tts703/",
+      "snippet": "gradients, real visuals, and real feel! Head to rouvy.com and use the code TTS to get your first month free on top of a 7-day free trial. Effor",
+      "status": "pending"
+    },
+    {
+      "id": "cand-that-triathlon-show-tts15",
+      "code": "TTS15",
+      "percent": 15,
+      "source": "That Triathlon Show",
+      "sourceType": "podcast",
+      "episode": "Kolie Moore - Overrated and Underrated Factors for Cycling Performance",
+      "date": "2026-06-25",
+      "url": "https://scientifictriathlon.com/tts703/",
+      "snippet": "gles ruin another swim. Go to shop.effortlessswimming.com and use the code TTS15 to get 15% off your goggles, and get a free two-month Effortless",
+      "status": "pending"
+    },
+    {
+      "id": "cand-the-strength-running-podcast-jason15",
+      "code": "jason15",
+      "brand": "Nike",
+      "brandId": "nike",
+      "percent": 15,
+      "source": "The Strength Running Podcast",
+      "sourceType": "podcast",
+      "episode": "Zone 2 Running Best Practices, Surprises, and Myths with Alyssa Olenick, PhD",
+      "date": "2026-06-25",
+      "url": "https://strengthrunning.libsyn.com/zone-2-running-best-practices-surprises-and-myths-with-alyssa-olenick-phd",
+      "snippet": "eo) Thank you Previnex! Get yourself 15% off your first purchase with code jason15 here . Previnex is a unique supplement company - one that I trus",
+      "status": "pending"
+    },
+    {
+      "id": "cand-the-strength-running-podcast-strengthrun10",
+      "code": "STRENGTHRUN10",
+      "brand": "Nike",
+      "brandId": "nike",
+      "percent": 10,
+      "source": "The Strength Running Podcast",
+      "sourceType": "podcast",
+      "episode": "Zone 2 Running Best Practices, Surprises, and Myths with Alyssa Olenick, PhD",
+      "date": "2026-06-25",
+      "url": "https://strengthrunning.libsyn.com/zone-2-running-best-practices-surprises-and-myths-with-alyssa-olenick-phd",
+      "snippet": "arned how important (and rare) this simple movement is. Save 10% with code STRENGTHRUN10 at checkout at moboboard.com . Thanks to The Performance Trainin",
+      "status": "pending"
+    },
+    {
+      "id": "cand-run-to-the-top-rttt",
+      "code": "RTTT",
+      "percent": 20,
+      "source": "Run to the Top",
+      "sourceType": "podcast",
+      "episode": "The #1 Easy Pace Mistake That Wrecks Your Fall Marathon Training",
+      "date": "2026-06-24",
+      "url": "https://runnersconnect.net/running-interviews/the-1-easy-pace-mistake-that-wrecks-your-fall-marathon-training/",
+      "snippet": "rs get 20% off + free shipping at blueprint.bryanjohnson.com by using code RTTT at checkout. MAS Edge Creatine Gummies If you've been on the fen",
+      "status": "pending"
+    },
+    {
+      "id": "cand-life-in-the-peloton-pelosurf",
+      "code": "PELOSURF",
+      "percent": 15,
+      "shopUrl": "https://saily.com/pelosurf",
+      "source": "Life in the Peloton",
+      "sourceType": "podcast",
+      "episode": "Something’s Cooking In France: Life In The Peloton’s Race Radio presented by SHOKZ",
+      "date": "2026-06-24",
+      "url": "https://lifeinthepeloton.podbean.com/e/something-s-cooking-in-france-life-in-the-peloton-s-race-radio-presented-by-shokz/",
+      "snippet": "KZ and Saily ! Get an exclusive 15% discount on Saily data plans! Use code PELOSURF at checkout. Download the Saily app or go to https://saily.com/p",
+      "status": "pending"
+    },
+    {
+      "id": "cand-life-in-the-peloton-litp",
+      "code": "LITP",
+      "brand": "Shokz",
+      "brandId": "shokz",
+      "shopUrl": "https://saily.com/pelosurf",
+      "source": "Life in the Peloton",
+      "sourceType": "podcast",
+      "episode": "Something’s Cooking In France: Life In The Peloton’s Race Radio presented by SHOKZ",
+      "date": "2026-06-24",
+      "url": "https://lifeinthepeloton.podbean.com/e/something-s-cooking-in-france-life-in-the-peloton-s-race-radio-presented-by-shokz/",
+      "snippet": "unning, or even swimming - get across to SHOKZ’s website, and use the code LITP enjoy a cheeky discount for being a LITP listener. https://bit.l",
+      "status": "pending"
+    },
     {
       "id": "cand-mission-triathlon-mtprabatt",
       "code": "MTPRABATT",
@@ -15,32 +169,17 @@
       "status": "pending"
     },
     {
-      "id": "cand-singletrack-singletrack",
-      "code": "SINGLETRACK",
-      "brand": "Precision Fuel",
-      "brandId": "precision",
-      "percent": 15,
-      "source": "Singletrack",
+      "id": "cand-some-work-all-play-swap",
+      "code": "SWAP",
+      "brand": "Wahoo",
+      "brandId": "wahoo",
+      "shopUrl": "https://janji.com",
+      "source": "Some Work All Play",
       "sourceType": "podcast",
-      "episode": "Lotti Brinks | 2026 Western States 100 Pre-Race Interview",
+      "episode": "316. Why Western States 100 Records Are Getting Smashed, Z1 v. Z2 Training, AI Coaching News, and Competitiveness v. Ego!",
       "date": "2026-06-23",
-      "url": "Buzzsprout-19388634",
-      "snippet": "and her race-day goals. Partners: Precision Fuel and Hydration - use code SINGLETRACK at checkout for 15% off your next order Norda - check out the 00",
-      "status": "pending"
-    },
-    {
-      "id": "cand-schnellerwerden-schneller10",
-      "code": "SCHNELLER10",
-      "brand": "BLACKROLL",
-      "brandId": "blackroll",
-      "percent": 10,
-      "shopUrl": "https://blackroll.com/de/products/blackroll-recovery-pillow?sku=A001168&utm_source=podcast&utm_medium=paid&utm_campaign=recovery_pillow&utm_term=schnellerwerden&utm_content=audio&voucher=SCHNELLER10",
-      "source": "Schnellerwerden",
-      "sourceType": "podcast",
-      "episode": "Die Angst vor der falschen Entscheidung",
-      "date": "2026-06-22",
-      "url": "https://schnellerwerden.podcaster.de/schnellerwerden-der-laufpodcast/die-angst-vor-der-falschen-entscheidung/",
-      "snippet": "10 Prozent Rabatt auf das BLACKROLL Recovery Pillow mit Code SCHNELLER10: https://blackroll.com/de/products/blackroll-recovery-pillow?sku",
+      "url": "https://podcasters.spotify.com/pod/show/someworkallplay/episodes/316--Why-Western-States-100-Records-Are-Getting-Smashed--Z1-v--Z2-Training--AI-Coaching-News--and-Competitiveness-v--Ego-e3l5vsk",
+      "snippet": "d here: thefeed.com/swap Buy Janji's amazing gear: https://janji.com (code \"SWAP\") The best treadmill is the Wahoo Kickr Run: https://www.wahoof",
       "status": "pending"
     },
     {
@@ -60,20 +199,6 @@
       "status": "pending"
     },
     {
-      "id": "cand-klartext-triathlon-klartext10",
-      "code": "KLARTEXT10",
-      "brand": "feels.like",
-      "brandId": "feelslike",
-      "shopUrl": "https://schneider-piecha.de/",
-      "source": "Klartext Triathlon",
-      "sourceType": "podcast",
-      "episode": "Triathlon-IQ: Hitze- wie reagiere ich im Training und im Wettkampf?",
-      "date": "2026-06-22",
-      "url": "https://redcircle.com/shows/baa4ab11-3bd2-4e04-97d6-dfce70f2c37b/episodes/3ba150e8-8d05-46e1-8025-6cb6d20b8e57",
-      "snippet": "athletes. (@feelslike.sport) • Instagram-Fotos und -Videos</a></p><p>RABATTCODE: KLARTEXT10</p><p><strong>Schneider und Piecha</strong></p><p><a href",
-      "status": "pending"
-    },
-    {
       "id": "cand-radio-rtw-rtw26",
       "code": "RTW26",
       "percent": 10,
@@ -84,18 +209,6 @@
       "date": "2026-06-22",
       "url": "https://radio-rtw.blogs.audiorella.com/71-new-episode",
       "snippet": "W Hörer:in bekommst du 10% Rabatt auf deine Police! Nutze einfach den Code RTW26 beim Checkout. Heutiger Werbepartner ist NordVPN 🌏 Verbessere d",
-      "status": "pending"
-    },
-    {
-      "id": "cand-richie-tobi-inr1saa",
-      "code": "INR1SAA",
-      "shopUrl": "https://www.insta360.com/sal/x5?utm_term=INR1SAA",
-      "source": "Richie & Tobi",
-      "sourceType": "youtube",
-      "episode": "Über 1200€ Ersparnis! | Wir haben ein gebrauchtes Rennrad für unseren Kameramann gekauft",
-      "date": "2026-06-21",
-      "url": "https://youtu.be/d1XUImP-h4A",
-      "snippet": "0 🎥 https://www.insta360.com/sal/x5?utm_term=INR1SAA Unser Affiliate-Code: INR1SAA ⛑️🔒 @Abusgroup ⛑️🔒 Unsere Helme und Fahrradschlösser https://",
       "status": "pending"
     },
     {
@@ -125,20 +238,6 @@
       "status": "pending"
     },
     {
-      "id": "cand-pace-der-ausdauerpodcast-pace",
-      "code": "PACE",
-      "brand": "PILLAR Performance",
-      "brandId": "pillar",
-      "percent": 10,
-      "source": "PACE - der Ausdauerpodcast",
-      "sourceType": "podcast",
-      "episode": "Vom Profi lernen: Watt-Werte, Puls, Training & richtige Ziele + Ironman Frankfurt | mit Jonas Hoffmann | Vision Weltspitze",
-      "date": "2026-06-19",
-      "url": "https://podcasters.spotify.com/pod/show/marvin-neumann7/episodes/Vom-Profi-lernen-Watt-Werte--Puls--Training--richtige-Ziele--Ironman-Frankfurt--mit-Jonas-Hoffmann--Vision-Weltspitze-e3ku2jh",
-      "snippet": "⁠⁠⁠⁠⁠⁠⁠⁠⁠⁠⁠⁠⁠ WERBEPARTNER ⁠feels.like | 10% Rabatt auf alles mit dem Code: PACE ⁠PILLAR Performance | Creatin, Rabatt mit dem CODE: PACE MNSTRY",
-      "status": "pending"
-    },
-    {
       "id": "cand-pace-der-ausdauerpodcast-pacetri20",
       "code": "PACETRI20",
       "brand": "PILLAR Performance",
@@ -163,29 +262,6 @@
       "date": "2026-06-18",
       "url": "https://www.besenwagen.com/403-einseitigaero",
       "snippet": "nd Besenwagen bei der Erholung punkten und dabei noch sparen! Mit dem Code BESENWAGEN gibt es 10% Rabatt auf alle Produkte (ausser Sale) → blackroll.d",
-      "status": "pending"
-    },
-    {
-      "id": "cand-that-triathlon-show-tts",
-      "code": "TTS",
-      "source": "That Triathlon Show",
-      "sourceType": "podcast",
-      "episode": "Effective training on 7 hours per week, using running power to test and compare shoes, and Ironman training for fast-twitch dominant athletes | Q&A",
-      "date": "2026-06-18",
-      "url": "https://scientifictriathlon.com/tts702/",
-      "snippet": "gradients, real visuals, and real feel! Head to rouvy.com and use the code TTS to get your first month free on top of a 7-day free trial. Effor",
-      "status": "pending"
-    },
-    {
-      "id": "cand-that-triathlon-show-tts15",
-      "code": "TTS15",
-      "percent": 15,
-      "source": "That Triathlon Show",
-      "sourceType": "podcast",
-      "episode": "Effective training on 7 hours per week, using running power to test and compare shoes, and Ironman training for fast-twitch dominant athletes | Q&A",
-      "date": "2026-06-18",
-      "url": "https://scientifictriathlon.com/tts702/",
-      "snippet": "gles ruin another swim. Go to shop.effortlessswimming.com and use the code TTS15 to get 15% off your goggles, and get a free two-month Effortless",
       "status": "pending"
     },
     {
@@ -222,20 +298,6 @@
       "date": "2026-06-16",
       "url": "https://watt-is-los-podcast.captivate.fm/episode/danke-fur-4-5-jahre-watt-is-los-behind-the-scenes",
       "snippet": "und direkt mit passenden Marken umsetzen. Jetzt registrieren und mit Code PODCAST den ersten Monat kostenlos testen. Hier kostenfrei dein Athleten",
-      "status": "pending"
-    },
-    {
-      "id": "cand-some-work-all-play-swap",
-      "code": "SWAP",
-      "brand": "Wahoo",
-      "brandId": "wahoo",
-      "shopUrl": "https://janji.com",
-      "source": "Some Work All Play",
-      "sourceType": "podcast",
-      "episode": "315. How Lower Carb Arguments Miss The Mark, Answering Bicarb Questions, Overload Weeks, and Heat Training!",
-      "date": "2026-06-16",
-      "url": "https://podcasters.spotify.com/pod/show/someworkallplay/episodes/315--How-Lower-Carb-Arguments-Miss-The-Mark--Answering-Bicarb-Questions--Overload-Weeks--and-Heat-Training-e3ksh8n",
-      "snippet": "d here: thefeed.com/swap Buy Janji's amazing gear: https://janji.com (code \"SWAP\") Wahoo Kickr Run treadmill: https://www.wahoofitness.com/devic",
       "status": "pending"
     },
     {
@@ -308,30 +370,6 @@
       "status": "pending"
     },
     {
-      "id": "cand-the-strength-running-podcast-jason15",
-      "code": "jason15",
-      "percent": 15,
-      "source": "The Strength Running Podcast",
-      "sourceType": "podcast",
-      "episode": "Plyometrics: How to Start the Easy Way, with 5x National Champ Eoin Everard",
-      "date": "2026-06-11",
-      "url": "https://strengthrunning.libsyn.com/plyometrics-how-to-start-the-easy-way-with-5x-national-champ-eoin-everard",
-      "snippet": "in! Thank you Previnex! Get yourself 15% off your first purchase with code jason15 here . Previnex is a unique supplement company - one that I trus",
-      "status": "pending"
-    },
-    {
-      "id": "cand-the-strength-running-podcast-strengthrun10",
-      "code": "STRENGTHRUN10",
-      "percent": 10,
-      "source": "The Strength Running Podcast",
-      "sourceType": "podcast",
-      "episode": "Plyometrics: How to Start the Easy Way, with 5x National Champ Eoin Everard",
-      "date": "2026-06-11",
-      "url": "https://strengthrunning.libsyn.com/plyometrics-how-to-start-the-easy-way-with-5x-national-champ-eoin-everard",
-      "snippet": "arned how important (and rare) this simple movement is. Save 10% with code STRENGTHRUN10 at checkout at moboboard.com . Thanks to The Performance Trainin",
-      "status": "pending"
-    },
-    {
       "id": "cand-frodeno-going-mental-ironman10",
       "code": "IRONMAN10",
       "brand": "Ryzon",
@@ -359,21 +397,6 @@
       "date": "2026-06-08",
       "url": "https://radio-rtw.blogs.audiorella.com/69-new-episode",
       "snippet": "rtner ist BLACKROLL Hier geht es direkt zum Recovery Pillow . Mit dem Code RTW10 spart ihr 10%. Wir wünschen erholsamen Schlaf! Alle Infos, Rabat",
-      "status": "pending"
-    },
-    {
-      "id": "cand-the-nero-show-nero10",
-      "code": "NERO10",
-      "brand": "Specialized",
-      "brandId": "specialized",
-      "percent": 10,
-      "shopUrl": "https://velotoze.com/",
-      "source": "The NERO Show",
-      "sourceType": "podcast",
-      "episode": "Vingegaard Back to Tadej Level? + New S-Works Crux 5 | NERO Show",
-      "date": "2026-06-03",
-      "url": "https://shows.acast.com/the-nero-show-1/episodes/vingegaard-back-to-tadej-level-new-s-works-crux-5-nero-show",
-      "snippet": "Pro and Chris chats about the Australian Gravel Championship. 🧦 Use Code NERO10 for 10% off the best aero accessories: https://velotoze.com/ 💻",
       "status": "pending"
     },
     {
