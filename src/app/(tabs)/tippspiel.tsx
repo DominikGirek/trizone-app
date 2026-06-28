@@ -11,6 +11,7 @@ import { useTheme } from '@/hooks/use-theme';
 import type { AppLanguage } from '@/i18n';
 import { countryFlag, formatDate } from '@/lib/format';
 import { isTipLocked, TIP_SIZE } from '@/lib/tippspiel';
+import { useAuth } from '@/store/auth';
 import { useTips } from '@/store/tips';
 
 // Clearly-labelled PREVIEW standings — illustrative only (the real list goes live with accounts in P3).
@@ -26,6 +27,7 @@ export default function TippspielScreen() {
   const lang = i18n.language as AppLanguage;
   const theme = useTheme();
   const { list } = useTips();
+  const { signedIn, displayName } = useAuth();
 
   const myTips = list();
 
@@ -36,6 +38,28 @@ export default function TippspielScreen() {
         <ThemedText type="small" themeColor="textSecondary" style={styles.intro}>
           {t('tippspiel.intro')}
         </ThemedText>
+
+        {/* Account / sign-in */}
+        <Pressable
+          onPress={() => router.push('/login')}
+          style={({ pressed }) => [styles.account, { backgroundColor: theme.backgroundElement }, pressed && { opacity: 0.8 }]}>
+          <Ionicons name={signedIn ? 'person-circle' : 'log-in-outline'} size={26} color={theme.primary} />
+          <View style={styles.flex}>
+            {signedIn ? (
+              <ThemedText type="smallBold" numberOfLines={1}>
+                {t('tippspiel.account', { name: displayName ?? '' })}
+              </ThemedText>
+            ) : (
+              <>
+                <ThemedText type="smallBold">{t('tippspiel.signInCta')}</ThemedText>
+                <ThemedText type="small" themeColor="textSecondary">
+                  {t('tippspiel.signInSub')}
+                </ThemedText>
+              </>
+            )}
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={theme.textSecondary} />
+        </Pressable>
 
         {/* Meine Tipps */}
         <ThemedText type="smallBold" style={styles.section}>
@@ -129,6 +153,7 @@ const styles = StyleSheet.create({
   content: { padding: Spacing.three, paddingBottom: Spacing.five, gap: Spacing.one },
   flex: { flex: 1 },
   intro: { lineHeight: 19, marginBottom: Spacing.two },
+  account: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, padding: Spacing.three, borderRadius: 14 },
   section: { fontSize: 15, fontWeight: '700', letterSpacing: -0.2, marginTop: Spacing.three, marginBottom: Spacing.one },
   sectionRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   empty: {

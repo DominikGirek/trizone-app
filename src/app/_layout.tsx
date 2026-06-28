@@ -18,6 +18,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ToastProvider } from '@/components/Toast';
 import { Colors } from '@/constants/theme';
 import '@/i18n';
+import { AuthProvider } from '@/store/auth';
 import { BookmarksProvider } from '@/store/bookmarks';
 import { CodeVotesProvider } from '@/store/codeVotes';
 import { PushSync } from '@/components/PushSync';
@@ -64,6 +65,7 @@ function NavigationStack() {
         <Stack.Screen name="report" options={{ headerShown: false, presentation: 'modal' }} />
         <Stack.Screen name="following" options={{ headerShown: false, presentation: 'modal' }} />
         <Stack.Screen name="my-races" options={{ headerShown: false, presentation: 'modal' }} />
+        <Stack.Screen name="login" options={{ headerShown: false, presentation: 'modal' }} />
         <Stack.Screen name="race/[id]" options={{ title: '', headerBackTitle: '' }} />
         <Stack.Screen name="event/[id]" options={{ title: '', headerBackTitle: '' }} />
         <Stack.Screen name="local/[id]" options={{ title: '', headerBackTitle: '' }} />
@@ -95,7 +97,8 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
-          <SettingsProvider>
+          <AuthProvider>
+            <SettingsProvider>
             <FavoritesProvider>
               <BookmarksProvider>
                 <RemindersProvider>
@@ -117,6 +120,7 @@ export default function RootLayout() {
               </BookmarksProvider>
             </FavoritesProvider>
           </SettingsProvider>
+          </AuthProvider>
         </QueryClientProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

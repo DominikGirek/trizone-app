@@ -391,7 +391,26 @@
     "preview": "Vorschau",
     "previewNote": "Beispiel-Ansicht. Sobald Accounts da sind, zählt jeder Tipp hier — global und in deinen Gruppen.",
     "points": "Pkt",
-    "groupsSoon": "Gruppen & Vereine kommen bald"
+    "groupsSoon": "Gruppen & Vereine kommen bald",
+    "signInCta": "Anmelden zum Mittippen",
+    "signInSub": "E-Mail oder Apple — in Sekunden",
+    "account": "Angemeldet als {{name}}"
+  },
+  "auth": {
+    "title": "Anmelden",
+    "intro": "Melde dich an, um zu tippen, Ranglisten zu sehen und Gruppen beizutreten.",
+    "or": "oder",
+    "emailPlaceholder": "deine@email.de",
+    "sendCode": "Code per E-Mail senden",
+    "codeSent": "Code an {{email}} gesendet. Gib ihn unten ein.",
+    "verify": "Bestätigen",
+    "changeEmail": "E-Mail ändern",
+    "signedInToast": "Angemeldet",
+    "signedOutToast": "Abgemeldet",
+    "signedInAs": "Angemeldet als",
+    "signOut": "Abmelden",
+    "errorGeneric": "Hat nicht geklappt. Versuch's nochmal.",
+    "codeWrong": "Code stimmt nicht."
   },
   "startlist": {
     "title": "Profi-Starterliste",
