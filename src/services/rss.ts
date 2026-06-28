@@ -126,8 +126,23 @@ async function fetchFeed(feed: (typeof FEEDS)[number]): Promise<Article[]> {
 
 /** Aggregate, de-duplicate and sort all feeds by recency. */
 export async function aggregateFeeds(): Promise<Article[]> {
-  const results = await Promise.all(FEEDS.map(fetchFeed));
-  const all = results.flat().filter((a) => a.title && a.link);
+  // Collect feeds as they arrive and DON'T let the slowest one hold up the dashboard:
+  // resolve when all feeds settle OR a soft deadline passes — whichever comes first.
+  // (Per-feed timeout still applies; feeds that miss the deadline fold into the next
+  // background refresh / snapshot.)
+  const collected: Article[][] = [];
+  const tasks = FEEDS.map((f) =>
+    fetchFeed(f)
+      .then((a) => {
+        collected.push(a);
+      })
+      .catch(() => {}),
+  );
+  await Promise.race([
+    Promise.allSettled(tasks),
+    new Promise<void>((resolve) => setTimeout(resolve, 4000)),
+  ]);
+  const all = collected.flat().filter((a) => a.title && a.link);
 
   const seen = new Set<string>();
   const deduped = all.filter((a) => {
