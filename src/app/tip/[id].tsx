@@ -69,11 +69,11 @@ export default function TipScreen() {
           <RaceTipResult raceId={vm.id} result={tipResult} />
         ) : entries && entries.length ? (
           <>
-            {field?.provisional && (
+            {(field?.provisional || field?.partial) && (
               <View style={[styles.provisional, { borderColor: theme.border }]}>
                 <Ionicons name="information-circle-outline" size={16} color={theme.textSecondary} />
                 <ThemedText type="small" themeColor="textSecondary" style={styles.flex}>
-                  {t('tip.provisional')}
+                  {t(field.partial ? 'tip.partial' : 'tip.provisional')}
                 </ThemedText>
               </View>
             )}

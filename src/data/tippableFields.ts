@@ -16,6 +16,8 @@ export interface TippableField {
   verifiedAt: string;
   /** True if the field is a pre-race provisional/tentative start list (may still change). */
   provisional?: boolean;
+  /** True if only the ALREADY-QUALIFIED athletes are listed and the field still grows (e.g. Kona). */
+  partial?: boolean;
 }
 
 export const tippableFields: TippableField[] = [
@@ -33,6 +35,37 @@ export const tippableFields: TippableField[] = [
     source: 'stats.protriathletes.org/race/vancouver-t100/2026/participants (tentative)',
     verifiedAt: '2026-06-28',
     provisional: true,
+  },
+  {
+    // IRONMAN World Championship Kona 2026 — single-day, BOTH genders. Only the already-QUALIFIED pros
+    // (TriRating qualification tracker); the field keeps growing through the season, so partial=true.
+    raceId: 'se-im-worlds-kona',
+    men: [
+      'kristian-blummenfelt', 'gustav-iden', 'sam-laidlow', 'leonard-arnold', 'marius-bjerkeset',
+      'casper-stornes', 'rasmus-svenningsson', 'cameron-wurf', 'ben-kanute', 'menno-koolhaas',
+      'sam-long', 'almog-elazary', 'arthur-horseau', 'sebastian-norberg', 'michele-sarzilla',
+      'jumpei-furuya', 'cameron-main', 'caleb-noble', 'nick-thompson', 'trevor-foley', 'matt-hanson',
+      'pierre-le-corre', 'jack-moody', 'brock-hoel', 'kieran-lindars', 'vincent-luis', 'jonas-schomburg',
+      'marten-van-riel', 'rudy-von-berg', 'florian-angert', 'matthew-marquardt', 'tristan-olij',
+      'mikel-ugarte-ramos', 'patrick-lange', 'damien-le-mesnager', 'jordi-montraveta-moya',
+      'arnaud-guilloux', 'wilhelm-hirsch', 'youri-keulen', 'benjamin-hill', 'jarrod-osborne',
+      'jon-saeveras-breivold', 'mattia-ceccarelli', 'antonio-benito-lopez', 'magnus-ditlev',
+      'nathan-guerbeur', 'jamie-riddle', 'kacper-stepniak', 'jan-stratmann',
+    ],
+    women: [
+      'chelsea-sodaro', 'lucy-charles-barclay', 'franzi-hofmann', 'rosie-wild', 'danielle-fauteux',
+      'anna-pabinger', 'solveig-lovseth', 'alice-alberts', 'elisabetta-curridori', 'rachel-zilinskas',
+      'arlette-mariana-gonzalez-hurtado', 'marta-lagownik', 'danielle-lewis', 'sara-svensk', 'kate-curran',
+      'charlotte-mcshane', 'anne-sophie-pierre', 'lotte-wilms', 'hannah-berry', 'regan-hollioake',
+      'tamara-jewett', 'kat-matthews', 'jackie-hering', 'taylor-knibb', 'gabrielle-lumkes', 'marta-sanchez',
+      'grace-thek', 'jana-uderstadt', 'daniela-bleymehl', 'daisy-davies', 'katrine-graesboll-christensen',
+      'henrike-gueber', 'rebecca-anderbury', 'nina-derron', 'nikita-paskiewiez', 'romina-biagioli',
+      'julie-iemmolo', 'pamella-oliveira', 'kaidi-kivioja', 'fenella-langridge', 'india-lee',
+      'lisa-perterer', 'laura-philipp', 'marjolaine-pierre', 'penny-slater', 'skye-wallace',
+    ],
+    source: 'trirating.com/kona-2026 (qualified so far)',
+    verifiedAt: '2026-06-28',
+    partial: true,
   },
 ];
 

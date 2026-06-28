@@ -377,7 +377,8 @@
     "pick": "Tippen",
     "noListTitle": "Startliste folgt",
     "noListHint": "Die Startliste ist noch nicht da — schau kurz vor dem Rennen wieder rein.",
-    "provisional": "Vorläufige Startliste — kann sich bis zum Start noch ändern."
+    "provisional": "Vorläufige Startliste — kann sich bis zum Start noch ändern.",
+    "partial": "Bisher Qualifizierte — das Feld wächst noch bis zum Renntag."
   },
   "tippspiel": {
     "title": "Tippspiel",
