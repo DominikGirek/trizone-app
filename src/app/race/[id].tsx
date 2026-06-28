@@ -40,7 +40,7 @@ import { getPrize } from '@/data/tippspielPrizes';
 import { isTippableRace } from '@/lib/tippable';
 import { getLocalEventById, providerLabel } from '@/services/localEvents';
 import { fetchNews } from '@/services/news';
-import { getRaceById, getRaceStartList, getResults, raceKey, startPointFor } from '@/services/races';
+import { getRaceById, getRaceEntries, getRaceStartList, getResults, raceKey, startPointFor } from '@/services/races';
 import { fetchRaceNews } from '@/services/raceNews';
 import { swimVenue } from '@/services/venue';
 import { useMyRaces } from '@/store/myRaces';
@@ -197,6 +197,12 @@ export default function RaceScreen() {
     enabled: !!startKey,
   });
   const hasStartList = !!startList?.entries.length;
+  // Pool to tip from: live start list OR a curated field (so curated-field races are tippable here too).
+  const { data: tipEntries } = useQuery({
+    queryKey: ['raceEntries', vm?.id],
+    queryFn: () => getRaceEntries(vm!.id, vm!.name, vm!.date),
+    enabled: !!vm,
+  });
 
   // Local events have no curated venue → resolve the swim water body via OSM (gated to the town).
   // Series/pro races use the curated raceVenues (startPointFor) instead.
@@ -342,7 +348,7 @@ export default function RaceScreen() {
   const tipResult = getRaceResult(vm.id);
   const racePrize = getPrize(vm.id);
   const tippable = isTippableRace(vm);
-  const showTip = tippable && (hasStartList || !!tipResult);
+  const showTip = tippable && (!!tipEntries?.length || !!tipResult);
   const tabs: { id: RaceTab; label: string }[] = [
     { id: 'overview', label: t('raceTab.overview') },
     ...(showTip ? [{ id: 'tip' as RaceTab, label: t('raceTab.tip') }] : []),
@@ -483,14 +489,14 @@ export default function RaceScreen() {
             )}
             {tipResult ? (
               <RaceTipResult raceId={vm.id} result={tipResult} />
-            ) : startList ? (
+            ) : tipEntries && tipEntries.length ? (
               <RaceTipPicker
                 raceId={vm.id}
                 raceName={cleanName}
                 raceDate={vm.date}
                 raceKind={isPro ? 'pro' : 'local'}
                 raceCountry={vm.country}
-                entries={startList.entries}
+                entries={tipEntries}
               />
             ) : null}
           </>

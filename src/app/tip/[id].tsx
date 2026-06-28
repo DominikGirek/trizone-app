@@ -17,7 +17,7 @@ import { getPrize } from '@/data/tippspielPrizes';
 import { countryFlag, formatDate } from '@/lib/format';
 import type { AppLanguage } from '@/i18n';
 import { getLocalEventById } from '@/services/localEvents';
-import { getRaceStartList, raceKey } from '@/services/races';
+import { getRaceEntries } from '@/services/races';
 
 /**
  * Focused "tip this race" screen — the direct door from the Tippspiel hub (no detour through the race
@@ -36,11 +36,10 @@ export default function TipScreen() {
     enabled: !!id,
   });
 
-  const startKey = vm ? raceKey(vm.name, vm.date) : '';
-  const { data: startList } = useQuery({
-    queryKey: ['startlist', startKey],
-    queryFn: () => getRaceStartList(startKey),
-    enabled: !!startKey,
+  const { data: entries } = useQuery({
+    queryKey: ['raceEntries', id],
+    queryFn: () => getRaceEntries(vm!.id, vm!.name, vm!.date),
+    enabled: !!vm,
   });
 
   if (isLoading) return <LoadingState />;
@@ -66,14 +65,14 @@ export default function TipScreen() {
 
         {tipResult ? (
           <RaceTipResult raceId={vm.id} result={tipResult} />
-        ) : startList ? (
+        ) : entries && entries.length ? (
           <RaceTipPicker
             raceId={vm.id}
             raceName={vm.name}
             raceDate={vm.date}
             raceKind="local"
             raceCountry={vm.country}
-            entries={startList.entries}
+            entries={entries}
           />
         ) : (
           <View style={[styles.soon, { borderColor: theme.border }]}>

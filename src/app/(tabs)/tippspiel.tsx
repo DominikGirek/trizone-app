@@ -14,6 +14,7 @@ import { useTheme } from '@/hooks/use-theme';
 import type { AppLanguage } from '@/i18n';
 import { countryFlag, formatDate } from '@/lib/format';
 import { getPrize, SEASON } from '@/data/tippspielPrizes';
+import { getTippableField } from '@/data/tippableFields';
 import { storage, StorageKeys } from '@/lib/storage';
 import { isTipLocked, TIP_SIZE } from '@/lib/tippspiel';
 import { getAllEvents, openTippableRaces } from '@/services/events';
@@ -106,7 +107,7 @@ export default function TippspielScreen() {
             </ThemedText>
             {openRaces.slice(0, 5).map((i) => {
               const tipped = hasTip(i.id);
-              const hasList = startKeys.includes(raceKey(i.event.name, i.date));
+              const hasList = startKeys.includes(raceKey(i.event.name, i.date)) || !!getTippableField(i.id);
               return (
                 <Pressable
                   key={i.id}

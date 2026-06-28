@@ -1,7 +1,8 @@
 import raceVenuesData from '@/data/raceVenues.json';
+import { getTippableField } from '@/data/tippableFields';
 import { races as mockRaces, racesById as mockRacesById } from '@/mocks/events';
 import { resultsByRace } from '@/mocks/results';
-import { getAthletes } from '@/services/athletes';
+import { getAthletes, getAthletesByIds } from '@/services/athletes';
 import { fetchWtcsEvents } from '@/services/worldTriathlon';
 import type { Athlete, AthleteStart, Race, RaceResult, SeriesId } from '@/types';
 
@@ -155,4 +156,27 @@ export async function getRaceStartList(key: string, now = Date.now()): Promise<R
   const longest = entries.map((e) => e.start).sort((a, b) => b.event.length - a.event.length)[0];
   const name = longest.event.replace(/\s*\([^)]*\)/g, '').trim(); // drop "(Titelverteidigung)" etc.
   return { key, name, date: longest.date, series: longest.series, location: longest.location, entries };
+}
+
+/**
+ * The pool to tip from: the LIVE start list (athletes' upcoming starts) if we have one, otherwise a
+ * curated field (src/data/tippableFields). Gender is taken from the field side an athlete is listed on,
+ * so grouping is right even if a roster gender is missing. Null = nothing to tip yet ("Startliste folgt").
+ */
+export async function getRaceEntries(raceId: string, name: string, date: string): Promise<StartListEntry[] | null> {
+  const live = await getRaceStartList(raceKey(name, date));
+  if (live?.entries.length) return live.entries;
+
+  const field = getTippableField(raceId);
+  if (!field) return null;
+  const athletes = await getAthletesByIds([...field.men, ...field.women]);
+  const byId = new Map(athletes.map((a) => [a.id, a] as const));
+  const mk = (id: string, gender: 'men' | 'women'): StartListEntry | null => {
+    const a = byId.get(id);
+    return a ? { athlete: { ...a, gender }, start: { date, event: name, confidence: 'confirmed' } } : null;
+  };
+  const entries = [...field.men.map((id) => mk(id, 'men')), ...field.women.map((id) => mk(id, 'women'))].filter(
+    (e): e is StartListEntry => !!e,
+  );
+  return entries.length ? entries : null;
 }
