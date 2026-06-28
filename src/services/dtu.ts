@@ -1,3 +1,4 @@
+import { fetchWithTimeout } from '@/lib/fetchTimeout';
 import type { LocalEvent, TimingProvider } from '@/types';
 
 /**
@@ -76,8 +77,10 @@ async function geocode(town: string): Promise<{ lat: number; lon: number } | nul
   const key = cleanTown(town);
   if (geoCache.has(key)) return geoCache.get(key)!;
   try {
-    const res = await fetch(
+    const res = await fetchWithTimeout(
       `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(key)}&count=1&language=de&country=DE`,
+      {},
+      5000,
     );
     const json = await res.json();
     const r = json?.results?.[0];
@@ -119,7 +122,9 @@ function parseListRows(html: string): ListRow[] {
 }
 
 function fetchPage(page: number): Promise<string> {
-  return fetch(`${LIST_URL}?page=${page}`, { headers: { 'User-Agent': UA } })
+  // Hard per-page timeout: a single slow DTU page must never stall the ingest
+  // (5 batched rounds × no timeout was the cold-start hang).
+  return fetchWithTimeout(`${LIST_URL}?page=${page}`, { headers: { 'User-Agent': UA } }, 5000)
     .then((r) => (r.ok ? r.text() : ''))
     .catch(() => '');
 }

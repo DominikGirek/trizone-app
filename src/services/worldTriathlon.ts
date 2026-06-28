@@ -1,3 +1,4 @@
+import { fetchWithTimeout } from '@/lib/fetchTimeout';
 import type { Athlete, Gender, Race, RankingEntry, SeriesId } from '@/types';
 
 /**
@@ -20,9 +21,11 @@ async function wtFetch<T>(path: string, params: Record<string, string | number> 
   const qs = new URLSearchParams(
     Object.entries(params).map(([k, v]) => [k, String(v)]),
   ).toString();
-  const res = await fetch(`${BASE}${path}${qs ? `?${qs}` : ''}`, {
-    headers: { apikey: API_KEY, Accept: 'application/json' },
-  });
+  const res = await fetchWithTimeout(
+    `${BASE}${path}${qs ? `?${qs}` : ''}`,
+    { headers: { apikey: API_KEY, Accept: 'application/json' } },
+    7000,
+  );
   if (!res.ok) throw new Error(`WT API ${path} → ${res.status}`);
   const json = await res.json();
   return json.data as T;

@@ -21,7 +21,15 @@ export type FeedItem =
   | { kind: 'series'; id: string; date: string; status: LocalEvent['status']; event: LocalEventWithDistance };
 
 export async function getAllEvents(coords?: Coords | null): Promise<FeedItem[]> {
-  const [races, locals, past] = await Promise.all([getRaces(), getLocalEvents(coords), getPastEvents()]);
+  // Resilient: one slow/failing source must never blank out the whole feed.
+  const [racesR, localsR, pastR] = await Promise.allSettled([
+    getRaces(),
+    getLocalEvents(coords),
+    getPastEvents(),
+  ]);
+  const races = racesR.status === 'fulfilled' ? racesR.value : [];
+  const locals = localsR.status === 'fulfilled' ? localsR.value : [];
+  const past = pastR.status === 'fulfilled' ? pastR.value : [];
 
   const withDist = (e: LocalEvent): LocalEventWithDistance => ({
     ...e,

@@ -2,6 +2,7 @@ import { Platform } from 'react-native';
 
 import type { Coords } from '@/hooks/use-location';
 import { distanceKm } from '@/lib/format';
+import { readSnapshot, writeSnapshot } from '@/lib/snapshotCache';
 import {
   featuredLocalEvents,
   localEvents as sampleEvents,
@@ -22,10 +23,34 @@ export interface LocalEventWithDistance extends LocalEvent {
  * - On any failure: fall back to the curated sample so the UI never breaks.
  */
 let listCache: LocalEvent[] | null = null;
+let dtuRefreshing = false;
+const DTU_TTL = 6 * 60 * 60 * 1000; // 6h — the calendar changes at day granularity
+
+async function ingestAndPersist(maxPages?: number): Promise<LocalEvent[]> {
+  const data = await ingestLocalEvents(maxPages);
+  if (data.length) {
+    listCache = data;
+    void writeSnapshot('dtuEvents', data);
+  }
+  return data;
+}
+
+/** Pull the COMPLETE calendar in the background (for the Events tab + next launch). */
+function refreshDtuInBackground(): void {
+  if (dtuRefreshing) return;
+  dtuRefreshing = true;
+  ingestAndPersist()
+    .catch(() => {})
+    .finally(() => {
+      dtuRefreshing = false;
+    });
+}
 
 async function loadEvents(): Promise<LocalEvent[]> {
-  try {
-    if (Platform.OS === 'web') {
+  if (listCache) return listCache;
+
+  if (Platform.OS === 'web') {
+    try {
       const res = await fetch('/api/local-events');
       if (res.ok) {
         const data = (await res.json()) as LocalEvent[];
@@ -34,12 +59,28 @@ async function loadEvents(): Promise<LocalEvent[]> {
           return data;
         }
       }
-    } else {
-      const data = await ingestLocalEvents();
-      if (data.length) {
-        listCache = data;
-        return data;
-      }
+    } catch {
+      // fall through to sample
+    }
+    return sampleEvents;
+  }
+
+  // Native: serve the last good snapshot INSTANTLY (no network on the hot path),
+  // then revalidate in the background if it's stale.
+  const snap = await readSnapshot<LocalEvent[]>('dtuEvents');
+  if (snap?.data?.length) {
+    listCache = snap.data;
+    if (Date.now() - snap.at > DTU_TTL) refreshDtuInBackground();
+    return snap.data;
+  }
+
+  // First-ever launch (no snapshot): a BOUNDED ingest so the app paints fast,
+  // then grab the full calendar in the background for the Events tab / next time.
+  try {
+    const data = await ingestAndPersist(8);
+    if (data.length) {
+      refreshDtuInBackground();
+      return data;
     }
   } catch {
     // fall through to sample
