@@ -440,6 +440,21 @@
     "noTipHint": "Here's the official result:",
     "source": "Result verified · source: {{source}}"
   },
+  "handle": {
+    "title": "Your name",
+    "intro": "This is how you appear on the leaderboards. You can change it anytime.",
+    "placeholder": "e.g. SwimBikeKlaus",
+    "save": "Save",
+    "saving": "Saving …",
+    "savedToast": "Name saved",
+    "taken": "That name is taken — try another.",
+    "error": "Something went wrong. Please try again.",
+    "secure": "Secure it later with email or Apple",
+    "playingAs": "Playing as {{name}}",
+    "tapToEdit": "Tap to change",
+    "chooseCta": "Choose your name",
+    "chooseSub": "How you appear on the leaderboard"
+  },
   "auth": {
     "title": "Sign in",
     "intro": "Sign in to play, see leaderboards and join groups.",

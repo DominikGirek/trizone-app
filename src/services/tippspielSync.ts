@@ -51,6 +51,30 @@ export async function fetchLeaderboard(limit = 100): Promise<LeaderboardRow[]> {
   return data as LeaderboardRow[];
 }
 
+// ── Handle (public leaderboard name) ───────────────────────────────────────────
+/** The caller's chosen public name, or null if none set / not signed in. Never creates a session. */
+export async function fetchMyHandle(): Promise<string | null> {
+  if (!authConfigured) return null;
+  const { data } = await supabase.auth.getSession();
+  const uid = data.session?.user?.id;
+  if (!uid) return null;
+  const { data: row } = await supabase.from('profiles').select('handle').eq('id', uid).maybeSingle();
+  return row?.handle ?? null;
+}
+
+/** Set the public name. Creates an (anonymous) identity if needed. `taken` if the name is in use. */
+export async function setMyHandle(handle: string): Promise<{ ok: boolean; error?: 'taken' | 'failed' }> {
+  if (!authConfigured) return { ok: false, error: 'failed' };
+  const uid = await ensureSession();
+  if (!uid) return { ok: false, error: 'failed' };
+  const { error } = await supabase.from('profiles').upsert({ id: uid, handle: handle.trim() });
+  if (error) {
+    if (error.code === '23505' || /duplicate|unique/i.test(error.message)) return { ok: false, error: 'taken' };
+    return { ok: false, error: 'failed' };
+  }
+  return { ok: true };
+}
+
 // ── Groups (P4) ───────────────────────────────────────────────────────────────
 export interface Group {
   id: string;

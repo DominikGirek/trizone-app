@@ -440,6 +440,21 @@
     "noTipHint": "So lief das Rennen offiziell:",
     "source": "Ergebnis verifiziert · Quelle: {{source}}"
   },
+  "handle": {
+    "title": "Dein Name",
+    "intro": "Unter diesem Namen erscheinst du in den Ranglisten. Du kannst ihn jederzeit ändern.",
+    "placeholder": "z. B. SwimBikeKlaus",
+    "save": "Speichern",
+    "saving": "Speichert …",
+    "savedToast": "Name gespeichert",
+    "taken": "Name schon vergeben — nimm einen anderen.",
+    "error": "Hat nicht geklappt. Bitte später erneut.",
+    "secure": "Später mit E-Mail oder Apple sichern",
+    "playingAs": "Du spielst als {{name}}",
+    "tapToEdit": "Tippen zum Ändern",
+    "chooseCta": "Wähle deinen Namen",
+    "chooseSub": "So erscheinst du in der Rangliste"
+  },
   "auth": {
     "title": "Anmelden",
     "intro": "Melde dich an, um zu tippen, Ranglisten zu sehen und Gruppen beizutreten.",

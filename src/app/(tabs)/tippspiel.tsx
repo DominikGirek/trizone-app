@@ -13,8 +13,7 @@ import { useTheme } from '@/hooks/use-theme';
 import type { AppLanguage } from '@/i18n';
 import { countryFlag, formatDate } from '@/lib/format';
 import { isTipLocked, TIP_SIZE } from '@/lib/tippspiel';
-import { fetchGroupGlobalLeaderboard, fetchLeaderboard, fetchMyGroups } from '@/services/tippspielSync';
-import { useAuth } from '@/store/auth';
+import { fetchGroupGlobalLeaderboard, fetchLeaderboard, fetchMyGroups, fetchMyHandle } from '@/services/tippspielSync';
 import { useTips } from '@/store/tips';
 
 export default function TippspielScreen() {
@@ -22,13 +21,13 @@ export default function TippspielScreen() {
   const lang = i18n.language as AppLanguage;
   const theme = useTheme();
   const { list } = useTips();
-  const { signedIn, displayName } = useAuth();
   const { data: board = [] } = useQuery({ queryKey: ['leaderboard'], queryFn: () => fetchLeaderboard() });
   const { data: myGroups = [], refetch: refetchGroups } = useQuery({ queryKey: ['myGroups'], queryFn: fetchMyGroups });
   const { data: groupGlobal = [] } = useQuery({ queryKey: ['groupGlobal'], queryFn: () => fetchGroupGlobalLeaderboard() });
+  const { data: myHandle, refetch: refetchHandle } = useQuery({ queryKey: ['myHandle'], queryFn: fetchMyHandle });
 
-  // Refresh "my groups" whenever the hub regains focus (e.g. after creating/joining one).
-  useFocusEffect(useCallback(() => { refetchGroups(); }, [refetchGroups]));
+  // Refresh identity + groups whenever the hub regains focus (e.g. after setting a name / joining a group).
+  useFocusEffect(useCallback(() => { refetchGroups(); refetchHandle(); }, [refetchGroups, refetchHandle]));
 
   const myTips = list();
 
@@ -40,22 +39,21 @@ export default function TippspielScreen() {
           {t('tippspiel.intro')}
         </ThemedText>
 
-        {/* Account / sign-in */}
+        {/* Identity — your public leaderboard name (works anonymously; secure with an account later) */}
         <Pressable
-          onPress={() => router.push('/login')}
+          onPress={() => router.push(myHandle ? `/handle?current=${encodeURIComponent(myHandle)}` : '/handle')}
           style={({ pressed }) => [styles.account, { backgroundColor: theme.backgroundElement }, pressed && { opacity: 0.8 }]}>
-          <Ionicons name={signedIn ? 'person-circle' : 'log-in-outline'} size={26} color={theme.primary} />
+          <Ionicons name={myHandle ? 'person-circle' : 'person-add-outline'} size={26} color={theme.primary} />
           <View style={styles.flex}>
-            {signedIn ? (
-              <ThemedText type="smallBold" numberOfLines={1}>
-                {t('tippspiel.account', { name: displayName ?? '' })}
-              </ThemedText>
+            {myHandle ? (
+              <>
+                <ThemedText type="smallBold" numberOfLines={1}>{t('handle.playingAs', { name: myHandle })}</ThemedText>
+                <ThemedText type="small" themeColor="textSecondary">{t('handle.tapToEdit')}</ThemedText>
+              </>
             ) : (
               <>
-                <ThemedText type="smallBold">{t('tippspiel.signInCta')}</ThemedText>
-                <ThemedText type="small" themeColor="textSecondary">
-                  {t('tippspiel.signInSub')}
-                </ThemedText>
+                <ThemedText type="smallBold">{t('handle.chooseCta')}</ThemedText>
+                <ThemedText type="small" themeColor="textSecondary">{t('handle.chooseSub')}</ThemedText>
               </>
             )}
           </View>
