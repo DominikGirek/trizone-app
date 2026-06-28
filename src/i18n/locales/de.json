@@ -404,6 +404,7 @@
     "openTitle": "Offene Tipprunden",
     "openTip": "Tippen",
     "openSoon": "Startliste folgt",
+    "openSoonSub": "Noch nicht tippbar — Startliste nicht bekannt",
     "tipped": "getippt",
     "lockHours_one": "noch {{count}} Std",
     "lockHours_other": "noch {{count}} Std",

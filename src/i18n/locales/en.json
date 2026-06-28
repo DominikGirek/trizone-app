@@ -404,6 +404,7 @@
     "openTitle": "Open to tip",
     "openTip": "Tip",
     "openSoon": "Start list soon",
+    "openSoonSub": "Not tippable yet — no start list",
     "tipped": "tipped",
     "lockHours_one": "{{count}} h left",
     "lockHours_other": "{{count}} h left",

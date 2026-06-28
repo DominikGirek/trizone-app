@@ -53,6 +53,17 @@ export default function TippspielScreen() {
 
   const myTips = list();
 
+  // Tippable-now races first; "Startliste folgt" ones (no field yet) sink below + render muted, so it's
+  // clear they can't be tipped yet.
+  const openRows = openRaces
+    .map((i) => ({
+      i,
+      hasList: startKeys.includes(raceKey(i.event.name, i.date)) || !!getTippableField(i.id),
+      tipped: hasTip(i.id),
+    }))
+    .sort((a, b) => Number(b.hasList) - Number(a.hasList))
+    .slice(0, 8);
+
   return (
     <ThemedView style={styles.container}>
       <TopBar title={t('tippspiel.title')} />
@@ -105,21 +116,25 @@ export default function TippspielScreen() {
             <ThemedText type="smallBold" style={styles.section}>
               {t('tippspiel.openTitle')}
             </ThemedText>
-            {openRaces.slice(0, 5).map((i) => {
-              const tipped = hasTip(i.id);
-              const hasList = startKeys.includes(raceKey(i.event.name, i.date)) || !!getTippableField(i.id);
+            {openRows.map(({ i, hasList, tipped }) => {
+              const dimmed = !hasList && !tipped;
               return (
                 <Pressable
                   key={i.id}
                   onPress={() => router.push(`/tip/${i.id}`)}
-                  style={({ pressed }) => [styles.tipCard, { backgroundColor: theme.backgroundElement }, pressed && { opacity: 0.8 }]}>
+                  style={({ pressed }) => [
+                    styles.tipCard,
+                    { backgroundColor: theme.backgroundElement },
+                    dimmed && { opacity: 0.55 },
+                    pressed && { opacity: dimmed ? 0.4 : 0.8 },
+                  ]}>
                   <View style={styles.flex}>
                     <ThemedText type="smallBold" numberOfLines={1}>
                       {i.event.country ? `${countryFlag(i.event.country)} ` : ''}
                       {i.event.name}
                     </ThemedText>
                     <ThemedText type="small" themeColor="textSecondary">
-                      {formatDate(i.date, lang)} · {lockLabel(i.date)}
+                      {formatDate(i.date, lang)} · {hasList || tipped ? lockLabel(i.date) : t('tippspiel.openSoonSub')}
                     </ThemedText>
                   </View>
                   {tipped ? (
@@ -133,6 +148,7 @@ export default function TippspielScreen() {
                     </View>
                   ) : (
                     <View style={[styles.openChip, { backgroundColor: theme.background }]}>
+                      <Ionicons name="time-outline" size={13} color={theme.textSecondary} />
                       <ThemedText type="small" themeColor="textSecondary">{t('tippspiel.openSoon')}</ThemedText>
                     </View>
                   )}
