@@ -11,11 +11,14 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { AnimatedSplash } from '@/components/AnimatedSplash';
 import { ToastProvider } from '@/components/Toast';
+import { getAllEvents } from '@/services/events';
+import { fetchNews } from '@/services/news';
 import { Colors } from '@/constants/theme';
 import '@/i18n';
 import { AuthProvider } from '@/store/auth';
@@ -91,8 +94,28 @@ export default function RootLayout() {
     Archivo_900Black,
   });
 
+  const [ready, setReady] = useState(false);
+  const [splashGone, setSplashGone] = useState(false);
+
   useEffect(() => {
-    if (fontsLoaded) SplashScreen.hideAsync().catch(() => {});
+    if (!fontsLoaded) return;
+    SplashScreen.hideAsync().catch(() => {}); // native splash off — the animated curtain takes over seamlessly
+    let revealed = false;
+    const since = Date.now();
+    const doReveal = () => {
+      if (!revealed) {
+        revealed = true;
+        setReady(true);
+      }
+    };
+    // Warm the first screen's data so the revealed app is ready (no tapping into a still-building UI),
+    // with a small minimum (so the curtain feels intentional) and a hard cap (so it never hangs).
+    Promise.allSettled([
+      queryClient.prefetchQuery({ queryKey: ['events'], queryFn: () => getAllEvents() }),
+      queryClient.prefetchQuery({ queryKey: ['news'], queryFn: fetchNews }),
+    ]).finally(() => setTimeout(doReveal, Math.max(0, 600 - (Date.now() - since))));
+    const cap = setTimeout(doReveal, 2800);
+    return () => clearTimeout(cap);
   }, [fontsLoaded]);
 
   if (!fontsLoaded) return null;
@@ -127,6 +150,7 @@ export default function RootLayout() {
           </AuthProvider>
         </QueryClientProvider>
       </SafeAreaProvider>
+      {!splashGone && <AnimatedSplash reveal={ready} onDone={() => setSplashGone(true)} />}
     </GestureHandlerRootView>
   );
 }
