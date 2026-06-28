@@ -30,7 +30,7 @@ import { hotAlerts } from '@/lib/hotNews';
 import { useHotNewsRead } from '@/store/hotNewsRead';
 import { mentionsAny, pickForYou } from '@/lib/newsTopics';
 import { getAthletesByIds } from '@/services/athletes';
-import { getAllEvents, type FeedItem } from '@/services/events';
+import { getAllEvents, openTippableRaces, type FeedItem } from '@/services/events';
 import { fetchNews } from '@/services/news';
 import { getRaceStartList, raceKey } from '@/services/races';
 import { useFavorites } from '@/store/favorites';
@@ -325,6 +325,8 @@ export default function DashboardScreen() {
       />
     );
 
+  const openTipCount = useMemo(() => openTippableRaces(events ?? []).length, [events]);
+
   // Smart, personalised story-shortcuts (adapt to your race / live state).
   const shortcuts: { emoji: string; title: string; subtitle?: string; accent?: boolean; onPress: () => void }[] = [
     myNext
@@ -335,7 +337,12 @@ export default function DashboardScreen() {
           onPress: openMyNext,
         }
       : { emoji: '🏁', title: t('dashboard.pickRace'), subtitle: t('dashboard.pickRaceSub'), onPress: () => router.push('/pick-race') },
-    { emoji: '🎯', title: t('tabs.tippspiel'), subtitle: t('tippspiel.cardSub'), onPress: () => router.push('/tippspiel') },
+    {
+      emoji: '🎯',
+      title: t('tabs.tippspiel'),
+      subtitle: openTipCount > 0 ? t('tippspiel.openCount', { count: openTipCount }) : t('tippspiel.cardSub'),
+      onPress: () => router.push('/tippspiel'),
+    },
     { emoji: '📅', title: t('quick.races'), subtitle: t('dashboard.calendarSub'), onPress: () => router.push('/events') },
     ...(showMatch ? [{ emoji: '⭐', title: t('dashboard.proStartersShort'), subtitle: nameOf(nextBig), onPress: () => openItem(nextBig) }] : []),
     { emoji: '🏆', title: t('quick.ranking'), subtitle: 'WTCS', onPress: () => router.push('/standings') },

@@ -395,7 +395,16 @@
     "signInCta": "Anmelden zum Mittippen",
     "signInSub": "E-Mail oder Apple — in Sekunden",
     "account": "Angemeldet als {{name}}",
-    "globalEmpty": "Noch keine Wertung — sobald Ergebnisse vorliegen, zählt jeder Tipp hier."
+    "globalEmpty": "Noch keine Wertung — sobald Ergebnisse vorliegen, zählt jeder Tipp hier.",
+    "openTitle": "Offene Tipprunden",
+    "openTip": "Tippen",
+    "tipped": "getippt",
+    "lockHours_one": "noch {{count}} Std",
+    "lockHours_other": "noch {{count}} Std",
+    "lockDays_one": "noch {{count}} Tag",
+    "lockDays_other": "noch {{count}} Tage",
+    "openCount_one": "{{count}} Rennen offen",
+    "openCount_other": "{{count}} Rennen offen"
   },
   "group": {
     "myGroups": "Meine Gruppen",

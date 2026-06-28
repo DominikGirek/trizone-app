@@ -395,7 +395,16 @@
     "signInCta": "Sign in to play",
     "signInSub": "Email or Apple — in seconds",
     "account": "Signed in as {{name}}",
-    "globalEmpty": "No standings yet — once results are in, every tip counts here."
+    "globalEmpty": "No standings yet — once results are in, every tip counts here.",
+    "openTitle": "Open to tip",
+    "openTip": "Tip",
+    "tipped": "tipped",
+    "lockHours_one": "{{count}} h left",
+    "lockHours_other": "{{count}} h left",
+    "lockDays_one": "{{count}} day left",
+    "lockDays_other": "{{count}} days left",
+    "openCount_one": "{{count}} race open",
+    "openCount_other": "{{count}} races open"
   },
   "group": {
     "myGroups": "My groups",

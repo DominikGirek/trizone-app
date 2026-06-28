@@ -13,6 +13,7 @@ import { useTheme } from '@/hooks/use-theme';
 import type { AppLanguage } from '@/i18n';
 import { countryFlag, formatDate } from '@/lib/format';
 import { isTipLocked, TIP_SIZE } from '@/lib/tippspiel';
+import { getAllEvents, openTippableRaces } from '@/services/events';
 import { fetchGroupGlobalLeaderboard, fetchLeaderboard, fetchMyGroups, fetchMyHandle } from '@/services/tippspielSync';
 import { useTips } from '@/store/tips';
 
@@ -20,7 +21,9 @@ export default function TippspielScreen() {
   const { t, i18n } = useTranslation();
   const lang = i18n.language as AppLanguage;
   const theme = useTheme();
-  const { list } = useTips();
+  const { list, hasTip } = useTips();
+  const { data: events = [] } = useQuery({ queryKey: ['events'], queryFn: () => getAllEvents() });
+  const openRaces = openTippableRaces(events);
   const { data: board = [] } = useQuery({ queryKey: ['leaderboard'], queryFn: () => fetchLeaderboard() });
   const { data: myGroups = [], refetch: refetchGroups } = useQuery({ queryKey: ['myGroups'], queryFn: fetchMyGroups });
   const { data: groupGlobal = [] } = useQuery({ queryKey: ['groupGlobal'], queryFn: () => fetchGroupGlobalLeaderboard() });
@@ -28,6 +31,12 @@ export default function TippspielScreen() {
 
   // Refresh identity + groups whenever the hub regains focus (e.g. after setting a name / joining a group).
   useFocusEffect(useCallback(() => { refetchGroups(); refetchHandle(); }, [refetchGroups, refetchHandle]));
+
+  // Time until a race locks (its start) — fed into the funnel rows.
+  const lockLabel = (iso: string) => {
+    const h = Math.max(0, Math.floor((+new Date(iso) - Date.now()) / 3_600_000));
+    return h < 24 ? t('tippspiel.lockHours', { count: h }) : t('tippspiel.lockDays', { count: Math.round(h / 24) });
+  };
 
   const myTips = list();
 
@@ -59,6 +68,44 @@ export default function TippspielScreen() {
           </View>
           <Ionicons name="chevron-forward" size={18} color={theme.textSecondary} />
         </Pressable>
+
+        {/* Offene Tipprunden — discovery funnel */}
+        {openRaces.length > 0 && (
+          <>
+            <ThemedText type="smallBold" style={styles.section}>
+              {t('tippspiel.openTitle')}
+            </ThemedText>
+            {openRaces.slice(0, 5).map((i) => {
+              const tipped = hasTip(i.id);
+              return (
+                <Pressable
+                  key={i.id}
+                  onPress={() => router.push(`/race/${i.id}?kind=local`)}
+                  style={({ pressed }) => [styles.tipCard, { backgroundColor: theme.backgroundElement }, pressed && { opacity: 0.8 }]}>
+                  <View style={styles.flex}>
+                    <ThemedText type="smallBold" numberOfLines={1}>
+                      {i.event.country ? `${countryFlag(i.event.country)} ` : ''}
+                      {i.event.name}
+                    </ThemedText>
+                    <ThemedText type="small" themeColor="textSecondary">
+                      {formatDate(i.date, lang)} · {lockLabel(i.date)}
+                    </ThemedText>
+                  </View>
+                  {tipped ? (
+                    <View style={[styles.openChip, { backgroundColor: theme.background }]}>
+                      <Ionicons name="checkmark-circle" size={14} color={theme.textSecondary} />
+                      <ThemedText type="small" themeColor="textSecondary">{t('tippspiel.tipped')}</ThemedText>
+                    </View>
+                  ) : (
+                    <View style={[styles.openChip, { backgroundColor: theme.primary }]}>
+                      <ThemedText type="small" style={{ color: theme.onPrimary }}>{t('tippspiel.openTip')}</ThemedText>
+                    </View>
+                  )}
+                </Pressable>
+              );
+            })}
+          </>
+        )}
 
         {/* Meine Tipps */}
         <ThemedText type="smallBold" style={styles.section}>
@@ -223,6 +270,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.one + 2,
   },
   statusChip: { paddingHorizontal: Spacing.two, paddingVertical: 3, borderRadius: 999 },
+  openChip: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: Spacing.two, paddingVertical: 4, borderRadius: 999 },
   previewChip: { paddingHorizontal: Spacing.two, paddingVertical: 3, borderRadius: 999, marginTop: Spacing.three },
   board: { borderRadius: 12, borderWidth: StyleSheet.hairlineWidth, overflow: 'hidden' },
   boardRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.three, paddingHorizontal: Spacing.three, paddingVertical: Spacing.two + 2 },

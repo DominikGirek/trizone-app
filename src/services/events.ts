@@ -1,5 +1,7 @@
 import type { Coords } from '@/hooks/use-location';
 import { distanceKm } from '@/lib/format';
+import { isTippableRace } from '@/lib/tippable';
+import { isTipLocked } from '@/lib/tippspiel';
 import { seriesEvents } from '@/mocks/seriesEvents';
 import { getLocalEvents, type LocalEventWithDistance } from '@/services/localEvents';
 import { getPastEvents } from '@/services/pastEvents';
@@ -57,4 +59,19 @@ export async function getAllEvents(coords?: Coords | null): Promise<FeedItem[]> 
     return +new Date(a.date) - +new Date(b.date);
   });
   return items;
+}
+
+/**
+ * The Tippspiel discovery funnel: tippable races (IM Pro Series · Roth · T100 · Kona) that are still
+ * OPEN to tip (not yet locked at the start), soonest first. Drives the "Offene Tipprunden" list + the
+ * dashboard card so users find what to predict instead of hunting through the calendar.
+ */
+export function openTippableRaces(
+  events: FeedItem[],
+  now = Date.now(),
+): Extract<FeedItem, { kind: 'series' | 'local' }>[] {
+  return events
+    .filter((i): i is Extract<FeedItem, { kind: 'series' | 'local' }> => i.kind !== 'pro')
+    .filter((i) => isTippableRace(i.event) && !isTipLocked(i.date, now))
+    .sort((a, b) => +new Date(a.date) - +new Date(b.date));
 }
