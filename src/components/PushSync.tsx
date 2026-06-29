@@ -30,7 +30,12 @@ export function PushSync() {
       ...races.map((r) => ({ kind: 'race' as const, ref_id: r.id, name: r.name })),
       ...(mainId ? [{ kind: 'main_race' as const, ref_id: mainId, name: mainRace?.name }] : []),
     ];
-    syncPush(interests, i18n.language).catch(() => {});
+    // Push registration (getExpoPushTokenAsync = APNs, slow/blocking, + a permission prompt that pauses the
+    // JS runloop) must NEVER run on the cold-start path — it froze the launch. Defer well past startup.
+    const t = setTimeout(() => {
+      syncPush(interests, i18n.language).catch(() => {});
+    }, 5000);
+    return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [athletes.join(','), series.join(','), brands.join(','), raceSig, mainId, i18n.language]);
 
