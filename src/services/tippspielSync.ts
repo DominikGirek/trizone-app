@@ -16,14 +16,28 @@ const clean = (picks: Picks): string[] => picks.map((p) => p ?? '');
  * Ensure we have an identity to write under. Login-at-write: if the user isn't signed in (email/Apple),
  * fall back to an ANONYMOUS Supabase session so they can tip instantly and "claim" the account later.
  * Returns the user id, or null if auth isn't configured / anonymous sign-in is disabled.
+ *
+ * DEDUPED: the Tippspiel tab fires ~5 queries at once on mount, each calling this. Without dedupe they
+ * all raced into signInAnonymously, which supabase-js serializes behind its auth lock → 5 sequential
+ * auth round-trips = a long tab hang. Sharing one in-flight promise collapses that to a single sign-in.
  */
+let inflightSession: Promise<string | null> | null = null;
+
 export async function ensureSession(): Promise<string | null> {
   if (!authConfigured) return null;
-  const { data } = await supabase.auth.getSession();
-  if (data.session?.user) return data.session.user.id;
-  const { data: anon, error } = await supabase.auth.signInAnonymously();
-  if (error) return null;
-  return anon.user?.id ?? null;
+  if (inflightSession) return inflightSession;
+  inflightSession = (async () => {
+    const { data } = await supabase.auth.getSession();
+    if (data.session?.user) return data.session.user.id;
+    const { data: anon, error } = await supabase.auth.signInAnonymously();
+    if (error) return null;
+    return anon.user?.id ?? null;
+  })();
+  try {
+    return await inflightSession;
+  } finally {
+    inflightSession = null;
+  }
 }
 
 /** Upsert the user's single tip for a race. Best-effort: no-ops if unconfigured/offline. */
