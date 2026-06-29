@@ -1,5 +1,6 @@
 import raceVenuesData from '@/data/raceVenues.json';
 import { getTippableField } from '@/data/tippableFields';
+import { mark } from '@/lib/bootTiming';
 import { races as mockRaces, racesById as mockRacesById } from '@/mocks/events';
 import { resultsByRace } from '@/mocks/results';
 import { getAthletes, getAthletesByIds } from '@/services/athletes';
@@ -145,12 +146,14 @@ export async function getStartListKeys(now = Date.now()): Promise<string[]> {
 /** All athletes we believe are starting the race identified by `key`. */
 export async function getRaceStartList(key: string, now = Date.now()): Promise<RaceStartList | null> {
   const athletes = await getAthletes();
+  mark('rsl-athletes↑');
   const entries: StartListEntry[] = [];
   for (const a of athletes) {
     for (const s of a.upcomingStarts ?? []) {
       if (raceKey(s.event, s.date) === key && +new Date(s.date) >= now - 86400000) entries.push({ athlete: a, start: s });
     }
   }
+  mark('rsl-loop↑');
   if (!entries.length) return null;
   entries.sort((x, y) => x.athlete.name.localeCompare(y.athlete.name));
   const longest = entries.map((e) => e.start).sort((a, b) => b.event.length - a.event.length)[0];

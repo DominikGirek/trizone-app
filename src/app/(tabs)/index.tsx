@@ -26,6 +26,7 @@ import { athleteTitle } from '@/lib/athleteTitle';
 import { avatarColor, initials } from '@/lib/avatar';
 import { countryFlag, formatDate, formatKm, timeAgo } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
+import { mark } from '@/lib/bootTiming';
 import { hotAlerts } from '@/lib/hotNews';
 import { useHotNewsRead } from '@/store/hotNewsRead';
 import { mentionsAny, pickForYou } from '@/lib/newsTopics';
@@ -162,12 +163,36 @@ export default function DashboardScreen() {
 
   const { data: events } = useQuery({
     queryKey: ['allEvents', coords?.lat, coords?.lon],
-    queryFn: () => getAllEvents(coords),
+    queryFn: async () => {
+      mark('q-events↓');
+      try {
+        return await getAllEvents(coords);
+      } finally {
+        mark('q-events↑');
+      }
+    },
   });
-  const { data: news, isLoading: newsLoading } = useQuery({ queryKey: ['news'], queryFn: fetchNews });
+  const { data: news, isLoading: newsLoading } = useQuery({
+    queryKey: ['news'],
+    queryFn: async () => {
+      mark('q-news↓');
+      try {
+        return await fetchNews();
+      } finally {
+        mark('q-news↑');
+      }
+    },
+  });
   const { data: favAthletes } = useQuery({
     queryKey: ['favoriteAthletes', athleteIds],
-    queryFn: () => getAthletesByIds(athleteIds),
+    queryFn: async () => {
+      mark('q-ath↓');
+      try {
+        return await getAthletesByIds(athleteIds);
+      } finally {
+        mark('q-ath↑');
+      }
+    },
     enabled: athleteIds.length > 0,
   });
   const athleteNames = useMemo(() => (favAthletes ?? []).map((a) => a.name), [favAthletes]);
@@ -219,7 +244,14 @@ export default function DashboardScreen() {
   const matchKey = showMatch ? raceKey(nameOf(nextBig), dateOf(nextBig)) : '';
   const { data: matchList } = useQuery({
     queryKey: ['startlist', matchKey],
-    queryFn: () => getRaceStartList(matchKey),
+    queryFn: async () => {
+      mark('q-startlist↓');
+      try {
+        return await getRaceStartList(matchKey);
+      } finally {
+        mark('q-startlist↑');
+      }
+    },
     enabled: !!matchKey,
   });
   // Lead with the best-known names (not alphabetical) so the avatars are recognisable.

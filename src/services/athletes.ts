@@ -8,6 +8,7 @@ import proStartsMediaData from '@/data/proStartsMedia.json';
 import proStartsMikaData from '@/data/proStartsMika.json';
 import proStartsPtoData from '@/data/proStartsPTO.json';
 import sourcesData from '@/data/sources.json';
+import { mark } from '@/lib/bootTiming';
 import { raceKey } from '@/lib/raceKey';
 import { athletes, athletesById } from '@/mocks/athletes';
 import { fetchWtAthlete } from '@/services/worldTriathlon';
@@ -167,7 +168,10 @@ function withLinks(athlete: Athlete, m: Merged): Athlete {
 
 export async function getAthletes(): Promise<Athlete[]> {
   const m = await loadMerged();
-  return m.allAthletes.map((a) => withLinks(a, m));
+  mark('ath-merged↑');
+  const r = m.allAthletes.map((a) => withLinks(a, m));
+  mark('ath-withlinks↑');
+  return r;
 }
 
 export async function getAthleteById(id: string): Promise<Athlete | undefined> {
