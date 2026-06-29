@@ -85,10 +85,12 @@ const VENUES = (raceVenuesData as { venues: Record<string, StartPoint & { source
 const DATA_BASE =
   process.env.EXPO_PUBLIC_DATA_URL ||
   'https://raw.githubusercontent.com/DominikGirek/trizone-app/main/src/data';
-fetch(`${DATA_BASE}/raceVenues.json`)
-  .then((r) => (r.ok ? r.json() : null))
-  .then((j) => { if (j?.venues) Object.assign(VENUES, j.venues); })
-  .catch(() => {});
+// EXPERIMENT: GitHub-raw fetches at startup are the suspected cold-start culprit (throttled host floods the
+// JS bridge). Disabled to confirm; bundled raceVenues are used. Re-enable (deferred) once confirmed.
+// fetch(`${DATA_BASE}/raceVenues.json`)
+//   .then((r) => (r.ok ? r.json() : null))
+//   .then((j) => { if (j?.venues) Object.assign(VENUES, j.venues); })
+//   .catch(() => {});
 
 /**
  * Best map target for an event: the verified SWIM-START coordinates if we have them

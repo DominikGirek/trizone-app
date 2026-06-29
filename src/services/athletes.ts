@@ -159,7 +159,9 @@ function refreshMergedInBackground(): void {
  */
 function getMerged(): Merged {
   if (cache && Date.now() - cache.at < TTL) return cache.data;
-  refreshMergedInBackground();
+  // EXPERIMENT: GitHub-raw startup fetches are the suspected cold-start culprit (throttled host floods the
+  // JS bridge). Disabled to confirm; bundled data is used. Re-enable (deferred) once confirmed.
+  // refreshMergedInBackground();
   return cache?.data ?? bundled;
 }
 
