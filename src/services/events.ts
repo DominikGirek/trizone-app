@@ -1,5 +1,4 @@
 import type { Coords } from '@/hooks/use-location';
-import { mark } from '@/lib/bootTiming';
 import { distanceKm } from '@/lib/format';
 import { isTippableRace } from '@/lib/tippable';
 import { isTipLocked } from '@/lib/tippspiel';
@@ -31,7 +30,6 @@ export async function getAllEvents(coords?: Coords | null): Promise<FeedItem[]> 
   const races = racesR.status === 'fulfilled' ? racesR.value : [];
   const locals = localsR.status === 'fulfilled' ? localsR.value : [];
   const past = pastR.status === 'fulfilled' ? pastR.value : [];
-  mark('ev-sources↑');
 
   const withDist = (e: LocalEvent): LocalEventWithDistance => ({
     ...e,
@@ -68,7 +66,6 @@ export async function getAllEvents(coords?: Coords | null): Promise<FeedItem[]> 
     if (rank(a.status) !== rank(b.status)) return rank(a.status) - rank(b.status);
     return +new Date(a.date) - +new Date(b.date);
   });
-  mark('ev-merged↑');
   return items;
 }
 

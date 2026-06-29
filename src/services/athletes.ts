@@ -8,7 +8,6 @@ import proStartsMediaData from '@/data/proStartsMedia.json';
 import proStartsMikaData from '@/data/proStartsMika.json';
 import proStartsPtoData from '@/data/proStartsPTO.json';
 import sourcesData from '@/data/sources.json';
-import { mark } from '@/lib/bootTiming';
 import { fetchWithTimeout } from '@/lib/fetchTimeout';
 import { raceKey } from '@/lib/raceKey';
 import { athletes, athletesById } from '@/mocks/athletes';
@@ -159,9 +158,7 @@ function refreshMergedInBackground(): void {
  */
 function getMerged(): Merged {
   if (cache && Date.now() - cache.at < TTL) return cache.data;
-  // EXPERIMENT: GitHub-raw startup fetches are the suspected cold-start culprit (throttled host floods the
-  // JS bridge). Disabled to confirm; bundled data is used. Re-enable (deferred) once confirmed.
-  // refreshMergedInBackground();
+  refreshMergedInBackground();
   return cache?.data ?? bundled;
 }
 
@@ -194,10 +191,7 @@ function withLinks(athlete: Athlete, m: Merged): Athlete {
 
 export async function getAthletes(): Promise<Athlete[]> {
   const m = getMerged();
-  mark('ath-merged↑');
-  const r = m.allAthletes.map((a) => withLinks(a, m));
-  mark('ath-withlinks↑');
-  return r;
+  return m.allAthletes.map((a) => withLinks(a, m));
 }
 
 export async function getAthleteById(id: string): Promise<Athlete | undefined> {

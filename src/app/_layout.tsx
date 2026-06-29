@@ -1,4 +1,3 @@
-import { bootSummary, counters, mark, sinceBoot } from '@/lib/bootTiming'; // must be first: marks JS startup (BOOT_T0)
 import {
   Archivo_400Regular,
   Archivo_500Medium,
@@ -8,17 +7,18 @@ import {
   Archivo_900Black,
   useFonts,
 } from '@expo-google-fonts/archivo';
-import * as Updates from 'expo-updates';
-import { Alert } from 'react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { Profiler, useEffect, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { AnimatedSplash } from '@/components/AnimatedSplash';
 import { ToastProvider } from '@/components/Toast';
+import { getAllEvents } from '@/services/events';
+import { fetchNews } from '@/services/news';
 import { Colors } from '@/constants/theme';
 import '@/i18n';
 import { AuthProvider } from '@/store/auth';
@@ -38,9 +38,6 @@ const queryClient = new QueryClient({
 });
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
-mark('layout-module-eval'); // all top-level imports of _layout (+ their module graph) have evaluated
-
-let firstRenderMarked = false;
 
 function NavigationStack() {
   const scheme = useResolvedScheme();
@@ -88,10 +85,6 @@ function NavigationStack() {
 }
 
 export default function RootLayout() {
-  if (!firstRenderMarked) {
-    firstRenderMarked = true;
-    mark('root-first-render');
-  }
   const [fontsLoaded] = useFonts({
     Archivo_400Regular,
     Archivo_500Medium,
@@ -101,44 +94,28 @@ export default function RootLayout() {
     Archivo_900Black,
   });
 
-  const fontsMsRef = useRef<number | null>(null);
-  const diagShownRef = useRef(false);
-
-  // TEMP boot diagnostic: shows where the cold-start time goes (JS phase vs native phase) + whether the
-  // app is running its embedded bundle or an OTA. Remove once the slow-start cause is confirmed.
-  const showBootDiag = () => {
-    if (diagShownRef.current) return;
-    diagShownRef.current = true;
-    const safe = (fn: () => unknown) => {
-      try {
-        return String(fn() ?? '—');
-      } catch {
-        return '—';
-      }
-    };
-    Alert.alert(
-      'Boot-Diagnose (bitte Screenshot)',
-      `DIAG: push-OFF\n` +
-        `JS-Start → sichtbar: ${sinceBoot()} ms\n` +
-        `Fonts: ${fontsMsRef.current ?? '?'} ms · Läuft: ${safe(() =>
-          Updates.isEmbeddedLaunch ? 'EINGEBAUT' : 'OTA',
-        )}\n` +
-        `thens: ${counters.thens}\n` +
-        `--- Phasen (ms ab JS-Start) ---\n` +
-        bootSummary(),
-      [{ text: 'OK' }],
-    );
-  };
+  const [ready, setReady] = useState(false);
+  const [splashGone, setSplashGone] = useState(false);
 
   useEffect(() => {
     if (!fontsLoaded) return;
-    if (fontsMsRef.current == null) fontsMsRef.current = sinceBoot();
-    mark('effect-after-fonts');
-    // EXPERIMENT: AnimatedSplash + setReady reveal machinery REMOVED. Just hide the native splash and show
-    // the app directly. If the ~11s freeze vanishes, the splash/reveal machinery was the cause.
-    SplashScreen.hideAsync().catch(() => {});
-    const diag = setTimeout(showBootDiag, 6000);
-    return () => clearTimeout(diag);
+    SplashScreen.hideAsync().catch(() => {}); // native splash off — the animated curtain takes over seamlessly
+    let revealed = false;
+    const since = Date.now();
+    const doReveal = () => {
+      if (!revealed) {
+        revealed = true;
+        setReady(true);
+      }
+    };
+    // Warm the first screen's data so the revealed app is ready (no tapping into a still-building UI),
+    // with a small minimum (so the curtain feels intentional) and a hard cap (so it never hangs).
+    Promise.allSettled([
+      queryClient.prefetchQuery({ queryKey: ['events'], queryFn: () => getAllEvents() }),
+      queryClient.prefetchQuery({ queryKey: ['news'], queryFn: fetchNews }),
+    ]).finally(() => setTimeout(doReveal, Math.max(0, 600 - (Date.now() - since))));
+    const cap = setTimeout(doReveal, 2800);
+    return () => clearTimeout(cap);
   }, [fontsLoaded]);
 
   if (!fontsLoaded) return null;
@@ -159,13 +136,7 @@ export default function RootLayout() {
                           <TipsProvider>
                             <ToastProvider>
                               <PushSync />
-                              <Profiler
-                                id="nav"
-                                onRender={(_id, phase, actualDuration) => {
-                                  if (actualDuration > 600) mark(`render-${phase} ${Math.round(actualDuration)}ms`);
-                                }}>
-                                <NavigationStack />
-                              </Profiler>
+                              <NavigationStack />
                             </ToastProvider>
                           </TipsProvider>
                         </HotNewsReadProvider>
@@ -179,6 +150,7 @@ export default function RootLayout() {
           </AuthProvider>
         </QueryClientProvider>
       </SafeAreaProvider>
+      {!splashGone && <AnimatedSplash reveal={ready} onDone={() => setSplashGone(true)} />}
     </GestureHandlerRootView>
   );
 }

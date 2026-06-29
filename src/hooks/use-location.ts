@@ -8,8 +8,6 @@ export interface Coords {
 
 type Status = 'idle' | 'loading' | 'granted' | 'denied';
 
-const LOCATION_DISABLED = true; // EXPERIMENT: temporarily skip expo-location to isolate the cold-start freeze
-
 /**
  * Lightweight geolocation hook for "events near me". Requests permission once
  * and exposes the user's coordinates, degrading gracefully when unavailable
@@ -20,12 +18,6 @@ export function useLocation() {
   const [status, setStatus] = useState<Status>('idle');
 
   const request = useCallback(async () => {
-    // EXPERIMENT: skip the actual expo-location request to test whether getCurrentPositionAsync is the
-    // ~11s cold-start freeze (consistent duration = looks like a GPS/permission stall). Re-enable after.
-    if (LOCATION_DISABLED) {
-      setStatus('denied');
-      return;
-    }
     setStatus('loading');
     try {
       const { status: perm } = await Location.requestForegroundPermissionsAsync();

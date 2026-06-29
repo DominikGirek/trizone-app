@@ -2,7 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
-import { useEffect, useMemo, useState, type ComponentProps, type ReactNode } from 'react';
+import { useMemo, useState, type ComponentProps, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LayoutAnimation, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -26,7 +26,6 @@ import { athleteTitle } from '@/lib/athleteTitle';
 import { avatarColor, initials } from '@/lib/avatar';
 import { countryFlag, formatDate, formatKm, timeAgo } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
-import { mark } from '@/lib/bootTiming';
 import { hotAlerts } from '@/lib/hotNews';
 import { useHotNewsRead } from '@/store/hotNewsRead';
 import { mentionsAny, pickForYou } from '@/lib/newsTopics';
@@ -154,9 +153,6 @@ export default function DashboardScreen() {
     setFeed(id);
   };
   const { coords } = useLocation();
-  useEffect(() => {
-    if (coords) mark('coords↑');
-  }, [coords]);
   const { idsOf } = useFavorites();
   const { next: myNext, isMain, races: myRaces } = useMyRaces();
 
@@ -166,36 +162,12 @@ export default function DashboardScreen() {
 
   const { data: events } = useQuery({
     queryKey: ['allEvents', coords?.lat, coords?.lon],
-    queryFn: async () => {
-      mark('q-events↓');
-      try {
-        return await getAllEvents(coords);
-      } finally {
-        mark('q-events↑');
-      }
-    },
+    queryFn: () => getAllEvents(coords),
   });
-  const { data: news, isLoading: newsLoading } = useQuery({
-    queryKey: ['news'],
-    queryFn: async () => {
-      mark('q-news↓');
-      try {
-        return await fetchNews();
-      } finally {
-        mark('q-news↑');
-      }
-    },
-  });
+  const { data: news, isLoading: newsLoading } = useQuery({ queryKey: ['news'], queryFn: fetchNews });
   const { data: favAthletes } = useQuery({
     queryKey: ['favoriteAthletes', athleteIds],
-    queryFn: async () => {
-      mark('q-ath↓');
-      try {
-        return await getAthletesByIds(athleteIds);
-      } finally {
-        mark('q-ath↑');
-      }
-    },
+    queryFn: () => getAthletesByIds(athleteIds),
     enabled: athleteIds.length > 0,
   });
   const athleteNames = useMemo(() => (favAthletes ?? []).map((a) => a.name), [favAthletes]);
@@ -247,14 +219,7 @@ export default function DashboardScreen() {
   const matchKey = showMatch ? raceKey(nameOf(nextBig), dateOf(nextBig)) : '';
   const { data: matchList } = useQuery({
     queryKey: ['startlist', matchKey],
-    queryFn: async () => {
-      mark('q-startlist↓');
-      try {
-        return await getRaceStartList(matchKey);
-      } finally {
-        mark('q-startlist↑');
-      }
-    },
+    queryFn: () => getRaceStartList(matchKey),
     enabled: !!matchKey,
   });
   // Lead with the best-known names (not alphabetical) so the avatars are recognisable.
