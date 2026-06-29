@@ -1,4 +1,4 @@
-import { bootSummary, mark, sinceBoot } from '@/lib/bootTiming'; // must be first: marks JS startup (BOOT_T0)
+import { bootSummary, counters, mark, sinceBoot } from '@/lib/bootTiming'; // must be first: marks JS startup (BOOT_T0)
 import {
   Archivo_400Regular,
   Archivo_500Medium,
@@ -123,6 +123,7 @@ export default function RootLayout() {
         `Fonts: ${fontsMsRef.current ?? '?'} ms · Läuft: ${safe(() =>
           Updates.isEmbeddedLaunch ? 'EINGEBAUT' : 'OTA',
         )}\n` +
+        `thens: ${counters.thens}\n` +
         `--- Phasen (ms ab JS-Start) ---\n` +
         bootSummary(),
       [{ text: 'OK' }],
