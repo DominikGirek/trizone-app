@@ -1,7 +1,7 @@
 import 'react-native-url-polyfill/auto';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, processLock } from '@supabase/supabase-js';
 import { Platform } from 'react-native';
 
 const url = process.env.EXPO_PUBLIC_SUPABASE_URL;
@@ -30,5 +30,14 @@ const isWebSSR = Platform.OS === 'web' && typeof window === 'undefined';
 export const supabase = createClient(url ?? 'https://placeholder.supabase.co', anon ?? 'public-anon', {
   auth: isWebSSR
     ? { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }
-    : { storage: AsyncStorage, autoRefreshToken: true, persistSession: true, detectSessionInUrl: false },
+    : {
+        storage: AsyncStorage,
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: false,
+        // CRITICAL on React Native: the default lock uses navigator.locks, which isn't available on RN, so
+        // every auth call (getSession on launch!) waited ~10s for the lock-acquire timeout — the cold-start
+        // freeze. processLock is a JS-promise lock that works on RN.
+        lock: processLock,
+      },
 });
