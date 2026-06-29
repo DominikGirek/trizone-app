@@ -14,11 +14,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { Profiler, useEffect, useRef, useState } from 'react';
+import { Profiler, useEffect, useRef } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import { AnimatedSplash } from '@/components/AnimatedSplash';
 import { ToastProvider } from '@/components/Toast';
 import { Colors } from '@/constants/theme';
 import '@/i18n';
@@ -102,8 +101,6 @@ export default function RootLayout() {
     Archivo_900Black,
   });
 
-  const [ready, setReady] = useState(false);
-  const [splashGone, setSplashGone] = useState(false);
   const fontsMsRef = useRef<number | null>(null);
   const diagShownRef = useRef(false);
 
@@ -135,20 +132,11 @@ export default function RootLayout() {
     if (!fontsLoaded) return;
     if (fontsMsRef.current == null) fontsMsRef.current = sinceBoot();
     mark('effect-after-fonts');
+    // EXPERIMENT: AnimatedSplash + setReady reveal machinery REMOVED. Just hide the native splash and show
+    // the app directly. If the ~11s freeze vanishes, the splash/reveal machinery was the cause.
     SplashScreen.hideAsync().catch(() => {});
-    // EXPERIMENT: no data prefetch on the start path. Reveal after a fixed short beat and let the dashboard
-    // load its own data (with skeletons). Isolates whether the prefetch/reveal machinery was the freeze.
-    const reveal = setTimeout(() => {
-      mark('reveal-called');
-      setReady(true);
-    }, 500);
-    // Fire the diagnostic late, so it captures any freeze that happens AFTER the reveal (the block detector
-    // records the gap regardless). If the thread is blocked, this timer itself fires late too.
     const diag = setTimeout(showBootDiag, 6000);
-    return () => {
-      clearTimeout(reveal);
-      clearTimeout(diag);
-    };
+    return () => clearTimeout(diag);
   }, [fontsLoaded]);
 
   if (!fontsLoaded) return null;
@@ -189,7 +177,6 @@ export default function RootLayout() {
           </AuthProvider>
         </QueryClientProvider>
       </SafeAreaProvider>
-      {!splashGone && <AnimatedSplash reveal={ready} onDone={() => setSplashGone(true)} />}
     </GestureHandlerRootView>
   );
 }
