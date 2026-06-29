@@ -2,14 +2,14 @@ import { Platform } from 'react-native';
 
 import type { Coords } from '@/hooks/use-location';
 import { distanceKm } from '@/lib/format';
-import { readSnapshot, writeSnapshot } from '@/lib/snapshotCache';
+import { readSnapshot } from '@/lib/snapshotCache';
 import {
   featuredLocalEvents,
   localEvents as sampleEvents,
   localEventsById,
 } from '@/mocks/localEvents';
 import { seriesEventsById } from '@/mocks/seriesEvents';
-import { ingestLocalEventDetail, ingestLocalEvents } from '@/services/dtu';
+import { ingestLocalEventDetail } from '@/services/dtu';
 import type { LocalEvent, TimingProvider } from '@/types';
 
 export interface LocalEventWithDistance extends LocalEvent {
@@ -23,28 +23,6 @@ export interface LocalEventWithDistance extends LocalEvent {
  * - On any failure: fall back to the curated sample so the UI never breaks.
  */
 let listCache: LocalEvent[] | null = null;
-let dtuRefreshing = false;
-const DTU_TTL = 6 * 60 * 60 * 1000; // 6h — the calendar changes at day granularity
-
-async function ingestAndPersist(maxPages?: number): Promise<LocalEvent[]> {
-  const data = await ingestLocalEvents(maxPages);
-  if (data.length) {
-    listCache = data;
-    void writeSnapshot('dtuEvents', data);
-  }
-  return data;
-}
-
-/** Pull the COMPLETE calendar in the background (for the Events tab + next launch). */
-function refreshDtuInBackground(): void {
-  if (dtuRefreshing) return;
-  dtuRefreshing = true;
-  ingestAndPersist()
-    .catch(() => {})
-    .finally(() => {
-      dtuRefreshing = false;
-    });
-}
 
 async function loadEvents(): Promise<LocalEvent[]> {
   if (listCache) return listCache;
@@ -65,25 +43,14 @@ async function loadEvents(): Promise<LocalEvent[]> {
     return sampleEvents;
   }
 
-  // Native: serve the last good snapshot INSTANTLY (no network on the hot path),
-  // then revalidate in the background if it's stale.
+  // EXPERIMENT (perf): on-device DTU HTML parsing (regex over ~19 calendar pages) is the suspected
+  // Hermes-slow cold-start freeze — it runs in JS on native, whereas web parses it server-side via /api.
+  // Skip it: serve the last persisted snapshot if present, else the curated sample. If this removes the
+  // ~10s block, the on-device parse is confirmed as the cause (next: parse off-device / chunked).
   const snap = await readSnapshot<LocalEvent[]>('dtuEvents');
   if (snap?.data?.length) {
     listCache = snap.data;
-    if (Date.now() - snap.at > DTU_TTL) refreshDtuInBackground();
     return snap.data;
-  }
-
-  // First-ever launch (no snapshot): a BOUNDED ingest so the app paints fast,
-  // then grab the full calendar in the background for the Events tab / next time.
-  try {
-    const data = await ingestAndPersist(8);
-    if (data.length) {
-      refreshDtuInBackground();
-      return data;
-    }
-  } catch {
-    // fall through to sample
   }
   return sampleEvents;
 }
