@@ -14,7 +14,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useRef, useState } from 'react';
+import { Profiler, useEffect, useRef, useState } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -169,7 +169,13 @@ export default function RootLayout() {
                           <TipsProvider>
                             <ToastProvider>
                               <PushSync />
-                              <NavigationStack />
+                              <Profiler
+                                id="nav"
+                                onRender={(_id, phase, actualDuration) => {
+                                  if (actualDuration > 600) mark(`render-${phase} ${Math.round(actualDuration)}ms`);
+                                }}>
+                                <NavigationStack />
+                              </Profiler>
                             </ToastProvider>
                           </TipsProvider>
                         </HotNewsReadProvider>
