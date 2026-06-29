@@ -20,8 +20,6 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AnimatedSplash } from '@/components/AnimatedSplash';
 import { ToastProvider } from '@/components/Toast';
-import { getAllEvents } from '@/services/events';
-import { fetchNews } from '@/services/news';
 import { Colors } from '@/constants/theme';
 import '@/i18n';
 import { AuthProvider } from '@/store/auth';
@@ -137,27 +135,20 @@ export default function RootLayout() {
     if (!fontsLoaded) return;
     if (fontsMsRef.current == null) fontsMsRef.current = sinceBoot();
     mark('effect-after-fonts');
-    SplashScreen.hideAsync().catch(() => {}); // native splash off — the animated curtain takes over seamlessly
-    let revealed = false;
-    const since = Date.now();
-    const doReveal = () => {
-      if (!revealed) {
-        revealed = true;
-        mark('reveal-called');
-        setReady(true);
-      }
+    SplashScreen.hideAsync().catch(() => {});
+    // EXPERIMENT: no data prefetch on the start path. Reveal after a fixed short beat and let the dashboard
+    // load its own data (with skeletons). Isolates whether the prefetch/reveal machinery was the freeze.
+    const reveal = setTimeout(() => {
+      mark('reveal-called');
+      setReady(true);
+    }, 500);
+    // Fire the diagnostic late, so it captures any freeze that happens AFTER the reveal (the block detector
+    // records the gap regardless). If the thread is blocked, this timer itself fires late too.
+    const diag = setTimeout(showBootDiag, 6000);
+    return () => {
+      clearTimeout(reveal);
+      clearTimeout(diag);
     };
-    // Warm the first screen's data so the revealed app is ready (no tapping into a still-building UI),
-    // with a small minimum (so the curtain feels intentional) and a hard cap (so it never hangs).
-    Promise.allSettled([
-      queryClient.prefetchQuery({ queryKey: ['events'], queryFn: () => getAllEvents() }).then(() => mark('events-prefetched')),
-      queryClient.prefetchQuery({ queryKey: ['news'], queryFn: fetchNews }).then(() => mark('news-prefetched')),
-    ]).finally(() => {
-      mark('prefetch-settled');
-      setTimeout(doReveal, Math.max(0, 600 - (Date.now() - since)));
-    });
-    const cap = setTimeout(doReveal, 2800);
-    return () => clearTimeout(cap);
   }, [fontsLoaded]);
 
   if (!fontsLoaded) return null;
@@ -192,15 +183,7 @@ export default function RootLayout() {
           </AuthProvider>
         </QueryClientProvider>
       </SafeAreaProvider>
-      {!splashGone && (
-        <AnimatedSplash
-          reveal={ready}
-          onDone={() => {
-            setSplashGone(true);
-            showBootDiag();
-          }}
-        />
-      )}
+      {!splashGone && <AnimatedSplash reveal={ready} onDone={() => setSplashGone(true)} />}
     </GestureHandlerRootView>
   );
 }
