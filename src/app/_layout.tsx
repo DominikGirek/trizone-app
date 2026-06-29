@@ -118,7 +118,8 @@ export default function RootLayout() {
     };
     Alert.alert(
       'Boot-Diagnose (bitte Screenshot)',
-      `JS-Start → sichtbar: ${sinceBoot()} ms\n` +
+      `DIAG: push-OFF\n` +
+        `JS-Start → sichtbar: ${sinceBoot()} ms\n` +
         `Fonts: ${fontsMsRef.current ?? '?'} ms · Läuft: ${safe(() =>
           Updates.isEmbeddedLaunch ? 'EINGEBAUT' : 'OTA',
         )}\n` +
