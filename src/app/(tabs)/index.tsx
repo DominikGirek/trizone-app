@@ -2,7 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
-import { useMemo, useState, type ComponentProps, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type ComponentProps, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LayoutAnimation, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -154,6 +154,9 @@ export default function DashboardScreen() {
     setFeed(id);
   };
   const { coords } = useLocation();
+  useEffect(() => {
+    if (coords) mark('coords↑');
+  }, [coords]);
   const { idsOf } = useFavorites();
   const { next: myNext, isMain, races: myRaces } = useMyRaces();
 

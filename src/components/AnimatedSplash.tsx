@@ -1,6 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { Animated, Dimensions, Easing, Image, StyleSheet } from 'react-native';
 
+import { mark } from '@/lib/bootTiming';
+
 const SPLASH_BG = '#E2231A'; // matches the native splash + app.json so the hand-off is seamless
 const H = Dimensions.get('window').height;
 
@@ -14,12 +16,16 @@ export function AnimatedSplash({ reveal, onDone }: { reveal: boolean; onDone: ()
 
   useEffect(() => {
     if (!reveal) return;
+    mark('splash-fx'); // reveal effect ran (re-render after setReady processed)
     Animated.timing(ty, {
       toValue: -(H + 80),
       duration: 620,
       easing: Easing.in(Easing.cubic),
       useNativeDriver: true,
-    }).start(({ finished }) => finished && onDone());
+    }).start(({ finished }) => {
+      mark('splash-done');
+      if (finished) onDone();
+    });
   }, [reveal, ty, onDone]);
 
   return (
