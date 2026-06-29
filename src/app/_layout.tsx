@@ -1,4 +1,4 @@
-import { sinceBoot } from '@/lib/bootTiming'; // must be first: importing this marks JS startup (BOOT_T0)
+import { bootSummary, mark, sinceBoot } from '@/lib/bootTiming'; // must be first: marks JS startup (BOOT_T0)
 import {
   Archivo_400Regular,
   Archivo_500Medium,
@@ -41,6 +41,9 @@ const queryClient = new QueryClient({
 });
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
+mark('layout-module-eval'); // all top-level imports of _layout (+ their module graph) have evaluated
+
+let firstRenderMarked = false;
 
 function NavigationStack() {
   const scheme = useResolvedScheme();
@@ -88,6 +91,10 @@ function NavigationStack() {
 }
 
 export default function RootLayout() {
+  if (!firstRenderMarked) {
+    firstRenderMarked = true;
+    mark('root-first-render');
+  }
   const [fontsLoaded] = useFonts({
     Archivo_400Regular,
     Archivo_500Medium,
@@ -117,10 +124,11 @@ export default function RootLayout() {
     Alert.alert(
       'Boot-Diagnose (bitte Screenshot)',
       `JS-Start → sichtbar: ${sinceBoot()} ms\n` +
-        `Fonts geladen nach: ${fontsMsRef.current ?? '?'} ms\n` +
-        `Läuft: ${safe(() => (Updates.isEmbeddedLaunch ? 'EINGEBAUT (kein OTA)' : 'OTA-Update'))}\n` +
-        `UpdateId: ${safe(() => Updates.updateId ?? 'embedded')}\n` +
-        `Channel: ${safe(() => Updates.channel)} · Runtime: ${safe(() => Updates.runtimeVersion)}`,
+        `Fonts: ${fontsMsRef.current ?? '?'} ms · Läuft: ${safe(() =>
+          Updates.isEmbeddedLaunch ? 'EINGEBAUT' : 'OTA',
+        )}\n` +
+        `--- Phasen (ms ab JS-Start) ---\n` +
+        bootSummary(),
       [{ text: 'OK' }],
     );
   };
@@ -128,21 +136,26 @@ export default function RootLayout() {
   useEffect(() => {
     if (!fontsLoaded) return;
     if (fontsMsRef.current == null) fontsMsRef.current = sinceBoot();
+    mark('effect-after-fonts');
     SplashScreen.hideAsync().catch(() => {}); // native splash off — the animated curtain takes over seamlessly
     let revealed = false;
     const since = Date.now();
     const doReveal = () => {
       if (!revealed) {
         revealed = true;
+        mark('reveal-called');
         setReady(true);
       }
     };
     // Warm the first screen's data so the revealed app is ready (no tapping into a still-building UI),
     // with a small minimum (so the curtain feels intentional) and a hard cap (so it never hangs).
     Promise.allSettled([
-      queryClient.prefetchQuery({ queryKey: ['events'], queryFn: () => getAllEvents() }),
-      queryClient.prefetchQuery({ queryKey: ['news'], queryFn: fetchNews }),
-    ]).finally(() => setTimeout(doReveal, Math.max(0, 600 - (Date.now() - since))));
+      queryClient.prefetchQuery({ queryKey: ['events'], queryFn: () => getAllEvents() }).then(() => mark('events-prefetched')),
+      queryClient.prefetchQuery({ queryKey: ['news'], queryFn: fetchNews }).then(() => mark('news-prefetched')),
+    ]).finally(() => {
+      mark('prefetch-settled');
+      setTimeout(doReveal, Math.max(0, 600 - (Date.now() - since)));
+    });
     const cap = setTimeout(doReveal, 2800);
     return () => clearTimeout(cap);
   }, [fontsLoaded]);
