@@ -1,3 +1,4 @@
+import { sinceBoot } from '@/lib/bootTiming'; // must be first: importing this marks JS startup (BOOT_T0)
 import {
   Archivo_400Regular,
   Archivo_500Medium,
@@ -7,11 +8,13 @@ import {
   Archivo_900Black,
   useFonts,
 } from '@expo-google-fonts/archivo';
+import * as Updates from 'expo-updates';
+import { Alert } from 'react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -96,9 +99,35 @@ export default function RootLayout() {
 
   const [ready, setReady] = useState(false);
   const [splashGone, setSplashGone] = useState(false);
+  const fontsMsRef = useRef<number | null>(null);
+  const diagShownRef = useRef(false);
+
+  // TEMP boot diagnostic: shows where the cold-start time goes (JS phase vs native phase) + whether the
+  // app is running its embedded bundle or an OTA. Remove once the slow-start cause is confirmed.
+  const showBootDiag = () => {
+    if (diagShownRef.current) return;
+    diagShownRef.current = true;
+    const safe = (fn: () => unknown) => {
+      try {
+        return String(fn() ?? '—');
+      } catch {
+        return '—';
+      }
+    };
+    Alert.alert(
+      'Boot-Diagnose (bitte Screenshot)',
+      `JS-Start → sichtbar: ${sinceBoot()} ms\n` +
+        `Fonts geladen nach: ${fontsMsRef.current ?? '?'} ms\n` +
+        `Läuft: ${safe(() => (Updates.isEmbeddedLaunch ? 'EINGEBAUT (kein OTA)' : 'OTA-Update'))}\n` +
+        `UpdateId: ${safe(() => Updates.updateId ?? 'embedded')}\n` +
+        `Channel: ${safe(() => Updates.channel)} · Runtime: ${safe(() => Updates.runtimeVersion)}`,
+      [{ text: 'OK' }],
+    );
+  };
 
   useEffect(() => {
     if (!fontsLoaded) return;
+    if (fontsMsRef.current == null) fontsMsRef.current = sinceBoot();
     SplashScreen.hideAsync().catch(() => {}); // native splash off — the animated curtain takes over seamlessly
     let revealed = false;
     const since = Date.now();
@@ -150,7 +179,15 @@ export default function RootLayout() {
           </AuthProvider>
         </QueryClientProvider>
       </SafeAreaProvider>
-      {!splashGone && <AnimatedSplash reveal={ready} onDone={() => setSplashGone(true)} />}
+      {!splashGone && (
+        <AnimatedSplash
+          reveal={ready}
+          onDone={() => {
+            setSplashGone(true);
+            showBootDiag();
+          }}
+        />
+      )}
     </GestureHandlerRootView>
   );
 }
