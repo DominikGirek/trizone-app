@@ -9,6 +9,7 @@ import proStartsMikaData from '@/data/proStartsMika.json';
 import proStartsPtoData from '@/data/proStartsPTO.json';
 import sourcesData from '@/data/sources.json';
 import { mark } from '@/lib/bootTiming';
+import { fetchWithTimeout } from '@/lib/fetchTimeout';
 import { raceKey } from '@/lib/raceKey';
 import { athletes, athletesById } from '@/mocks/athletes';
 import { fetchWtAthlete } from '@/services/worldTriathlon';
@@ -31,7 +32,7 @@ const DATA_BASE =
 
 async function fetchJson<T>(file: string, fallback: T): Promise<T> {
   try {
-    const res = await fetch(`${DATA_BASE}/${file}`);
+    const res = await fetchWithTimeout(`${DATA_BASE}/${file}`, {}, 8000);
     if (!res.ok) throw new Error(`${file} ${res.status}`);
     return (await res.json()) as T;
   } catch {
@@ -112,11 +113,12 @@ const bundled = build(
   new Set((athleteBlocklistData as BlockFile).blocked ?? []),
 );
 
-// Cached merge of the HOSTED data (refreshed hourly).
+// Cached merge of the HOSTED data (refreshed in the background).
 let cache: { at: number; data: Merged } | null = null;
+let refreshing = false;
 const TTL = 60 * 60 * 1000;
-async function loadMerged(): Promise<Merged> {
-  if (cache && Date.now() - cache.at < TTL) return cache.data;
+
+async function refreshMerged(): Promise<void> {
   const [links, hand, pro, ptoStarts, ironmanStarts, mikaStarts, mediaStarts, llmStarts, sources, block] = await Promise.all([
     fetchJson('athleteLinks.json', athleteLinksData as unknown as LinksFile),
     fetchJson('athleteStarts.json', athleteStartsData as unknown as StartsFile),
@@ -129,14 +131,36 @@ async function loadMerged(): Promise<Merged> {
     fetchJson('sources.json', sourcesData as SourcesFile),
     fetchJson('athleteBlocklist.json', athleteBlocklistData as BlockFile),
   ]);
-  const data = build(
-    links, hand,
-    keyed(pro, ptoStarts, ironmanStarts, mikaStarts, mediaStarts, llmStarts),
-    sources.enabled ?? {},
-    new Set(block.blocked ?? []),
-  );
-  cache = { at: Date.now(), data };
-  return data;
+  cache = {
+    at: Date.now(),
+    data: build(
+      links, hand,
+      keyed(pro, ptoStarts, ironmanStarts, mikaStarts, mediaStarts, llmStarts),
+      sources.enabled ?? {},
+      new Set(block.blocked ?? []),
+    ),
+  };
+}
+
+function refreshMergedInBackground(): void {
+  if (refreshing) return;
+  refreshing = true;
+  refreshMerged()
+    .catch(() => {})
+    .finally(() => {
+      refreshing = false;
+    });
+}
+
+/**
+ * Merged athlete data, INSTANT and never blocking the hot path: the cached hosted data if fresh,
+ * otherwise the bundled snapshot. The hosted refresh (10 network fetches) runs only in the background —
+ * it used to be awaited here and froze the cold start for ~10s when raw.githubusercontent throttled.
+ */
+function getMerged(): Merged {
+  if (cache && Date.now() - cache.at < TTL) return cache.data;
+  refreshMergedInBackground();
+  return cache?.data ?? bundled;
 }
 
 function withLinks(athlete: Athlete, m: Merged): Athlete {
@@ -167,7 +191,7 @@ function withLinks(athlete: Athlete, m: Merged): Athlete {
 }
 
 export async function getAthletes(): Promise<Athlete[]> {
-  const m = await loadMerged();
+  const m = getMerged();
   mark('ath-merged↑');
   const r = m.allAthletes.map((a) => withLinks(a, m));
   mark('ath-withlinks↑');
@@ -176,7 +200,7 @@ export async function getAthletes(): Promise<Athlete[]> {
 
 export async function getAthleteById(id: string): Promise<Athlete | undefined> {
   // App ids are name slugs (e.g. "patrick-lange"); real World Triathlon ids are numeric.
-  const m = await loadMerged();
+  const m = getMerged();
   if (m.allById[id]) return withLinks(m.allById[id], m);
   try {
     return await fetchWtAthlete(id);
@@ -186,7 +210,7 @@ export async function getAthleteById(id: string): Promise<Athlete | undefined> {
 }
 
 export async function getAthletesByIds(ids: string[]): Promise<Athlete[]> {
-  const m = await loadMerged();
+  const m = getMerged();
   return ids
     .map((id) => m.allById[id])
     .filter(Boolean)
