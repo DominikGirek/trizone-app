@@ -1,4 +1,5 @@
 import raceVenuesData from '@/data/raceVenues.json';
+import { readSnapshot, writeSnapshot } from '@/lib/snapshotCache';
 import { getTippableField } from '@/data/tippableFields';
 import { races as mockRaces, racesById as mockRacesById } from '@/mocks/events';
 import { resultsByRace } from '@/mocks/results';
@@ -11,14 +12,45 @@ const delay = <T>(value: T, ms = 80) =>
 
 // Memoized real-events loader with graceful fallback to mock data.
 let cache: { at: number; races: Race[] } | null = null;
+let wtRefreshing = false;
 const TTL = 10 * 60 * 1000;
+const WT_SNAP_TTL = 60 * 60 * 1000; // 1h — WTCS calendar barely changes day-to-day
+
+/** Pull the live WTCS calendar in the background and persist it for the next launch. */
+function refreshWtInBackground(): void {
+  if (wtRefreshing) return;
+  wtRefreshing = true;
+  fetchWtcsEvents()
+    .then((real) => {
+      if (real.length) {
+        cache = { at: Date.now(), races: real };
+        void writeSnapshot('wtcsRaces', real);
+      }
+    })
+    .catch(() => {})
+    .finally(() => {
+      wtRefreshing = false;
+    });
+}
 
 async function loadRaces(): Promise<Race[]> {
   if (cache && Date.now() - cache.at < TTL) return cache.races;
+
+  // Snapshot-first (mirrors news/DTU): serve the last good WTCS list INSTANTLY so the
+  // cold start never blocks on the network, then revalidate in the background if stale.
+  const snap = await readSnapshot<Race[]>('wtcsRaces');
+  if (snap?.data?.length) {
+    cache = { at: Date.now(), races: snap.data };
+    if (Date.now() - snap.at > WT_SNAP_TTL) refreshWtInBackground();
+    return snap.data;
+  }
+
+  // First-ever launch (no snapshot): one bounded fetch, then persist for next time.
   try {
     const real = await fetchWtcsEvents();
     if (real.length) {
       cache = { at: Date.now(), races: real };
+      void writeSnapshot('wtcsRaces', real);
       return real;
     }
   } catch {

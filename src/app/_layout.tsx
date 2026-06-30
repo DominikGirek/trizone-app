@@ -17,7 +17,6 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AnimatedSplash } from '@/components/AnimatedSplash';
 import { ToastProvider } from '@/components/Toast';
-import { getAllEvents } from '@/services/events';
 import { fetchNews } from '@/services/news';
 import { Colors } from '@/constants/theme';
 import '@/i18n';
@@ -108,12 +107,12 @@ export default function RootLayout() {
         setReady(true);
       }
     };
-    // Warm the first screen's data so the revealed app is ready (no tapping into a still-building UI),
-    // with a small minimum (so the curtain feels intentional) and a hard cap (so it never hangs).
-    Promise.allSettled([
-      queryClient.prefetchQuery({ queryKey: ['events'], queryFn: () => getAllEvents() }),
-      queryClient.prefetchQuery({ queryKey: ['news'], queryFn: fetchNews }),
-    ]).finally(() => setTimeout(doReveal, Math.max(0, 600 - (Date.now() - since))));
+    // Warm ONLY the dashboard's news (its events query runs itself, under a different key —
+    // prefetching events here just duplicated getAllEvents + the WTCS fetch and delayed the curtain).
+    // Small minimum so the curtain feels intentional; hard cap below so it never hangs.
+    queryClient
+      .prefetchQuery({ queryKey: ['news'], queryFn: fetchNews })
+      .finally(() => setTimeout(doReveal, Math.max(0, 600 - (Date.now() - since))));
     const cap = setTimeout(doReveal, 2800);
     return () => clearTimeout(cap);
   }, [fontsLoaded]);
