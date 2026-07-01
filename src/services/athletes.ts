@@ -7,6 +7,7 @@ import proStartsLlmData from '@/data/proStartsLLM.json';
 import proStartsMediaData from '@/data/proStartsMedia.json';
 import proStartsMikaData from '@/data/proStartsMika.json';
 import proStartsPtoData from '@/data/proStartsPTO.json';
+import raceWithdrawalsData from '@/data/raceWithdrawals.json';
 import sourcesData from '@/data/sources.json';
 import { fetchWithTimeout } from '@/lib/fetchTimeout';
 import { raceKey } from '@/lib/raceKey';
@@ -19,7 +20,19 @@ type LinksFile = { links: Record<string, AthleteLinks> };
 type StartsFile = { starts: Record<string, AthleteStart[]> };
 type SourcesFile = { enabled?: Record<string, boolean> };
 type BlockFile = { blocked?: string[] };
+type Withdrawn = { athlete: string; date: string; race?: string };
+type WithdrawFile = { withdrawn?: Withdrawn[] };
 type KeyedSource = { key: string; data: ProFile };
+
+// Drop an athlete's start(s) for a race they've withdrawn from (matched by date + optional name
+// substring), leaving their other races untouched. Applied at merge time so a re-ingest can't undo it.
+function dropWithdrawn(list: AthleteStart[], id: string, wd: Withdrawn[]): AthleteStart[] {
+  const mine = wd.filter((w) => w.athlete === id);
+  if (!mine.length) return list;
+  return list.filter(
+    (s) => !mine.some((w) => s.date === w.date && (!w.race || s.event.toLowerCase().includes(w.race.toLowerCase()))),
+  );
+}
 
 // The robots commit fresh data to GitHub; the app fetches those hosted files at runtime
 // so new pro start lists reach already-installed apps WITHOUT a pull or rebuild. Each
@@ -53,6 +66,7 @@ function build(
   proSources: KeyedSource[],
   enabled: Record<string, boolean>,
   blocked: Set<string>,
+  withdrawn: Withdrawn[],
 ): Merged {
   // Per-source kill-switch: a source flagged false (sources.json) is dropped entirely.
   const active = proSources.filter((s) => enabled[s.key] !== false).map((s) => s.data);
@@ -79,6 +93,12 @@ function build(
       PRO_STARTS[id] = [...(PRO_STARTS[id] ?? []), ...list];
     }
   }
+  // Withdrawals: drop a specific race from an athlete's starts (curated + generated), leaving their
+  // other races — applied here (post-ingest) so the weekly cron can't re-add the dropped start.
+  const STARTS = withdrawn.length
+    ? Object.fromEntries(Object.entries(hand.starts).map(([id, l]) => [id, dropWithdrawn(l, id, withdrawn)]))
+    : hand.starts;
+  if (withdrawn.length) for (const id of Object.keys(PRO_STARTS)) PRO_STARTS[id] = dropWithdrawn(PRO_STARTS[id], id, withdrawn);
   // Takedown: blocked ids vanish from profiles + every start list.
   const generatedPros = [...genById.values()].filter((p) => !athletesById[p.id] && !blocked.has(p.id));
   const curated = Object.fromEntries(Object.entries(athletesById).filter(([id]) => !blocked.has(id)));
@@ -86,7 +106,7 @@ function build(
     allAthletes: [...athletes.filter((a) => !blocked.has(a.id)), ...generatedPros],
     allById: { ...Object.fromEntries(generatedPros.map((a) => [a.id, a])), ...curated },
     LINKS: links.links,
-    STARTS: hand.starts,
+    STARTS,
     PRO_STARTS,
   };
 }
@@ -110,6 +130,7 @@ const bundled = build(
   keyed(proAthletesData as unknown as ProFile, proStartsPtoData as unknown as ProFile, proStartsIronmanData as unknown as ProFile, proStartsMikaData as unknown as ProFile, proStartsMediaData as unknown as ProFile, proStartsLlmData as unknown as ProFile),
   (sourcesData as SourcesFile).enabled ?? {},
   new Set((athleteBlocklistData as BlockFile).blocked ?? []),
+  (raceWithdrawalsData as WithdrawFile).withdrawn ?? [],
 );
 
 // Cached merge of the HOSTED data (refreshed in the background).
@@ -118,7 +139,7 @@ let refreshing = false;
 const TTL = 60 * 60 * 1000;
 
 async function refreshMerged(): Promise<void> {
-  const [links, hand, pro, ptoStarts, ironmanStarts, mikaStarts, mediaStarts, llmStarts, sources, block] = await Promise.all([
+  const [links, hand, pro, ptoStarts, ironmanStarts, mikaStarts, mediaStarts, llmStarts, sources, block, wd] = await Promise.all([
     fetchJson('athleteLinks.json', athleteLinksData as unknown as LinksFile),
     fetchJson('athleteStarts.json', athleteStartsData as unknown as StartsFile),
     fetchJson('proAthletes.json', proAthletesData as unknown as ProFile),
@@ -129,6 +150,7 @@ async function refreshMerged(): Promise<void> {
     fetchJson('proStartsLLM.json', proStartsLlmData as unknown as ProFile),
     fetchJson('sources.json', sourcesData as SourcesFile),
     fetchJson('athleteBlocklist.json', athleteBlocklistData as BlockFile),
+    fetchJson('raceWithdrawals.json', raceWithdrawalsData as WithdrawFile),
   ]);
   cache = {
     at: Date.now(),
@@ -137,6 +159,7 @@ async function refreshMerged(): Promise<void> {
       keyed(pro, ptoStarts, ironmanStarts, mikaStarts, mediaStarts, llmStarts),
       sources.enabled ?? {},
       new Set(block.blocked ?? []),
+      wd.withdrawn ?? [],
     ),
   };
 }

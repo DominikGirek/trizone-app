@@ -1,0 +1,11 @@
+{
+  "note": "Per-race withdrawals: an athlete confirmed OUT of ONE race (they stay in their OTHER races, unlike athleteBlocklist which hides them everywhere). Applied at the athlete-data MERGE, AFTER the weekly ingest — so the cron cannot re-add the dropped start. Match = athlete id + date (+ optional 'race' substring matched against the event name). Ids are name slugs, e.g. \"laura-philipp\". Verify every entry against a real source before adding; never guess a withdrawal.",
+  "withdrawn": [
+    {
+      "athlete": "laura-philipp",
+      "date": "2026-07-05",
+      "race": "Roth",
+      "reason": "Defending champion out of DATEV Challenge Roth 2026, health reasons. Verified tri-mag.de / TRI247 / tri2b.com, 2026-07-01."
+    }
+  ]
+}

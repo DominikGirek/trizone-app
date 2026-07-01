@@ -19,7 +19,11 @@
       { "date": "2026-10-10", "event": "IRONMAN World Championship (Kona)", "series": "ironman", "location": "Kailua-Kona, Hawaii", "url": "https://www.ironman.com/im-world-championship" }
     ],
     "magnus-ditlev": [
+      { "date": "2026-07-05", "event": "DATEV Challenge Roth", "series": "challenge", "location": "Roth, Deutschland", "url": "https://www.challenge-roth.com/" },
       { "date": "2026-10-10", "event": "IRONMAN World Championship (Kona)", "series": "ironman", "location": "Kailua-Kona, Hawaii", "url": "https://www.ironman.com/im-world-championship" }
+    ],
+    "finn-grosse-freese": [
+      { "date": "2026-07-05", "event": "DATEV Challenge Roth", "series": "challenge", "location": "Roth, Deutschland", "url": "https://www.challenge-roth.com/" }
     ],
     "gustav-iden": [
       { "date": "2026-09-12", "event": "IRONMAN 70.3 World Championship", "series": "ironman703", "location": "Nizza, Frankreich", "url": "https://www.ironman.com/im703-world-championship" },
@@ -43,6 +47,7 @@
       { "date": "2026-10-10", "event": "IRONMAN World Championship (Kona)", "series": "ironman", "location": "Kailua-Kona, Hawaii", "url": "https://www.ironman.com/im-world-championship" }
     ],
     "lucy-charles-barclay": [
+      { "date": "2026-07-05", "event": "DATEV Challenge Roth", "series": "challenge", "location": "Roth, Deutschland", "url": "https://www.challenge-roth.com/" },
       { "date": "2026-10-10", "event": "IRONMAN World Championship (Kona)", "series": "ironman", "location": "Kailua-Kona, Hawaii", "url": "https://www.ironman.com/im-world-championship" }
     ],
     "taylor-knibb": [
