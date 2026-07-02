@@ -38,6 +38,10 @@ export default function HandleScreen() {
       haptics.success();
       qc.invalidateQueries({ queryKey: ['myHandle'] });
       qc.invalidateQueries({ queryKey: ['leaderboard'] });
+      // The name also appears in every GROUP leaderboard (+ the global group list) — without
+      // invalidating those, the cached rows keep showing the old name ("anon") for up to staleTime.
+      qc.invalidateQueries({ queryKey: ['groupBoard'] });
+      qc.invalidateQueries({ queryKey: ['groupGlobal'] });
       show(t('handle.savedToast'), 'checkmark-circle');
       router.back();
     } else {
