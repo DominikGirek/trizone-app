@@ -116,7 +116,12 @@ async function fetchFeed(feed: (typeof FEEDS)[number]): Promise<Article[]> {
       signal: controller.signal,
     });
     if (!res.ok) return [];
-    return parseFeed(await res.text(), feed.source, feed.lang);
+    const xml = await res.text();
+    // Yield to the event loop before the (synchronous) XML parse: feeds resolve around the same
+    // time, and parsing them back-to-back starved timers/touches for ~2s on device. One breath
+    // between parses keeps the app responsive while the aggregate builds.
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    return parseFeed(xml, feed.source, feed.lang);
   } catch {
     return [];
   } finally {

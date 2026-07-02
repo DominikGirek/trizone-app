@@ -206,8 +206,20 @@ const RECAP_RE =
 // Whole-word match — a city token must NOT match inside an unrelated word ("bonn" should
 // not hit "Charbonnet"). \w is ASCII-only, so we bound on Unicode letters/digits (\p{L}\p{N})
 // to also respect German umlauts on the edges.
-const wordRe = (tok: string) =>
-  new RegExp(`(^|[^\\p{L}\\p{N}])${tok.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}($|[^\\p{L}\\p{N}])`, 'iu');
+//
+// PERF-CRITICAL: unicode-property regexes are very expensive to COMPILE on Hermes (~ms each).
+// mentionsAny runs races×articles×tokens on the dashboard (hot-news scan) — compiling per call
+// produced >100k compiles ≈ the 13s cold-start freeze. Tokens repeat massively, so we compile
+// each token ONCE and cache it (bounded vocabulary: race/venue name tokens).
+const wordReCache = new Map<string, RegExp>();
+const wordRe = (tok: string): RegExp => {
+  let re = wordReCache.get(tok);
+  if (!re) {
+    re = new RegExp(`(^|[^\\p{L}\\p{N}])${tok.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}($|[^\\p{L}\\p{N}])`, 'iu');
+    wordReCache.set(tok, re);
+  }
+  return re;
+};
 export function mentionsAny(text: string, tokens: string[]): boolean {
   return tokens.some((t) => t.length >= 3 && wordRe(t).test(text));
 }
