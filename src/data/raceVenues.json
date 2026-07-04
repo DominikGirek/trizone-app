@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-27T08:13:27.170Z",
+  "generatedAt": "2026-07-04T08:13:43.418Z",
   "note": "Verified SWIM-START coordinates per race, keyed by city token(s) (date-independent — a city's swim venue rarely changes year to year). Geocoded from the real swim-venue NAME via OpenStreetMap Nominatim and validated to lie within ~25 km of the event town (guards against the organizer HQ / a wrong-city match / an LLM-invented venue). NEVER the organizer's office. Robot: scripts/ingest-race-venues.mjs regenerates/extends this; only verified coordinates are written, never fabricated.",
   "venues": {
     "roth": {
@@ -163,6 +163,24 @@
       "lon": -123.14371,
       "label": "Schwimmstart English Bay Beach, Vancouver",
       "source": "OSM: English Bay Beach, Vancouver (natural/beach, 1.7 km from centre)"
+    },
+    "barcelona": {
+      "lat": 41.37009,
+      "lon": 2.18547,
+      "label": "Schwimmstart Port Vell",
+      "source": "OSM: Port Vell (landuse/harbour, 2.4 km from centre)"
+    },
+    "mallorca-peguera": {
+      "lat": 39.5387,
+      "lon": 2.4473,
+      "label": "Schwimmstart Peguera Beach",
+      "source": "OSM: Peguera Beach (tourism/hotel, 1.0 km from centre)"
+    },
+    "canberra": {
+      "lat": -35.2991,
+      "lon": 149.07967,
+      "label": "Schwimmstart Lake Burley Griffin, Canberra",
+      "source": "OSM: Lake Burley Griffin, Canberra (water/lake, 5.0 km from centre)"
     }
   }
 }
