@@ -1,6 +1,13 @@
 {
   "results": [
     {
+      "raceId": "se-ch-roth",
+      "men": ["sam-laidlow", "kristian-blummenfelt", "rico-bogen", "menno-koolhaas", "jonas-schomburg"],
+      "women": ["alanis-siffert", "lucy-charles-barclay", "daisy-davies", "kat-matthews", "caroline-pohle"],
+      "source": "stats.protriathletes.org/race/challenge-roth/2026/results (Laidlow WR 7:21:04; Siffert 8:09:09)",
+      "verifiedAt": "2026-07-06"
+    },
+    {
       "raceId": "se-im-frankfurt",
       "men": ["casper-stornes", "gustav-iden", "antonio-benito-lopez", "kacper-stepniak", "vincent-luis"],
       "women": [],
