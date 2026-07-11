@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-04T08:13:43.418Z",
+  "generatedAt": "2026-07-11T07:26:14.778Z",
   "note": "Verified SWIM-START coordinates per race, keyed by city token(s) (date-independent — a city's swim venue rarely changes year to year). Geocoded from the real swim-venue NAME via OpenStreetMap Nominatim and validated to lie within ~25 km of the event town (guards against the organizer HQ / a wrong-city match / an LLM-invented venue). NEVER the organizer's office. Robot: scripts/ingest-race-venues.mjs regenerates/extends this; only verified coordinates are written, never fabricated.",
   "venues": {
     "roth": {
@@ -181,6 +181,18 @@
       "lon": 149.07967,
       "label": "Schwimmstart Lake Burley Griffin, Canberra",
       "source": "OSM: Lake Burley Griffin, Canberra (water/lake, 5.0 km from centre)"
+    },
+    "aix-provence": {
+      "lat": 43.65502,
+      "lon": 5.59085,
+      "label": "Schwimmstart Lac de Peyrolles",
+      "source": "OSM: Lac de Peyrolles (water/lake, 18.1 km from centre)"
+    },
+    "sanremo": {
+      "lat": 43.82048,
+      "lon": 7.78311,
+      "label": "Schwimmstart Portosole, Sanremo",
+      "source": "OSM: Portosole, Sanremo (amenity/pharmacy, 0.3 km from centre)"
     }
   }
 }
