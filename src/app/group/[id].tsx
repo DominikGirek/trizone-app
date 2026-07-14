@@ -1,8 +1,8 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { ScrollView, Share, StyleSheet, Switch, View } from 'react-native';
+import { Pressable, ScrollView, Share, StyleSheet, Switch, View } from 'react-native';
 
 import { InviteCode } from '@/components/InviteCode';
 import { ThemedText } from '@/components/themed-text';
@@ -82,11 +82,19 @@ export default function GroupScreen() {
         {board.length > 0 ? (
           <View style={[styles.board, { borderColor: theme.border }]}>
             {board.map((r, i) => (
-              <View key={r.user_id} style={[styles.boardRow, i > 0 && { borderTopColor: theme.border, borderTopWidth: StyleSheet.hairlineWidth }]}>
+              <Pressable
+                key={r.user_id}
+                onPress={() => router.push(`/member-tips?group=${id}&user=${r.user_id}&name=${encodeURIComponent(r.handle)}`)}
+                style={({ pressed }) => [
+                  styles.boardRow,
+                  i > 0 && { borderTopColor: theme.border, borderTopWidth: StyleSheet.hairlineWidth },
+                  pressed && { opacity: 0.6 },
+                ]}>
                 <ThemedText type="smallBold" style={styles.rank}>{i + 1}</ThemedText>
                 <ThemedText type="small" style={styles.flex} numberOfLines={1}>{r.handle}</ThemedText>
                 <ThemedText type="smallBold">{r.points} {t('tippspiel.points')}</ThemedText>
-              </View>
+                <Ionicons name="chevron-forward" size={15} color={theme.textSecondary} />
+              </Pressable>
             ))}
           </View>
         ) : (

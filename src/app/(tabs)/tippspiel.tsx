@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
 
 import { PrizeStrip } from '@/components/PrizeStrip';
 import { ThemedText } from '@/components/themed-text';
@@ -19,7 +19,7 @@ import { storage, StorageKeys } from '@/lib/storage';
 import { isTipLocked, TIP_SIZE } from '@/lib/tippspiel';
 import { getAllEvents, openTippableRaces } from '@/services/events';
 import { getStartListKeys, raceKey } from '@/services/races';
-import { fetchGroupGlobalLeaderboard, fetchLeaderboard, fetchMyGroups, fetchMyHandle, fetchSecured } from '@/services/tippspielSync';
+import { fetchGroupGlobalLeaderboard, fetchLeaderboard, fetchMyGroups, fetchMyHandle, fetchSecured, fetchTipsPublic, setTipsPublic } from '@/services/tippspielSync';
 import { useTips } from '@/store/tips';
 
 export default function TippspielScreen() {
@@ -36,9 +36,15 @@ export default function TippspielScreen() {
   const { data: groupGlobal = [] } = useQuery({ queryKey: ['groupGlobal'], queryFn: () => fetchGroupGlobalLeaderboard() });
   const { data: myHandle, refetch: refetchHandle } = useQuery({ queryKey: ['myHandle'], queryFn: fetchMyHandle });
   const { data: secured, refetch: refetchSecured } = useQuery({ queryKey: ['secured'], queryFn: fetchSecured });
+  const { data: tipsPublic = true, refetch: refetchTipsPublic } = useQuery({ queryKey: ['tipsPublic'], queryFn: fetchTipsPublic });
 
   // Refresh identity + groups whenever the hub regains focus (e.g. after setting a name / joining a group).
   useFocusEffect(useCallback(() => { refetchGroups(); refetchHandle(); refetchSecured(); }, [refetchGroups, refetchHandle, refetchSecured]));
+
+  const onToggleTipsPublic = async (v: boolean) => {
+    await setTipsPublic(v);
+    refetchTipsPublic();
+  };
 
   // One-time, dismissible "your tips live only on this device" hint (anonymous-first, honest, not nagging).
   const [hintDismissed, setHintDismissed] = useState(true);
@@ -94,6 +100,18 @@ export default function TippspielScreen() {
           </View>
           <Ionicons name="chevron-forward" size={18} color={theme.textSecondary} />
         </Pressable>
+
+        {/* Privacy: whether group members can see your tips (only ever after each race locks). */}
+        <View style={[styles.privacyRow, { backgroundColor: theme.backgroundElement }]}>
+          <Ionicons name={tipsPublic ? 'eye-outline' : 'eye-off-outline'} size={20} color={theme.primary} />
+          <View style={styles.flex}>
+            <ThemedText type="smallBold">{t('tippspiel.tipsVisibleTitle')}</ThemedText>
+            <ThemedText type="small" themeColor="textSecondary" style={styles.privacyHint}>
+              {tipsPublic ? t('tippspiel.tipsVisibleOn') : t('tippspiel.tipsVisibleOff')}
+            </ThemedText>
+          </View>
+          <Switch value={tipsPublic} onValueChange={onToggleTipsPublic} trackColor={{ true: theme.primary, false: theme.border }} />
+        </View>
 
         {/* One-time, dismissible honesty nudge: tips are device-only until secured (optional) */}
         {!hintDismissed && !secured && myTips.length > 0 && (
@@ -305,6 +323,8 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   intro: { lineHeight: 19, marginBottom: Spacing.two },
   account: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, padding: Spacing.three, borderRadius: 14 },
+  privacyRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, padding: Spacing.three, borderRadius: 14, marginTop: Spacing.one },
+  privacyHint: { lineHeight: 17, marginTop: 1 },
   hint: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, padding: Spacing.three, borderRadius: 12, marginTop: Spacing.one },
   section: { fontSize: 15, fontWeight: '700', letterSpacing: -0.2, marginTop: Spacing.three, marginBottom: Spacing.one },
   sectionRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },

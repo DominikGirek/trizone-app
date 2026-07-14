@@ -69,6 +69,7 @@ function NavigationStack() {
         <Stack.Screen name="my-races" options={{ headerShown: false, presentation: 'modal' }} />
         <Stack.Screen name="login" options={{ headerShown: false, presentation: 'modal' }} />
         <Stack.Screen name="handle" options={{ headerShown: false, presentation: 'modal' }} />
+        <Stack.Screen name="member-tips" options={{ headerShown: false, presentation: 'modal' }} />
         <Stack.Screen name="group/new" options={{ headerShown: false, presentation: 'modal' }} />
         <Stack.Screen name="group/[id]" options={{ title: '', headerBackTitle: '' }} />
         <Stack.Screen name="tip/[id]" options={{ title: '', headerBackTitle: '' }} />

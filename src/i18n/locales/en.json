@@ -412,7 +412,10 @@
     "lockDays_other": "{{count}} days left",
     "openCount_one": "{{count}} race open",
     "openCount_other": "{{count}} races open",
-    "seasonNote": "2026 season · across all races you tip"
+    "seasonNote": "2026 season · across all races you tip",
+    "tipsVisibleTitle": "My tips visible",
+    "tipsVisibleOn": "Group members can see your tips — but only after the race starts.",
+    "tipsVisibleOff": "Your tips are private — no one can see them."
   },
   "prize": {
     "win": "Up for grabs",
@@ -454,7 +457,15 @@
     "loading": "Loading …",
     "created": "Group created!",
     "toGroup": "Open group",
-    "foot": "Tip on races — your tip counts automatically across all your groups."
+    "foot": "Tap a member to see their tips (after the race starts). Your tip counts automatically across all your groups."
+  },
+  "memberTips": {
+    "title": "Tips",
+    "subtitle": "Submitted tips",
+    "men": "Men",
+    "women": "Women",
+    "empty": "No visible tips — either private, or no tipped race has started yet.",
+    "foot": "Tips only become visible to others once a race has started (fairness). You can set your tips to private in the Tippspiel tab."
   },
   "result": {
     "yourScore": "Your score: {{points}} pts",

@@ -412,7 +412,10 @@
     "lockDays_other": "noch {{count}} Tage",
     "openCount_one": "{{count}} Rennen offen",
     "openCount_other": "{{count}} Rennen offen",
-    "seasonNote": "Saison 2026 · über alle getippten Rennen"
+    "seasonNote": "Saison 2026 · über alle getippten Rennen",
+    "tipsVisibleTitle": "Meine Tipps sichtbar",
+    "tipsVisibleOn": "Gruppenmitglieder sehen deine Tipps — aber erst nach dem Rennstart.",
+    "tipsVisibleOff": "Deine Tipps sind privat — niemand kann sie sehen."
   },
   "prize": {
     "win": "Zu gewinnen",
@@ -454,7 +457,15 @@
     "loading": "Lädt …",
     "created": "Gruppe erstellt!",
     "toGroup": "Zur Gruppe",
-    "foot": "Tippe bei Rennen mit — dein Tipp zählt automatisch in allen deinen Gruppen."
+    "foot": "Tippe auf ein Mitglied, um seine Tipps zu sehen (nach dem Rennstart). Dein Tipp zählt automatisch in allen deinen Gruppen."
+  },
+  "memberTips": {
+    "title": "Tipps",
+    "subtitle": "Abgegebene Tipps",
+    "men": "Männer",
+    "women": "Frauen",
+    "empty": "Keine sichtbaren Tipps — entweder privat oder es hat noch kein getipptes Rennen begonnen.",
+    "foot": "Tipps werden erst nach dem Start eines Rennens für andere sichtbar (Fairness). Wer möchte, kann seine Tipps im Tippspiel auf privat stellen."
   },
   "result": {
     "yourScore": "Deine Wertung: {{points}} Pkt",

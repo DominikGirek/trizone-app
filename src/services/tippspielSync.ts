@@ -97,6 +97,44 @@ export async function setMyHandle(handle: string): Promise<{ ok: boolean; error?
   return { ok: true };
 }
 
+// ── Tip visibility / privacy ────────────────────────────────────────────────
+/** Whether the user's tips are visible to their group members (after each race locks). Default true. */
+export async function fetchTipsPublic(): Promise<boolean> {
+  if (!authConfigured) return true;
+  const { data } = await supabase.auth.getSession();
+  const uid = data.session?.user?.id;
+  if (!uid) return true;
+  const { data: row } = await supabase.from('profiles').select('tips_public').eq('id', uid).maybeSingle();
+  return row?.tips_public ?? true;
+}
+
+/** Set whether the user's (locked) tips are visible to group members. */
+export async function setTipsPublic(pub: boolean): Promise<void> {
+  if (!authConfigured) return;
+  const uid = await ensureSession();
+  if (!uid) return;
+  // Upsert touches only tips_public; handle stays intact on conflict.
+  await supabase.from('profiles').upsert({ id: uid, tips_public: pub });
+}
+
+export interface MemberTip {
+  race_id: string;
+  race_name: string | null;
+  race_date: string | null;
+  men: string[];
+  women: string[];
+}
+
+/** A group member's tips — LOCKED races only (anti-cheat) + only if they haven't hidden them. Your own
+ *  tips always come back. Empty if the member is private or has no started races yet. */
+export async function fetchMemberTips(groupId: string, userId: string): Promise<MemberTip[]> {
+  if (!authConfigured) return [];
+  await ensureSession();
+  const { data, error } = await supabase.rpc('group_member_tips', { p_group: groupId, p_user: userId });
+  if (error || !data) return [];
+  return data as MemberTip[];
+}
+
 // ── Groups (P4) ───────────────────────────────────────────────────────────────
 export interface Group {
   id: string;
