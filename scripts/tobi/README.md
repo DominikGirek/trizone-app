@@ -14,9 +14,21 @@ roster.mjs        Slug-Universum in zwei Stufen: canonical (Tipps/Wertung) + kno
 canonical.mjs     löst Quell-Slug → kanonischen Slug: alias → canonical → normalisiert (Diakritika) → unknown
 aliases.json      Quell-Schreibweise → kanonischer Slug (nur genuine Fälle; Transliteration macht canonical.mjs)
 core.mjs          Kanonik-Auflösung + Kreuzabgleich + Konfidenz-Gate → Urteil (publish/stage/fail) + robot_runs
-run.mjs           Orchestrator (Dry-Run): alle Adapter des Rennens laufen lassen, bewerten, berichten
+publish.mjs       Schreib-Schicht: raceResults.json upsert (idempotent) + Supabase race_results/robot_runs
+run.mjs           Orchestrator: alle Adapter laufen lassen, bewerten, berichten; `--write`/`--today`
 test.mjs          Offline-Beweis gegen die Roth-2026-Fixtures (PTO + MIKA)
 ```
+
+## Modi (`run.mjs`)
+
+```bash
+node scripts/tobi/run.mjs                     # alle Rennen, live, Dry-Run (nichts geschrieben)
+node scripts/tobi/run.mjs --race=se-ch-roth   # ein Rennen
+node scripts/tobi/run.mjs --write             # publish → raceResults.json (+ Supabase, wenn SERVICE_ROLE)
+node scripts/tobi/run.mjs --write --today      # nur heutige Rennen (Renntag-Scheduler der GitHub Action)
+```
+`--write` fasst `raceResults.json` **nur bei `publish`** an und **idempotent** (identische Top-5 → kein
+Schreiben). Supabase-Push (`race_results` + `robot_runs`) nur, wenn `SUPABASE_SERVICE_ROLE_KEY` gesetzt ist.
 
 ## Konfidenz-Gate (Datenintegrität ist heilig)
 
@@ -41,6 +53,9 @@ node scripts/tobi/run.mjs --race=se-ch-roth    # ein Rennen
   Transliterations-Normalisierung). Roth publisht jetzt **auto** mit 2 einigen Quellen (PTO×MIKA).
   `node scripts/tobi/test.mjs` = 23/23 offline. IRONMAN-Rennen (Frankfurt/Hamburg/Kona) haben noch nur
   PTO → stagen, bis ein IRONMAN-Adapter dazukommt.
-- **Slice 3** — GitHub Action (renntag-bewusst) + Prod-Write (`raceResults.json`) + Supabase-Push.
-  ⚠️ Braucht `SUPABASE_SERVICE_ROLE_KEY` als GitHub-Actions-Secret + `robot_runs`-Migration in Prod.
+- **Slice 3 ✅ (Code gebaut, noch nicht scharf)** — `publish.mjs` (idempotenter `raceResults.json`-Upsert +
+  Supabase-Push) + `run.mjs --write/--today` + Workflow `.github/workflows/ingest-race-results.yml`
+  (renntag-bewusst, hourly 14–21 UTC). Lokal ohne Secret getestet (Roth publisht, Datei unverändert).
+  ⚠️ **Zum Scharfschalten (Dominik):** (1) `SUPABASE_SERVICE_ROLE_KEY` als GitHub-Actions-Secret,
+  (2) `robot_runs`-Migration in Prod anwenden. Bis dahin: JSON-Write ok, DB-Push/Log übersprungen.
 - **Slice 4/5** — In-App-Reveal + Admin-Cockpit.

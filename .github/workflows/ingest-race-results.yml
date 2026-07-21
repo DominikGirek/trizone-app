@@ -1,0 +1,57 @@
+name: Tobi — ingest verified race results
+
+# Tobi, the results robot (docs/robot-fleet.md). On a race day it pulls each configured race from its
+# sources (PTO + MIKA), cross-verifies, canonicalises names, and AUTO-PUBLISHES only when ≥2 sources agree
+# on the identical top-5 (else it stages + logs, never invents). Writes src/data/raceResults.json (feeds the
+# in-app "tip vs result" view, committed here) and — with the SUPABASE_SERVICE_ROLE_KEY secret — upserts
+# Supabase race_results (leaderboards score) + logs robot_runs (Cockpit). Fully idempotent + race-day aware.
+
+on:
+  schedule:
+    # Race-day window: hourly 14:07–21:07 UTC (16–23 CEST) — covers European afternoon/evening finishes.
+    # The script is idempotent and --today-filtered, so off-day runs and already-published races are no-ops.
+    - cron: "7 14-21 * * *"
+  workflow_dispatch:
+    inputs:
+      race:
+        description: "Single race id (e.g. se-ch-roth). Empty = all configured races, ignoring --today."
+        required: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ingest-race-results
+  cancel-in-progress: false
+
+jobs:
+  tobi:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      # Tobi's only npm dep is the Supabase client (results parsing uses Node built-ins). Targeted install
+      # keeps race-day runs fast — no full app toolchain. Harmless before the secret exists (client unused).
+      - name: Install Supabase client
+        run: npm install @supabase/supabase-js --no-save --no-audit --no-fund
+
+      - name: Run Tobi
+        env:
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          if [ -n "${{ github.event.inputs.race }}" ]; then
+            node scripts/tobi/run.mjs --write --race=${{ github.event.inputs.race }}
+          elif [ "${{ github.event_name }}" = "schedule" ]; then
+            node scripts/tobi/run.mjs --write --today
+          else
+            node scripts/tobi/run.mjs --write
+          fi
+
+      - name: Commit results if changed
+        run: >-
+          node scripts/ci-commit-data.mjs src/data/raceResults.json
+          "chore(data): Tobi verified race results"

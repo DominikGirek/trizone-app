@@ -202,6 +202,22 @@ Zwei Teile, beide offline gegen Roth verifiziert (`node scripts/tobi/test.mjs` �
 - Offen bleibt: IRONMAN-Rennen (Frankfurt/Hamburg/Kona) haben nur PTO → stagen bis zu einem IRONMAN- oder
   raceresult-Adapter (kann in Slice 3 mitkommen oder später).
 
+### Slice 3 — Stand: ✅ Code gebaut, noch nicht scharfgeschaltet (2026-07-21)
+- **`publish.mjs`**: `raceResults.json`-Upsert (nur bei `publish`, **idempotent** — Serializer reproduziert
+  die Datei byte-genau, hand-kuratierte `source` wird nie überschrieben) + Supabase `race_results`-Upsert
+  (Leaderboards) + `robot_runs`-Insert (Cockpit, jeder Lauf).
+- **`run.mjs --write/--today`**: `--write` handelt nach dem Urteil (publish → schreiben; stage/fail → nur
+  loggen); `--today` filtert auf heutige Rennen (Renntag-Scheduler). Ohne Secret: JSON-Write ok, DB
+  übersprungen.
+- **Workflow `.github/workflows/ingest-race-results.yml`**: hourly 14–21 UTC (16–23 CEST), `--write --today`,
+  committet via `ci-commit-data.mjs`, liest `SUPABASE_SERVICE_ROLE_KEY` aus den Secrets. Idempotent →
+  Off-Day-/Bereits-publisht-Läufe sind No-Ops.
+- Lokal ohne Secret verifiziert: Roth publisht, `raceResults.json` bleibt **unverändert** (idempotent),
+  Supabase sauber übersprungen. `--today` heute (21.07.) = „No race scheduled".
+- ⚠️ **Zwei Handgriffe von Dominik zum Scharfschalten:** (1) `SUPABASE_SERVICE_ROLE_KEY` als
+  GitHub-Actions-Secret, (2) `robot_runs`-Migration (`supabase/migrations/20260721130000_robot_runs.sql`)
+  in Prod anwenden (per Browser). Danach ist Tobi live.
+
 ---
 
 ## 8. Leitplanken (gelten für die ganze Flotte)
