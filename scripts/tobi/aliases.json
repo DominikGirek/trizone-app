@@ -1,8 +1,6 @@
 {
   "_note": "Tobi slug aliases: a SOURCE spelling (left) → the app's canonical roster slug (right). Sources (esp. PTO) sometimes spell a name differently than our roster. When Tobi stages an 'unknown slug', Dominik maps it here ONCE and it auto-resolves forever after — the exception-handling loop from docs/robot-fleet.md. Only ever map a genuine same-person spelling; never map two different athletes together.",
   "aliases": {
-    "carolin-pohle": "caroline-pohle",
-    "solveig-loevseth": "solveig-lovseth",
-    "katrine-graesboell-christensen": "katrine-graesboll-christensen"
+    "carolin-pohle": "caroline-pohle"
   }
 }

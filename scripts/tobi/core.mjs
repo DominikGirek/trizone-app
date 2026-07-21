@@ -2,38 +2,41 @@
  * Tobi · core — turns adapter outputs into a VERDICT + a `robot_runs` record.
  *
  * Safety rules (docs/robot-fleet.md §4/§5 — data integrity is heilig):
- *   • every finisher slug must resolve (via alias) to a KNOWN roster slug. Unknown ⇒ STAGE + ping,
+ *   • every finisher slug must resolve to a CANONICAL slug (the spelling tips + scoring use) via
+ *     alias → canonical → transliteration-normalised (see canonical.mjs). Unresolved ⇒ STAGE + ping,
  *     never invent a finisher.
- *   • AUTO-PUBLISH only when ≥ minSources sources AGREE on the identical top-N per gender, AND all slugs
- *     are known, AND each expected gender has a complete top-N.
- *   • anything short ⇒ status 'stage' (lands in the approval inbox, pings Dominik).
- *   • no live source at all ⇒ status 'fail'.
+ *   • AUTO-PUBLISH only when ≥ minSources sources AGREE on the identical top-N per gender (after
+ *     resolution), AND all slugs resolved, AND each expected gender has a complete top-N.
+ *   • anything short ⇒ status 'stage' (approval inbox, pings Dominik). No live source ⇒ 'fail'.
  *
  * Pure function — no network, no fs, no clock. The caller stamps `ran_at` and does any writing.
  */
+import { buildCanonicalIndex, resolveCanonical } from './canonical.mjs';
 
 /** @typedef {'publish'|'stage'|'fail'} TobiStatus */
 
 const sameList = (a, b) => a.length === b.length && a.every((x, i) => x === b[i]);
 
-function resolveList(list, aliases, roster) {
+function resolveList(list, deps) {
   const resolved = [];
   const unknown = [];
   for (const raw of list) {
-    const slug = aliases[raw] || raw;
-    resolved.push(slug);
-    if (!roster.slugs.has(slug)) unknown.push(raw);
+    const r = resolveCanonical(raw, deps);
+    resolved.push(r.slug);
+    if (r.how === 'unknown') unknown.push(raw);
   }
   return { resolved, unknown };
 }
 
 /**
  * @param {{ raceId:string, genders:Array<'men'|'women'>, sources:Array<{source:string, ok:boolean, url?:string, men?:string[], women?:string[]}> }} input
- * @param {{ aliases:Record<string,string>, roster:{slugs:Set<string>}, minSources?:number, topN?:number }} deps
+ * @param {{ aliases:Record<string,string>, roster:{canonical:Set<string>}, byNorm?:Map<string,Set<string>>, minSources?:number, topN?:number }} deps
  */
 export function evaluate(input, deps) {
   const { raceId, genders, sources } = input;
   const { aliases = {}, roster, minSources = 2, topN = 5 } = deps;
+  const byNorm = deps.byNorm || buildCanonicalIndex(roster.canonical);
+  const resolveDeps = { aliases, canonical: roster.canonical, byNorm };
 
   const live = sources.filter((s) => s && s.ok);
   const perGender = {};
@@ -44,7 +47,7 @@ export function evaluate(input, deps) {
 
   for (const g of genders) {
     const lists = live.map((s) => {
-      const { resolved, unknown } = resolveList((s[g] || []).slice(0, topN), aliases, roster);
+      const { resolved, unknown } = resolveList((s[g] || []).slice(0, topN), resolveDeps);
       if (unknown.length) {
         allKnown = false;
         for (const u of unknown) unknownSlugs.push({ gender: g, slug: u, source: s.source });
@@ -78,7 +81,7 @@ export function evaluate(input, deps) {
     reason = 'Quellen uneinig';
   } else {
     status = 'publish';
-    reason = `${live.length} Quellen einig, alle Slugs bekannt`;
+    reason = `${live.length} Quellen einig, alle Slugs kanonisch aufgelöst`;
   }
 
   const result = {};
@@ -88,7 +91,7 @@ export function evaluate(input, deps) {
     raceId,
     status,
     reason,
-    result, // { men?:[...], women?:[...] } — best candidate (may be staged, never invented)
+    result, // { men?:[...], women?:[...] } — canonical candidate (may be staged, never invented)
     unknownSlugs,
     sources: live.map((s) => ({ source: s.source, url: s.url })),
     // A row for the Supabase `robot_runs` table (the Cockpit reads this). Caller adds `ran_at`.

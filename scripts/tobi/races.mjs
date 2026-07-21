@@ -4,12 +4,18 @@
  *  • raceId  — the app race id (matches predictions.race_id AND raceResults.raceId one-to-one).
  *  • genders — which podiums this race edition actually scores (some 2026 championships were single-gender).
  *  • pto     — the protriathletes.org race ref { slug, year } for the PTO adapter.
+ *  • mika    — the mikatiming iframe race ref { base, event } for the MIKA adapter (Challenge/MIKA-timed).
  *
- * Slice 1 wires the PTO adapter only. More adapters (MIKA, IRONMAN, World-Triathlon) get added here as
- * extra refs in Slice 2 — that's what lets the confidence gate reach ≥2 agreeing sources and auto-publish.
+ * A race with ≥2 configured adapters can reach the ≥2-agreeing-sources bar and AUTO-PUBLISH. IRONMAN
+ * races (Frankfurt/Hamburg/Kona) currently have PTO only → they stage until an IRONMAN adapter lands.
  */
 export const TOBI_RACES = [
-  { raceId: 'se-ch-roth', genders: ['men', 'women'], pto: { slug: 'challenge-roth', year: 2026 } },
+  {
+    raceId: 'se-ch-roth',
+    genders: ['men', 'women'],
+    pto: { slug: 'challenge-roth', year: 2026 },
+    mika: { base: 'https://roth-iframe.r.mikatiming.com/2026/', event: 'P' },
+  },
   { raceId: 'se-im-frankfurt', genders: ['men'], pto: { slug: 'im-germany', year: 2026 } },
   { raceId: 'se-im-hamburg', genders: ['women'], pto: { slug: 'im-hamburg', year: 2026 } },
   { raceId: 'se-t100-singapore', genders: ['men'], pto: { slug: 'singapore-t100', year: 2026 } },

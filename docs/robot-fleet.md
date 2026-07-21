@@ -1,7 +1,7 @@
 # TriZone — Robot-Flotte (Design-Doc)
 
-> **Status:** Design abgeschlossen 2026-07-21 (via `/grill-me`). **Tobi Slice 1 ✅ gebaut & bewiesen.**
-> Lebendiges Dokument — künftige Entscheidungen ins §5-Log. Tobi-Code: `scripts/tobi/`.
+> **Status:** Design abgeschlossen 2026-07-21 (via `/grill-me`). **Tobi Slices 1–2 ✅ gebaut & bewiesen**
+> (Roth auto-publisht offline mit PTO×MIKA, 23/23). Lebendiges Dokument — Entscheidungen ins §5-Log. Code: `scripts/tobi/`.
 
 ---
 
@@ -187,6 +187,20 @@ Code in `scripts/tobi/` (`core.mjs`, `adapters/pto.mjs`, `roster.mjs`, `aliases.
   normalisierte Auto-Alias-Ableitung (Diakritika/oe↔o) + evtl. Roster-Dedup.
 - Bestätigt: mit nur 1 Quelle (PTO) staged Tobi *immer* — Auto-Publish braucht Slice 2 (2. Quelle). Das ist
   korrekt & sicher, kein Bug.
+
+### Slice 2 — Stand: ✅ gebaut & bewiesen (2026-07-21)
+Zwei Teile, beide offline gegen Roth verifiziert (`node scripts/tobi/test.mjs` → **23/23**):
+- **Kanonik-Map** (`canonical.mjs`): löst Quell-Slug → gewerteter Slug über `alias → canonical →
+  normalisiert → unknown`. Die Transliterations-Normalisierung (ø/ö→oe↔o, ä, ü, ß) löst `solveig-loevseth`
+  & `katrine-graesboell` **automatisch** — nur *genuine* Schreibunterschiede (`carolin`↔`caroline`) brauchen
+  noch einen manuellen Alias. `roster.mjs` unterscheidet jetzt **canonical** (Tipps/Wertung: mocks +
+  tippableFields + raceResults) vs. **known** (Union inkl. Scrape). Sicherheit: mehrdeutige Normalform →
+  *kein* Auto-Match, wird gestaged.
+- **MIKA-Adapter** (`adapters/mika.mjs`): mikatiming `pid=list` → Top-5 je Geschlecht, unabhängig von PTO.
+  Roth **publisht jetzt automatisch** (PTO×MIKA einig, alle Slugs kanonisch). Schöner Nebeneffekt: MIKA
+  schreibt `Caroline` Pohle korrekt, wo PTO `carolin` hatte — die Quellen ergänzen sich.
+- Offen bleibt: IRONMAN-Rennen (Frankfurt/Hamburg/Kona) haben nur PTO → stagen bis zu einem IRONMAN- oder
+  raceresult-Adapter (kann in Slice 3 mitkommen oder später).
 
 ---
 

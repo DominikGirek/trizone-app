@@ -14,6 +14,7 @@ import { readFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { mikaAdapter } from './adapters/mika.mjs';
 import { ptoAdapter } from './adapters/pto.mjs';
 import { evaluate } from './core.mjs';
 import { loadRoster } from './roster.mjs';
@@ -43,11 +44,16 @@ async function main() {
   }
 
   const [roster, aliases] = await Promise.all([loadRoster(), loadAliases()]);
-  console.log(`Tobi (dry run) · roster ${roster.slugs.size} slugs · ${races.length} race(s) · min-sources ${minSources}\n`);
+  console.log(`Tobi (dry run) · ${roster.canonical.size} canonical / ${roster.known.size} known slugs · ${races.length} race(s) · min-sources ${minSources}\n`);
 
   for (const race of races) {
-    // Slice 1: PTO only. Slice 2 collects the race's other adapter refs here too.
-    const sources = [await ptoAdapter(race.pto, { topN: 5 })];
+    // Run every adapter the race has configured (PTO, MIKA, …) → cross-source check in the core.
+    const sources = (
+      await Promise.all([
+        race.pto ? ptoAdapter(race.pto, { topN: 5 }) : null,
+        race.mika ? mikaAdapter(race.mika, { topN: 5 }) : null,
+      ])
+    ).filter(Boolean);
     const verdict = evaluate({ raceId: race.raceId, genders: race.genders, sources }, { aliases, roster, minSources });
 
     console.log(`${ICON[verdict.status]}  ${race.raceId}  — ${verdict.reason}`);

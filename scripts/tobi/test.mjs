@@ -1,7 +1,7 @@
 /**
- * Tobi · Slice-1 proof — OFFLINE. No network, no secrets, no prod writes.
+ * Tobi · Slice 1–2 proof — OFFLINE. No network, no secrets, no prod writes.
  *
- * Runs the PTO adapter + core against the saved Roth-2026 results fixture and asserts the whole safety
+ * Runs the PTO + MIKA adapters + core against saved Roth-2026 fixtures and asserts the whole safety
  * design against the result we already verified by hand (src/data/raceResults.json → se-ch-roth):
  *
  *   1. PTO parse reconstructs the EXACT verified men's top-5.
@@ -17,7 +17,9 @@ import { readFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { mikaAdapter } from './adapters/mika.mjs';
 import { parsePto, ptoAdapter } from './adapters/pto.mjs';
+import { buildCanonicalIndex, resolveCanonical } from './canonical.mjs';
 import { evaluate } from './core.mjs';
 import { loadRoster } from './roster.mjs';
 
@@ -41,7 +43,7 @@ async function main() {
   const roster = await loadRoster();
   const aliasesJson = JSON.parse(await readFile(resolve(HERE, 'aliases.json'), 'utf8')).aliases || {};
 
-  console.log('Tobi · Slice-1 offline proof (Roth 2026 fixture)\n');
+  console.log('Tobi · Slice 1–2 offline proof (Roth 2026 fixtures)\n');
 
   // 1 + 2 — raw parse
   const raw = parsePto(await readFile(FIXTURE, 'utf8'));
@@ -76,7 +78,41 @@ async function main() {
   check('published women == verified', eq(twoSrc.result.women, VERIFIED.women));
   check('confidence == 100', twoSrc.run.confidence === 100);
 
-  console.log(`\n${failures ? `✗ ${failures} assertion(s) FAILED` : '✓ all assertions passed — Slice 1 proven'}`);
+  // 6 — canonical resolver (Slice 2): transliteration auto-resolves; a genuine spelling diff needs an alias
+  console.log('\nCanonical resolver (Slice 2):');
+  const byNorm = buildCanonicalIndex(roster.canonical);
+  const rc = (raw, al = {}) => resolveCanonical(raw, { aliases: al, canonical: roster.canonical, byNorm });
+  const loev = rc('solveig-loevseth');
+  check("'solveig-loevseth' auto-resolves (normalized) → solveig-lovseth", loev.how === 'normalized' && loev.slug === 'solveig-lovseth');
+  const graes = rc('katrine-graesboell-christensen');
+  check("'katrine-graesboell-christensen' → …graesboll… (normalized)", graes.how === 'normalized' && graes.slug === 'katrine-graesboll-christensen');
+  check("'carolin-pohle' is UNKNOWN without an alias (genuine spelling diff, not a rule)", rc('carolin-pohle').how === 'unknown');
+  const pohle = rc('carolin-pohle', aliasesJson);
+  check("'carolin-pohle' resolves via alias when mapped → caroline-pohle", pohle.how === 'alias' && pohle.slug === 'caroline-pohle');
+  check('a non-athlete slug stays unknown (no false auto-match)', rc('this-athlete-does-not-exist').how === 'unknown');
+
+  // 7 — MIKA adapter + REAL cross-source auto-publish (Slice 2), offline against both fixtures
+  console.log('\nMIKA adapter + real PTO×MIKA cross-source (Slice 2):');
+  const mikaSrc = await mikaAdapter(
+    { base: 'fixture://roth', event: 'P' },
+    {
+      fixture: {
+        men: resolve(HERE, 'fixtures/se-ch-roth.mika.men.html'),
+        women: resolve(HERE, 'fixtures/se-ch-roth.mika.women.html'),
+      },
+    },
+  );
+  check('MIKA men == verified', eq(mikaSrc.men, VERIFIED.men));
+  check('MIKA women == verified (MIKA already spells Caroline)', eq(mikaSrc.women, VERIFIED.women));
+  const cross = evaluate(
+    { raceId: 'se-ch-roth', genders: ['men', 'women'], sources: [src, mikaSrc] },
+    { aliases: aliasesJson, roster, minSources: 2 },
+  );
+  check("two REAL independent sources agree ⇒ status 'publish'", cross.status === 'publish');
+  check('published men == verified', eq(cross.result.men, VERIFIED.men));
+  check('published women == verified', eq(cross.result.women, VERIFIED.women));
+
+  console.log(`\n${failures ? `✗ ${failures} assertion(s) FAILED` : '✓ all assertions passed — Slices 1–2 proven'}`);
   process.exit(failures ? 1 : 0);
 }
 

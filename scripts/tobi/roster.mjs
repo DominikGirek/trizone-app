@@ -1,10 +1,14 @@
 /**
- * Tobi · roster — the universe of KNOWN athlete slugs (+ gender where known).
+ * Tobi · roster — the athlete-slug universe, in two tiers:
  *
- * A finisher slug that isn't in here is NEVER invented into a result: Tobi stages it and pings Dominik
- * (see docs/robot-fleet.md — data integrity is heilig). The roster is the UNION of every source the app
- * can already render an athlete from, so a legit pro almost always resolves and only genuinely-new names
- * get flagged.
+ *  • `canonical` — the slugs that TIPS and SCORING actually reference: the curated roster
+ *    (src/mocks/athletes.ts) + the tippable fields (the picker's pool) + verified past results. These are
+ *    "gold": what Tobi must publish so a user's pick lines up with the result.
+ *  • `known` — the broad UNION that also includes scraped start-list spellings (PTO/media/LLM/MIKA/WTCS).
+ *    Used only to tell "real athlete, different spelling" from "genuinely never seen".
+ *
+ * A finisher slug that resolves to neither (see canonical.mjs) is NEVER invented into a result: Tobi
+ * stages it and pings (docs/robot-fleet.md — data integrity is heilig).
  */
 import { readFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
@@ -13,7 +17,7 @@ import { fileURLToPath } from 'node:url';
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const DATA = (f) => resolve(ROOT, 'src/data', f);
 
-// JSON pro rosters — shape: { athletes: [{ id, gender? }], starts?: { slug: [...] } }
+// Scraped pro rosters — shape: { athletes: [{ id, gender? }], starts?: { slug: [...] } }. KNOWN, not gold.
 const JSON_ROSTERS = [
   'proAthletes.json',
   'proStartsPTO.json',
@@ -38,35 +42,54 @@ async function readText(path) {
   }
 }
 
+// Slug-shaped, quoted tokens from a TS/JSON blob: start with a letter, contain a hyphen (skips dates,
+// numeric ids, and the dotted/slashed `source` URLs, which never match as a single token).
+function slugTokens(text) {
+  const out = [];
+  for (const m of text.matchAll(/['"]([a-z][a-z0-9]*(?:-[a-z0-9]+)+)['"]/g)) out.push(m[1]);
+  return out;
+}
+
 /**
- * Build the known-slug set + a best-effort gender map.
- * @returns {Promise<{ slugs: Set<string>, gender: Map<string, 'men'|'women'> }>}
+ * @returns {Promise<{ known: Set<string>, canonical: Set<string>, gender: Map<string,'men'|'women'> }>}
  */
 export async function loadRoster() {
-  const slugs = new Set();
+  const known = new Set();
+  const canonical = new Set();
   const gender = new Map();
-  const add = (slug, g) => {
+  const addKnown = (slug, g) => {
     if (!slug) return;
-    slugs.add(slug);
+    known.add(slug);
     if ((g === 'men' || g === 'women') && !gender.has(slug)) gender.set(slug, g);
   };
+  const addCanonical = (slug) => {
+    if (!slug) return;
+    canonical.add(slug);
+    known.add(slug);
+  };
 
-  // Curated source of truth — one athlete per line: `{ id: 'slug', ... gender: 'men' ... }`.
+  // GOLD · curated roster — one athlete per line: `{ id: 'slug', ... gender: 'men' ... }`.
   const mocks = await readText(resolve(ROOT, 'src/mocks/athletes.ts'));
   for (const line of mocks.split('\n')) {
     const id = line.match(/id:\s*'([a-z0-9-]+)'/);
     if (!id) continue;
     const g = line.match(/gender:\s*'(men|women)'/);
-    add(id[1], g?.[1]);
+    addCanonical(id[1]);
+    if (g) gender.set(id[1], g[1]);
   }
 
-  // JSON pro rosters (WTCS + all start-list robots).
+  // GOLD · tippable fields (the picker's pool) + verified results (what scoring compares against).
+  for (const f of ['tippableFields.ts', 'raceResults.json']) {
+    for (const slug of slugTokens(await readText(DATA(f)))) addCanonical(slug);
+  }
+
+  // KNOWN · scraped pro rosters (WTCS + all start-list robots) — real athletes, possibly non-canonical spelling.
   for (const f of JSON_ROSTERS) {
     const j = await readJson(DATA(f));
     if (!j) continue;
-    for (const a of j.athletes || []) add(a.id, a.gender);
-    for (const slug of Object.keys(j.starts || {})) add(slug);
+    for (const a of j.athletes || []) addKnown(a.id, a.gender);
+    for (const slug of Object.keys(j.starts || {})) addKnown(slug);
   }
 
-  return { slugs, gender };
+  return { known, canonical, gender };
 }

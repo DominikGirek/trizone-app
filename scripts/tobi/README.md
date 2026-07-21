@@ -7,13 +7,15 @@ und speist den Flagship-„Ergebnis-Moment". Vollständiges Design: [`docs/robot
 ## Architektur
 
 ```
-races.mjs        raceId → Adapter-Refs (+ welche Geschlechter das Rennen wertet)
-adapters/pto.mjs Quell-Adapter: protriathletes.org /results → Top-5 Slugs je Geschlecht (rein, testbar)
-roster.mjs       Universum bekannter Athleten-Slugs (Union aller App-Quellen) + Geschlecht
-aliases.json     Quell-Schreibweise → kanonischer Roster-Slug (Ausnahme-Auflösung, wächst mit der Zeit)
-core.mjs         Roster-Match + Alias + Konfidenz-Gate → Urteil (publish/stage/fail) + robot_runs-Record
-run.mjs          Orchestrator (Dry-Run): Adapter laufen lassen, bewerten, berichten
-test.mjs         Offline-Beweis gegen die Roth-2026-Fixture
+races.mjs         raceId → Adapter-Refs (PTO, MIKA, …) + welche Geschlechter das Rennen wertet
+adapters/pto.mjs  Quell-Adapter: protriathletes.org /results → Top-5 Slugs je Geschlecht (rein, testbar)
+adapters/mika.mjs Quell-Adapter: mikatiming pid=list → Top-5 je Geschlecht (unabhängig von PTO)
+roster.mjs        Slug-Universum in zwei Stufen: canonical (Tipps/Wertung) + known (Union inkl. Scrape)
+canonical.mjs     löst Quell-Slug → kanonischen Slug: alias → canonical → normalisiert (Diakritika) → unknown
+aliases.json      Quell-Schreibweise → kanonischer Slug (nur genuine Fälle; Transliteration macht canonical.mjs)
+core.mjs          Kanonik-Auflösung + Kreuzabgleich + Konfidenz-Gate → Urteil (publish/stage/fail) + robot_runs
+run.mjs           Orchestrator (Dry-Run): alle Adapter des Rennens laufen lassen, bewerten, berichten
+test.mjs          Offline-Beweis gegen die Roth-2026-Fixtures (PTO + MIKA)
 ```
 
 ## Konfidenz-Gate (Datenintegrität ist heilig)
@@ -34,10 +36,11 @@ node scripts/tobi/run.mjs --race=se-ch-roth    # ein Rennen
 
 ## Slice-Status
 
-- **Slice 1 ✅** — Core + PTO-Adapter + `robot_runs`-Migration, offline gegen Roth bewiesen (13/13). Dry-Run,
-  keine Prod-Writes, keine Secrets.
-- **Slice 2** — 2.–3. Adapter (MIKA/IRONMAN/World-Triathlon) → echter Kreuzabgleich fürs Auto-Publish;
-  **Kanonik-Map** (normalisierte Schreibweisen automatisch auf den gewerteten Slug ziehen).
+- **Slice 1 ✅** — Core + PTO-Adapter + `robot_runs`-Migration, offline gegen Roth bewiesen. Dry-Run.
+- **Slice 2 ✅** — **MIKA-Adapter** (echter Kreuzabgleich) + **Kanonik-Map** (`canonical.mjs`,
+  Transliterations-Normalisierung). Roth publisht jetzt **auto** mit 2 einigen Quellen (PTO×MIKA).
+  `node scripts/tobi/test.mjs` = 23/23 offline. IRONMAN-Rennen (Frankfurt/Hamburg/Kona) haben noch nur
+  PTO → stagen, bis ein IRONMAN-Adapter dazukommt.
 - **Slice 3** — GitHub Action (renntag-bewusst) + Prod-Write (`raceResults.json`) + Supabase-Push.
   ⚠️ Braucht `SUPABASE_SERVICE_ROLE_KEY` als GitHub-Actions-Secret + `robot_runs`-Migration in Prod.
 - **Slice 4/5** — In-App-Reveal + Admin-Cockpit.
