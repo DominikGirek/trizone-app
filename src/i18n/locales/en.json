@@ -119,6 +119,7 @@
     "feedMyRaces": "My Races",
     "feedAthletes": "Athletes",
     "feedEmpty": "Nothing here yet — follow more and it fills up.",
+    "caughtUp": "You're all caught up",
     "moreAlerts_one": "+{{count}} more alert",
     "moreAlerts_other": "+{{count}} more alerts",
     "lessAlerts": "Show less",

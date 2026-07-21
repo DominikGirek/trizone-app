@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { useMemo, useState, type ComponentProps, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { LayoutAnimation, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { FlatList, LayoutAnimation, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { LocalEventCard } from '@/components/LocalEventCard';
@@ -141,6 +141,7 @@ export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
   const [feed, setFeed] = useState<FeedTab>('foryou');
   const [hotExpanded, setHotExpanded] = useState(false);
+  const [feedPage, setFeedPage] = useState(1); // infinite-scroll page for the bottom news river
 
   // Switch the feed with a soft cross-fade + resize so sections don't hard-jump (the hero above
   // the chips stays put). No-op on web; smooth on native.
@@ -151,6 +152,7 @@ export default function DashboardScreen() {
       LayoutAnimation.create(220, LayoutAnimation.Types.easeInEaseOut, LayoutAnimation.Properties.opacity),
     );
     setFeed(id);
+    setFeedPage(1); // start the new tab's river from the top
   };
   const { coords } = useLocation();
   const { idsOf } = useFavorites();
@@ -266,23 +268,42 @@ export default function DashboardScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [news, uiLang, athleteNames.join('|'), seriesIds.join('|'), brandIds.join('|'), sessionSeed, newsBucket]);
 
-  // The switchable bottom feed — one news list per chip.
+  // The switchable bottom feed — one FULL news list per chip (paginated below into an infinite river).
   const recentNews = useMemo(() => {
     const arr = (news ?? []).filter((a) => a.lang === uiLang);
-    return [...(arr.length ? arr : (news ?? []))]
-      .sort((a, b) => +new Date(b.publishedAt) - +new Date(a.publishedAt))
-      .slice(0, 14);
+    return [...(arr.length ? arr : (news ?? []))].sort(
+      (a, b) => +new Date(b.publishedAt) - +new Date(a.publishedAt),
+    );
   }, [news, uiLang]);
   const athleteNewsList = useMemo(() => {
     const toks = athleteNames.flatMap((n) => [n, n.split(/\s+/).pop() ?? '']).filter((tk) => tk.length >= 4);
-    return toks.length ? (news ?? []).filter((a) => mentionsAny(`${a.title} ${a.summary}`, toks)).slice(0, 12) : [];
+    return toks.length ? (news ?? []).filter((a) => mentionsAny(`${a.title} ${a.summary}`, toks)) : [];
   }, [news, athleteNames]);
   const raceNewsList = useMemo(() => {
     const toks = myRaces.flatMap((r) => r.name.split(/[^\p{L}\p{N}]+/u)).filter((w) => w.length >= 4);
-    return toks.length ? (news ?? []).filter((a) => mentionsAny(`${a.title} ${a.summary}`, toks)).slice(0, 12) : [];
+    return toks.length ? (news ?? []).filter((a) => mentionsAny(`${a.title} ${a.summary}`, toks)) : [];
   }, [news, myRaces]);
-  const feedNews =
-    feed === 'news' ? recentNews : feed === 'athletes' ? athleteNewsList : feed === 'races' ? raceNewsList : topNews;
+  // "For You" = the curated top picks first, then everything else freshest-first → a deep, personal river.
+  const forYouFeed = useMemo(() => {
+    const arr = (news ?? []).filter((a) => a.lang === uiLang);
+    const base = arr.length ? arr : (news ?? []);
+    const topIds = new Set(topNews.map((a) => a.id));
+    const rest = base
+      .filter((a) => !topIds.has(a.id))
+      .sort((a, b) => +new Date(b.publishedAt) - +new Date(a.publishedAt));
+    return [...topNews, ...rest];
+  }, [news, uiLang, topNews]);
+
+  const feedPool =
+    feed === 'news' ? recentNews : feed === 'athletes' ? athleteNewsList : feed === 'races' ? raceNewsList : forYouFeed;
+
+  // Infinite scroll: reveal the river in pages; FlatList virtualises so an endless feed stays fast.
+  const FEED_PAGE = 12;
+  const visibleFeed = useMemo(() => feedPool.slice(0, feedPage * FEED_PAGE), [feedPool, feedPage]);
+  const feedHasMore = visibleFeed.length < feedPool.length;
+  const loadMoreFeed = () => {
+    if (feedHasMore) setFeedPage((p) => p + 1);
+  };
 
   const openArticle = (link: string) => link && WebBrowser.openBrowserAsync(link);
   // — Hot news: time-critical changes (cancel/shorten/postpone) to upcoming races. Stage-1, in-app
@@ -363,7 +384,25 @@ export default function DashboardScreen() {
         <View style={{ flex: 1 }} />
         <HeaderIconButton icon="search" onPress={() => router.push('/search')} label={t('search.placeholder')} />
       </View>
-      <ScrollView contentContainerStyle={styles.content}>
+      <FlatList
+        data={visibleFeed}
+        keyExtractor={(a) => a.id}
+        renderItem={({ item }) => <NewsCard article={item} onPress={() => openArticle(item.link)} />}
+        onEndReached={loadMoreFeed}
+        onEndReachedThreshold={0.6}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.content}
+        removeClippedSubviews
+        ListFooterComponent={
+          feedPool.length > 0 && !feedHasMore ? (
+            <View style={styles.caughtUp}>
+              <Ionicons name="checkmark-circle" size={15} color={theme.textSecondary} />
+              <ThemedText type="small" themeColor="textSecondary">{t('dashboard.caughtUp')}</ThemedText>
+            </View>
+          ) : null
+        }
+        ListHeaderComponent={
+          <>
         {/* Hot news — urgent race-status changes for upcoming races (preview of a future push). */}
         {visibleHot.length > 0 && (
           <View style={styles.hotStack}>
@@ -615,17 +654,17 @@ export default function DashboardScreen() {
           }
           actionLabel={t('dashboard.seeAll')}
           onAction={() => router.push('/news')}>
-          {newsLoading ? (
+          {newsLoading && visibleFeed.length === 0 ? (
             <NewsListSkeleton />
-          ) : feedNews.length > 0 ? (
-            feedNews.map((a) => <NewsCard key={a.id} article={a} onPress={() => openArticle(a.link)} />)
-          ) : (
+          ) : !newsLoading && feedPool.length === 0 ? (
             <ThemedText type="small" themeColor="textSecondary" style={styles.feedEmpty}>
               {t('dashboard.feedEmpty')}
             </ThemedText>
-          )}
+          ) : null}
         </Section>
-      </ScrollView>
+          </>
+        }
+      />
     </ThemedView>
   );
 }
@@ -659,6 +698,7 @@ const styles = StyleSheet.create({
   chipRow: { gap: Spacing.two, paddingHorizontal: Spacing.three, paddingTop: Spacing.three },
   chip: { paddingHorizontal: Spacing.three, paddingVertical: Spacing.one + 2, borderRadius: 999 },
   feedEmpty: { paddingHorizontal: Spacing.three, paddingVertical: Spacing.three },
+  caughtUp: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingTop: Spacing.four, paddingBottom: Spacing.two },
   section: { marginTop: Spacing.four },
   sectionHead: {
     flexDirection: 'row',
