@@ -214,9 +214,10 @@ Zwei Teile, beide offline gegen Roth verifiziert (`node scripts/tobi/test.mjs` �
   Off-Day-/Bereits-publisht-Läufe sind No-Ops.
 - Lokal ohne Secret verifiziert: Roth publisht, `raceResults.json` bleibt **unverändert** (idempotent),
   Supabase sauber übersprungen. `--today` heute (21.07.) = „No race scheduled".
-- ⚠️ **Zwei Handgriffe von Dominik zum Scharfschalten:** (1) `SUPABASE_SERVICE_ROLE_KEY` als
-  GitHub-Actions-Secret, (2) `robot_runs`-Migration (`supabase/migrations/20260721130000_robot_runs.sql`)
-  in Prod anwenden (per Browser). Danach ist Tobi live.
+- **Scharfschalten:** (1) `SUPABASE_SERVICE_ROLE_KEY` als GitHub-Actions-Secret — ⏳ **offen (Dominik; ein
+  Admin-Key, den Claude nicht anfassen darf).** (2) `robot_runs`-Migration in Prod — ✅ **erledigt
+  2026-07-21 per Browser** (Tabelle da, 3 Indizes, RLS an, 0 Zeilen). Sobald das Secret gesetzt ist, ist
+  Tobi live.
 
 ---
 
