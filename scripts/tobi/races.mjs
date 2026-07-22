@@ -19,6 +19,7 @@ export async function loadTobiRaces(year = new Date().getFullYear()) {
   return (j.races || []).map((r) => ({
     raceId: r.raceId,
     genders: r.genders && r.genders.length ? r.genders : ['men', 'women'],
+    date: r.date, // optional — powers the overdue alarm (run.mjs); not used for scoring
     pto: { slug: r.pto, year },
     mika: r.mika ? { base: r.mika.base.replace('{year}', String(year)), event: r.mika.event } : undefined,
   }));

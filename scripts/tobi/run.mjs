@@ -2,10 +2,11 @@
  * Tobi · run — self-discovering results robot. Iterates the tippable-race registry (raceMap.json), skips
  * races already fully published, fetches each race's sources (PTO always; MIKA where configured), and —
  * in --write mode — publishes when the confidence gate clears (≥2 sources agree, OR a single source is
- * stable across two runs ≥~45 min apart). Fully hands-off: no per-race dates, no manual triggering.
+ * stable across two runs ≥~45 min apart). Fully hands-off: no per-race dates for scoring, no manual triggers.
  *
- * Timing needs no date logic: a race that hasn't happened returns no finishers → skipped silently; a
- * finished race clears the gate and publishes; a published race is skipped next run. Runs hourly (workflow).
+ * OVERDUE ALARM (anti-silent-failure): every registry race carries its expected `date`. If a race is well
+ * past it with STILL no result, Tobi logs a visible `robot_runs` flag instead of skipping silently — so a
+ * missing/wrong PTO slug or a race PTO didn't publish becomes a ping, not a quiet miss.
  *
  * Usage:
  *   node scripts/tobi/run.mjs                       # all registry races, live, dry run
@@ -19,6 +20,7 @@ import { fileURLToPath } from 'node:url';
 import { mikaAdapter } from './adapters/mika.mjs';
 import { ptoAdapter } from './adapters/pto.mjs';
 import { evaluate } from './core.mjs';
+import { isOverdue, overdueHours, sameRun } from './overdue.mjs';
 import { fetchLastRun, getSupabase, logRun, pushRaceResult, upsertRaceResultsFile } from './publish.mjs';
 import { loadRoster } from './roster.mjs';
 import { loadTobiRaces, getTobiRace } from './races.mjs';
@@ -57,7 +59,8 @@ async function main() {
   const only = arg('race');
   const write = flag('write');
   const minSources = Number(arg('min-sources')) || 2;
-  const now = Date.now();
+  const overdueH = Number(arg('overdue-h')) || 36;
+  const now = arg('now') ? Date.parse(arg('now')) : Date.now(); // --now=ISO overrides the clock (testing)
 
   let races = only ? [await getTobiRace(only)].filter(Boolean) : await loadTobiRaces();
   if (only && !races.length) {
@@ -70,6 +73,19 @@ async function main() {
   const mode = write ? (sb ? 'WRITE + Supabase' : 'WRITE (no SERVICE_ROLE → JSON only)') : 'dry run';
   console.log(`Tobi (${mode}) · ${roster.canonical.size} canonical slugs · ${races.length} race(s) · min-sources ${minSources}\n`);
 
+  // Log a robot_runs row unless it's identical to the last (dedup → one row per state; keeps the stability
+  // clock anchored to first sighting). Returns whether it logged.
+  const logDeduped = async (last, run) => {
+    if (!sb || sameRun(last, run)) return false;
+    try {
+      await logRun(sb, run);
+      return true;
+    } catch (e) {
+      console.error(`     robot_runs: ${e.message}`);
+      return false;
+    }
+  };
+
   let acted = 0;
   for (const race of races) {
     // Skip races already fully published — no fetch needed (unless a single race was explicitly requested).
@@ -81,14 +97,35 @@ async function main() {
         race.mika ? mikaAdapter(race.mika, { topN: TOP_N }) : null,
       ])
     ).filter(Boolean);
+    const last = sb ? await fetchLastRun(sb, race.raceId) : null;
 
-    // No finishers anywhere ⇒ the race simply hasn't happened yet. Skip silently (no log noise).
-    if (!only && !sourcesHaveData(sources)) continue;
+    if (!sourcesHaveData(sources)) {
+      // No finishers anywhere. Either the race hasn't happened → skip silently, or it's well past its date
+      // and STILL empty → an OVERDUE alarm (missing/wrong slug, or PTO never published).
+      if (isOverdue(race.date, now, overdueH)) {
+        const hrs = Math.round(overdueHours(race.date, now));
+        const run = {
+          robot: 'tobi',
+          race_id: race.raceId,
+          status: 'stage',
+          confidence: 0,
+          men: [],
+          women: [],
+          source_count: 0,
+          unknown_slugs: [],
+          note: `ÜBERFÄLLIG: kein Ergebnis nach Rennen (${race.date}) — PTO-Slug/Quelle prüfen`,
+        };
+        console.log(`🔴 ÜBERFÄLLIG  ${race.raceId}  — ${hrs} h nach Rennen (${race.date}), keine Quelle liefert Ergebnisse`);
+        if (write) await logDeduped(last, run);
+        console.log('');
+        acted++;
+      }
+      continue;
+    }
 
-    const previousRun = sb ? await fetchLastRun(sb, race.raceId) : null;
     const verdict = evaluate(
       { raceId: race.raceId, genders: race.genders, sources },
-      { aliases, roster, minSources, previousRun, now },
+      { aliases, roster, minSources, previousRun: last, now },
     );
     acted++;
 
@@ -99,13 +136,7 @@ async function main() {
     }
 
     if (write) {
-      if (sb) {
-        try {
-          await logRun(sb, verdict.run);
-        } catch (e) {
-          console.error(`     robot_runs: ${e.message}`);
-        }
-      }
+      await logDeduped(last, verdict.run);
       if (verdict.status === 'publish') {
         const entry = {
           raceId: race.raceId,
@@ -132,7 +163,7 @@ async function main() {
 
   if (!acted) console.log('Nichts zu tun — kein Rennen mit frischen Ergebnissen (alle fertig oder noch nicht gelaufen).');
   else if (!write) console.log('Dry run — nichts geschrieben. `--write` schreibt raceResults.json (+ Supabase, wenn SERVICE_ROLE).');
-  else if (!sb) console.log('Write ohne Secret: nur raceResults.json angefasst. DB-Push/Log brauchen SUPABASE_SERVICE_ROLE_KEY.');
+  else if (!sb) console.log('Write ohne Secret: nur raceResults.json angefasst. DB-Push/Log/Alarm brauchen SUPABASE_SERVICE_ROLE_KEY.');
 }
 
 main().catch((e) => {

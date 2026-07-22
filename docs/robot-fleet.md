@@ -250,6 +250,18 @@ Antwort auf Dominiks Wunsch „so automatisch wie möglich". Vorher brauchte jed
   **Kona** wartet auf seinen PTO-2026-Slug (aktuell 404). Cross-Saison: publishte raceIds werden übersprungen →
   Season-Reset ist App-Sache (raceIds sind jahresunabhängig).
 
+### IM-Zuverlässigkeit — Säule ① Überfällig-Alarm ✅ (2026-07-22)
+Weil IM-Abdeckung an PTO hängt (ironman.com = ToS-Riegel, kein Scraper), ist der größte Risiko-Fall der
+**stille Miss** (Slug fehlt/falsch, oder PTO publisht nicht → nichts scored, keiner merkt's). Fix:
+- Jede `raceMap`-Zeile trägt `date` (von der PTO-Renn-Seite geholt, nie geraten). Ist ein Rennen **>36 h**
+  nach seinem Datum ohne Ergebnis → `overdue.mjs`/`run.mjs` schreibt eine `ÜBERFÄLLIG`-`robot_runs`-Zeile
+  (Cockpit-Ping) statt still zu überspringen. Ist zugleich die **empirische PTO-Validierung** — beim ersten
+  IM-Rennen sehen wir schwarz auf weiß, ob PTO sauber liefert.
+- **Log-Dedup** (`sameRun`): eine Zeile pro Zustand (kein Stunden-Spam) und verankert die Stabilitäts-Uhr am
+  Erst-Sichtungszeitpunkt. Offline bewiesen (`test.mjs` 33/33; Live-Demo via `--now=` Zeitschalter).
+- **Noch offen** (Säulen ②③, Dominik will einzeln): ② Registry-Audit (Slug löst noch auf? tippbares Rennen
+  ohne Registry-Eintrag?) · ③ ToS-sichere 2. Quelle für IM = Medien/LLM-Ergebnis-Adapter (statt Scraper).
+
 ---
 
 ## 8. Leitplanken (gelten für die ganze Flotte)

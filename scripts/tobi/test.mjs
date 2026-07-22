@@ -21,6 +21,7 @@ import { mikaAdapter } from './adapters/mika.mjs';
 import { parsePto, ptoAdapter } from './adapters/pto.mjs';
 import { buildCanonicalIndex, resolveCanonical } from './canonical.mjs';
 import { evaluate } from './core.mjs';
+import { isOverdue, overdueHours, sameRun } from './overdue.mjs';
 import { loadRoster } from './roster.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -135,7 +136,18 @@ async function main() {
     evalStab({ men: [...VERIFIED.men].reverse(), women: VERIFIED.women, ran_at: iso(60 * 60 * 1000) }).status === 'stage',
   );
 
-  console.log(`\n${failures ? `✗ ${failures} assertion(s) FAILED` : '✓ all assertions passed — Slices 1–2 + auto-discovery proven'}`);
+  // 9 — overdue alarm helpers (anti-silent-failure): a race past its date with no result gets flagged
+  console.log('\nOverdue alarm (anti-silent-failure):');
+  const T = Date.parse('2026-07-10T12:00:00Z');
+  check('race 5 days ago (>36h) → overdue', isOverdue('2026-07-05', T, 36));
+  check('race today (0h) → not overdue', !isOverdue('2026-07-10', T, 36));
+  check('no date → never overdue (graceful)', !isOverdue(undefined, T, 36));
+  check('overdueHours is large for a past race', overdueHours('2026-07-05', T) > 100);
+  const r1 = { status: 'stage', men: ['a'], women: [], note: 'x' };
+  check('sameRun: identical rows dedup', sameRun(r1, { status: 'stage', men: ['a'], women: [], note: 'x' }));
+  check('sameRun: changed note → not same (logs)', !sameRun(r1, { status: 'stage', men: ['a'], women: [], note: 'y' }));
+
+  console.log(`\n${failures ? `✗ ${failures} assertion(s) FAILED` : '✓ all assertions passed — Slices 1–2 + auto-discovery + overdue proven'}`);
   process.exit(failures ? 1 : 0);
 }
 

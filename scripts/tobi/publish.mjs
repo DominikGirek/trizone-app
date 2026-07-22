@@ -91,7 +91,7 @@ export async function fetchLastRun(sb, raceId) {
   if (!sb) return null;
   const { data, error } = await sb
     .from('robot_runs')
-    .select('men, women, ran_at')
+    .select('status, men, women, note, ran_at')
     .eq('robot', 'tobi')
     .eq('race_id', raceId)
     .order('ran_at', { ascending: false })
