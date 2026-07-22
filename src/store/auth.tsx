@@ -4,7 +4,7 @@ import * as WebBrowser from 'expo-web-browser';
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Platform } from 'react-native';
 
-import { authConfigured, loginEnabled, supabase } from '@/lib/supabase';
+import { authConfigured, googleEnabled, loginEnabled, supabase } from '@/lib/supabase';
 
 export type OAuthProvider = 'apple' | 'google';
 export type AuthResult = { ok: true } | { ok: false; error: string };
@@ -88,7 +88,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAnonymous,
       displayName: handle ?? emailName,
       appleAvailable: loginEnabled && authConfigured && Platform.OS === 'ios',
-      googleAvailable: loginEnabled && authConfigured,
+      // Google is gated on its OWN flag (googleEnabled) so Apple + email can launch before a stable Google
+      // Cloud project exists. Flip EXPO_PUBLIC_GOOGLE_ENABLED=true once the Web client is wired into Supabase.
+      googleAvailable: loginEnabled && authConfigured && googleEnabled,
 
       signInWithProvider: async (provider) => {
         if (!authConfigured) return { ok: false, error: 'auth-unconfigured' };

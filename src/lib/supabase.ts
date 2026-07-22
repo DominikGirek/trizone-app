@@ -18,6 +18,15 @@ export const authConfigured = !!url && !!anon;
  */
 export const loginEnabled = process.env.EXPO_PUBLIC_LOGIN_ENABLED === 'true';
 
+/**
+ * Google sign-in is gated SEPARATELY from the master switch. The launch offers Apple + email only; Google
+ * needs a stable Google Cloud OAuth project (the first brand-account attempt was disabled by Google's
+ * bot-detection). Once a healthy Web client ID + secret is wired into Supabase, flip
+ * EXPO_PUBLIC_GOOGLE_ENABLED=true and ship an OTA — no code change. Keeping it off simply hides the Google
+ * button so we never show a login path whose backend isn't ready.
+ */
+export const googleEnabled = process.env.EXPO_PUBLIC_GOOGLE_ENABLED === 'true';
+
 // Expo Router statically renders the web build in Node, where there's no window/localStorage. During
 // that pass we must NOT touch persistent storage (it crashes "window is not defined"). Native and the
 // real browser keep full session persistence; only the SSR pass runs storage-less.
