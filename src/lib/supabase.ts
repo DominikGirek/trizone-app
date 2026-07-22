@@ -35,6 +35,9 @@ export const supabase = createClient(url ?? 'https://placeholder.supabase.co', a
         autoRefreshToken: true,
         persistSession: true,
         detectSessionInUrl: false,
+        // PKCE: OAuth (Apple/Google) redirects back with a `?code=`; we exchange it for a session on device
+        // (auth store). The code_verifier is stashed in AsyncStorage by signInWithOAuth/linkIdentity.
+        flowType: 'pkce',
         // CRITICAL on React Native: the default lock uses navigator.locks, which isn't available on RN, so
         // every auth call (getSession on launch!) waited ~10s for the lock-acquire timeout — the cold-start
         // freeze. processLock is a JS-promise lock that works on RN.

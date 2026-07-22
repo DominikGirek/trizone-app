@@ -515,18 +515,29 @@
   "auth": {
     "title": "Anmelden",
     "intro": "Melde dich an, um zu tippen, Ranglisten zu sehen und Gruppen beizutreten.",
+    "introSecure": "Sichere deinen Account — deine Tipps und Punkte bleiben erhalten und gehen auf keinem Gerät verloren.",
+    "continueApple": "Weiter mit Apple",
+    "continueGoogle": "Weiter mit Google",
+    "orEmail": "oder mit E-Mail",
     "or": "oder",
     "emailPlaceholder": "deine@email.de",
     "sendCode": "Code per E-Mail senden",
     "codeSent": "Code an {{email}} gesendet. Gib ihn unten ein.",
     "verify": "Bestätigen",
     "changeEmail": "E-Mail ändern",
+    "resendCode": "Code erneut senden",
     "signedInToast": "Angemeldet",
     "signedOutToast": "Abgemeldet",
     "signedInAs": "Angemeldet als",
     "signOut": "Abmelden",
     "errorGeneric": "Hat nicht geklappt. Versuch's nochmal.",
-    "codeWrong": "Code stimmt nicht."
+    "codeWrong": "Code stimmt nicht.",
+    "err": {
+      "email-taken": "Diese E-Mail gehört schon zu einem Account. Melde dich direkt damit an.",
+      "rate-limited": "Zu viele Versuche. Warte kurz und probier's dann erneut.",
+      "expired": "Der Code ist abgelaufen. Fordere einen neuen an.",
+      "code-wrong": "Code stimmt nicht."
+    }
   },
   "startlist": {
     "title": "Profi-Starterliste",

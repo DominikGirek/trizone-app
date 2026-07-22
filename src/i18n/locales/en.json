@@ -515,18 +515,29 @@
   "auth": {
     "title": "Sign in",
     "intro": "Sign in to play, see leaderboards and join groups.",
+    "introSecure": "Secure your account — your tips and points are kept and never lost across devices.",
+    "continueApple": "Continue with Apple",
+    "continueGoogle": "Continue with Google",
+    "orEmail": "or with email",
     "or": "or",
     "emailPlaceholder": "you@email.com",
     "sendCode": "Send code by email",
     "codeSent": "Code sent to {{email}}. Enter it below.",
     "verify": "Confirm",
     "changeEmail": "Change email",
+    "resendCode": "Resend code",
     "signedInToast": "Signed in",
     "signedOutToast": "Signed out",
     "signedInAs": "Signed in as",
     "signOut": "Sign out",
     "errorGeneric": "That didn't work. Please try again.",
-    "codeWrong": "Wrong code."
+    "codeWrong": "Wrong code.",
+    "err": {
+      "email-taken": "This email already belongs to an account. Sign in with it directly.",
+      "rate-limited": "Too many attempts. Wait a moment and try again.",
+      "expired": "The code expired. Request a new one.",
+      "code-wrong": "Wrong code."
+    }
   },
   "startlist": {
     "title": "Pro start list",

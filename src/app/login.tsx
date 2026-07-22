@@ -2,7 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { router, Stack } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -10,18 +10,18 @@ import { useToast } from '@/components/Toast';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { haptics } from '@/lib/haptics';
-import { useAuth } from '@/store/auth';
+import { useAuth, type OAuthProvider } from '@/store/auth';
 
 export default function LoginScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
   const { show } = useToast();
-  const { signedIn, displayName, sendEmailCode, verifyEmailCode, signOut } = useAuth();
+  const { signedIn, isAnonymous, displayName, appleAvailable, googleAvailable, signInWithProvider, sendEmailCode, verifyEmailCode, signOut } = useAuth();
 
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
   const [stage, setStage] = useState<'email' | 'code'>('email');
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState<null | 'apple' | 'google' | 'email'>(null);
 
   const done = () => {
     haptics.success();
@@ -29,27 +29,47 @@ export default function LoginScreen() {
     router.back();
   };
 
+  // Map a store error code to a friendly line (silent on user-cancel).
+  const errText = (err: string): string | null => {
+    if (err === 'cancelled') return null;
+    const key = `auth.err.${err}`;
+    const msg = t(key);
+    return msg === key ? t('auth.errorGeneric') : msg;
+  };
+  const showErr = (err: string) => {
+    const m = errText(err);
+    if (m) show(m, 'alert-circle');
+  };
+
+  const onProvider = async (provider: OAuthProvider) => {
+    setBusy(provider);
+    const res = await signInWithProvider(provider);
+    setBusy(null);
+    if (res.ok) done();
+    else showErr(res.error);
+  };
+
   const onSend = async () => {
     if (!email.includes('@')) return;
-    setBusy(true);
+    setBusy('email');
     const res = await sendEmailCode(email);
-    setBusy(false);
+    setBusy(null);
     if (res.ok) {
       haptics.light();
       setStage('code');
-    } else {
-      show(t('auth.errorGeneric'), 'alert-circle');
-    }
+    } else showErr(res.error);
   };
 
   const onVerify = async () => {
     if (code.trim().length < 4) return;
-    setBusy(true);
+    setBusy('email');
     const res = await verifyEmailCode(email, code);
-    setBusy(false);
+    setBusy(null);
     if (res.ok) done();
-    else show(t('auth.codeWrong'), 'alert-circle');
+    else showErr(res.error);
   };
+
+  const anyBusy = busy !== null;
 
   return (
     <ThemedView style={styles.container}>
@@ -82,8 +102,48 @@ export default function LoginScreen() {
       ) : (
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.body}>
           <ThemedText type="small" themeColor="textSecondary" style={styles.intro}>
-            {t('auth.intro')}
+            {isAnonymous ? t('auth.introSecure') : t('auth.intro')}
           </ThemedText>
+
+          {/* Smoothest first: one-tap social. Apple on iOS (App Store 4.8), Google everywhere. */}
+          {appleAvailable && (
+            <Pressable
+              onPress={() => onProvider('apple')}
+              disabled={anyBusy}
+              style={({ pressed }) => [styles.social, { backgroundColor: theme.text }, (anyBusy || pressed) && { opacity: 0.85 }]}>
+              {busy === 'apple' ? (
+                <ActivityIndicator color={theme.background} />
+              ) : (
+                <>
+                  <Ionicons name="logo-apple" size={19} color={theme.background} />
+                  <ThemedText type="smallBold" style={{ color: theme.background, fontSize: 16 }}>{t('auth.continueApple')}</ThemedText>
+                </>
+              )}
+            </Pressable>
+          )}
+          {googleAvailable && (
+            <Pressable
+              onPress={() => onProvider('google')}
+              disabled={anyBusy}
+              style={({ pressed }) => [styles.social, styles.socialOutline, { backgroundColor: theme.backgroundElement, borderColor: theme.border }, (anyBusy || pressed) && { opacity: 0.85 }]}>
+              {busy === 'google' ? (
+                <ActivityIndicator color={theme.text} />
+              ) : (
+                <>
+                  <Ionicons name="logo-google" size={18} color={theme.text} />
+                  <ThemedText type="smallBold" style={{ fontSize: 16 }}>{t('auth.continueGoogle')}</ThemedText>
+                </>
+              )}
+            </Pressable>
+          )}
+
+          {(appleAvailable || googleAvailable) && (
+            <View style={styles.orRow}>
+              <View style={[styles.line, { backgroundColor: theme.border }]} />
+              <ThemedText type="small" themeColor="textSecondary">{t('auth.orEmail')}</ThemedText>
+              <View style={[styles.line, { backgroundColor: theme.border }]} />
+            </View>
+          )}
 
           {stage === 'email' ? (
             <>
@@ -96,18 +156,18 @@ export default function LoginScreen() {
                 autoCorrect={false}
                 keyboardType="email-address"
                 inputMode="email"
+                editable={!anyBusy}
                 style={[styles.input, { backgroundColor: theme.backgroundElement, color: theme.text, borderColor: theme.border }]}
               />
               <Pressable
                 onPress={onSend}
-                disabled={busy || !email.includes('@')}
-                style={({ pressed }) => [
-                  styles.primary,
-                  { backgroundColor: theme.primary, opacity: busy || !email.includes('@') ? 0.5 : pressed ? 0.85 : 1 },
-                ]}>
-                <ThemedText type="smallBold" style={{ color: theme.onPrimary, fontSize: 16 }}>
-                  {t('auth.sendCode')}
-                </ThemedText>
+                disabled={anyBusy || !email.includes('@')}
+                style={({ pressed }) => [styles.primary, { backgroundColor: theme.primary, opacity: anyBusy || !email.includes('@') ? 0.5 : pressed ? 0.85 : 1 }]}>
+                {busy === 'email' ? (
+                  <ActivityIndicator color={theme.onPrimary} />
+                ) : (
+                  <ThemedText type="smallBold" style={{ color: theme.onPrimary, fontSize: 16 }}>{t('auth.sendCode')}</ThemedText>
+                )}
               </Pressable>
             </>
           ) : (
@@ -123,22 +183,27 @@ export default function LoginScreen() {
                 keyboardType="number-pad"
                 inputMode="numeric"
                 maxLength={6}
+                editable={!anyBusy}
                 style={[styles.input, styles.code, { backgroundColor: theme.backgroundElement, color: theme.text, borderColor: theme.border }]}
               />
               <Pressable
                 onPress={onVerify}
-                disabled={busy || code.trim().length < 4}
-                style={({ pressed }) => [
-                  styles.primary,
-                  { backgroundColor: theme.primary, opacity: busy || code.trim().length < 4 ? 0.5 : pressed ? 0.85 : 1 },
-                ]}>
-                <ThemedText type="smallBold" style={{ color: theme.onPrimary, fontSize: 16 }}>
-                  {t('auth.verify')}
-                </ThemedText>
+                disabled={anyBusy || code.trim().length < 4}
+                style={({ pressed }) => [styles.primary, { backgroundColor: theme.primary, opacity: anyBusy || code.trim().length < 4 ? 0.5 : pressed ? 0.85 : 1 }]}>
+                {busy === 'email' ? (
+                  <ActivityIndicator color={theme.onPrimary} />
+                ) : (
+                  <ThemedText type="smallBold" style={{ color: theme.onPrimary, fontSize: 16 }}>{t('auth.verify')}</ThemedText>
+                )}
               </Pressable>
-              <Pressable onPress={() => setStage('email')} hitSlop={8} style={styles.changeRow}>
-                <ThemedText type="small" themeColor="textSecondary">{t('auth.changeEmail')}</ThemedText>
-              </Pressable>
+              <View style={styles.codeFoot}>
+                <Pressable onPress={() => setStage('email')} hitSlop={8} disabled={anyBusy}>
+                  <ThemedText type="small" themeColor="textSecondary">{t('auth.changeEmail')}</ThemedText>
+                </Pressable>
+                <Pressable onPress={onSend} hitSlop={8} disabled={anyBusy}>
+                  <ThemedText type="small" style={{ color: theme.primary }}>{t('auth.resendCode')}</ThemedText>
+                </Pressable>
+              </View>
             </>
           )}
         </KeyboardAvoidingView>
@@ -153,8 +218,9 @@ const styles = StyleSheet.create({
   body: { paddingHorizontal: Spacing.three, gap: Spacing.three },
   flex: { flex: 1 },
   intro: { lineHeight: 19 },
-  appleBtn: { height: 48, width: '100%' },
-  orRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
+  social: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: Spacing.two, height: 50, borderRadius: 14 },
+  socialOutline: { borderWidth: StyleSheet.hairlineWidth },
+  orRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, marginVertical: Spacing.one },
   line: { flex: 1, height: StyleSheet.hairlineWidth },
   input: {
     borderWidth: StyleSheet.hairlineWidth,
@@ -164,8 +230,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   code: { fontSize: 22, letterSpacing: 6, textAlign: 'center', fontVariant: ['tabular-nums'] },
-  primary: { alignItems: 'center', justifyContent: 'center', paddingVertical: Spacing.three, borderRadius: 14 },
+  primary: { alignItems: 'center', justifyContent: 'center', height: 50, borderRadius: 14 },
   secondary: { alignItems: 'center', paddingVertical: Spacing.three, borderRadius: 14, borderWidth: StyleSheet.hairlineWidth },
-  changeRow: { alignItems: 'center', paddingVertical: Spacing.two },
+  codeFoot: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: Spacing.one },
   profile: { flexDirection: 'row', alignItems: 'center', gap: Spacing.three, padding: Spacing.three, borderRadius: 14 },
 });
