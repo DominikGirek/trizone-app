@@ -82,3 +82,20 @@ export async function logRun(sb, run) {
   const { error } = await sb.from('robot_runs').insert({ ...run, ran_at: new Date().toISOString() });
   if (error) throw new Error(error.message);
 }
+
+/**
+ * The most recent robot_runs row for a race — Tobi's memory for the TEMPORAL stability gate (did the last
+ * run produce the identical top-5, and how long ago). Returns null if no client or no prior run.
+ */
+export async function fetchLastRun(sb, raceId) {
+  if (!sb) return null;
+  const { data, error } = await sb
+    .from('robot_runs')
+    .select('men, women, ran_at')
+    .eq('robot', 'tobi')
+    .eq('race_id', raceId)
+    .order('ran_at', { ascending: false })
+    .limit(1);
+  if (error || !data || !data.length) return null;
+  return data[0];
+}

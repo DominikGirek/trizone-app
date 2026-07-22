@@ -45,8 +45,6 @@ jobs:
         run: |
           if [ -n "${{ github.event.inputs.race }}" ]; then
             node scripts/tobi/run.mjs --write --race=${{ github.event.inputs.race }}
-          elif [ "${{ github.event_name }}" = "schedule" ]; then
-            node scripts/tobi/run.mjs --write --today
           else
             node scripts/tobi/run.mjs --write
           fi

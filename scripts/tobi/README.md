@@ -7,28 +7,45 @@ und speist den Flagship-„Ergebnis-Moment". Vollständiges Design: [`docs/robot
 ## Architektur
 
 ```
-races.mjs         raceId → Adapter-Refs (PTO, MIKA, …) + welche Geschlechter das Rennen wertet
+raceMap.json      DIE Registry: PTO-Slug → app raceId (+ optional MIKA + single-gender-Override). Einzige Pflege.
+races.mjs         lädt raceMap → fertige Adapter-Refs; füllt Jahr automatisch (kein Datum, kein Hardcode-Jahr)
 adapters/pto.mjs  Quell-Adapter: protriathletes.org /results → Top-5 Slugs je Geschlecht (rein, testbar)
 adapters/mika.mjs Quell-Adapter: mikatiming pid=list → Top-5 je Geschlecht (unabhängig von PTO)
 roster.mjs        Slug-Universum in zwei Stufen: canonical (Tipps/Wertung) + known (Union inkl. Scrape)
 canonical.mjs     löst Quell-Slug → kanonischen Slug: alias → canonical → normalisiert (Diakritika) → unknown
 aliases.json      Quell-Schreibweise → kanonischer Slug (nur genuine Fälle; Transliteration macht canonical.mjs)
-core.mjs          Kanonik-Auflösung + Kreuzabgleich + Konfidenz-Gate → Urteil (publish/stage/fail) + robot_runs
-publish.mjs       Schreib-Schicht: raceResults.json upsert (idempotent) + Supabase race_results/robot_runs
-run.mjs           Orchestrator: alle Adapter laufen lassen, bewerten, berichten; `--write`/`--today`
-test.mjs          Offline-Beweis gegen die Roth-2026-Fixtures (PTO + MIKA)
+core.mjs          Kanonik + Kreuzabgleich + Stabilitäts-Gate → Urteil (publish/stage/fail) + robot_runs
+publish.mjs       Schreib-Schicht: raceResults.json upsert (idempotent) + Supabase race_results/robot_runs + fetchLastRun
+run.mjs           Orchestrator: Registry iterieren, Fertiges/Nicht-Gelaufenes überspringen, bewerten, schreiben
+test.mjs          Offline-Beweis gegen die Roth-2026-Fixtures (PTO + MIKA + Stabilitäts-Gate)
 ```
+
+## Selbst-entdeckend (24/7)
+
+Tobi iteriert `raceMap.json` bei **jedem** Lauf — **kein Datum, kein manuelles Triggern**:
+- Rennen schon vollständig in `raceResults.json` → übersprungen (kein Fetch).
+- Rennen noch nicht gelaufen → Quellen liefern keine Finisher → still übersprungen (kein Log-Rauschen).
+- Rennen fertig → Gate greift → Publish.
+
+**Ein neues tippbares Rennen = eine Zeile in `raceMap.json`** (nur verifizierten PTO-Slug eintragen).
+
+## Konfidenz-Gate (Hybrid — „nie falsche Ergebnisse")
+
+Auto-Publish, wenn alle Top-5 kanonisch aufgelöst + jede erwartete Kategorie komplett (5) **UND**
+- **Cross-Source:** ≥2 unabhängige Quellen liefern das identische Top-5 (→ sofort, z. B. Roth PTO×MIKA), **ODER**
+- **Temporal:** eine einzelne Quelle ist **stabil** — der vorige Lauf (≥~45 min her, aus `robot_runs`) hatte
+  das identische Top-5 (finalisierte Ergebnisse ändern sich nicht mehr).
+
+Sonst → `stage` (geloggt; nächster Lauf bestätigt). Unbekannter Slug / unvollständig → nie publishen.
 
 ## Modi (`run.mjs`)
 
 ```bash
-node scripts/tobi/run.mjs                     # alle Rennen, live, Dry-Run (nichts geschrieben)
-node scripts/tobi/run.mjs --race=se-ch-roth   # ein Rennen
+node scripts/tobi/run.mjs                     # ganze Registry, live, Dry-Run (nichts geschrieben)
+node scripts/tobi/run.mjs --race=se-ch-roth   # ein Rennen erzwingen (ignoriert den „schon fertig"-Skip)
 node scripts/tobi/run.mjs --write             # publish → raceResults.json (+ Supabase, wenn SERVICE_ROLE)
-node scripts/tobi/run.mjs --write --today      # nur heutige Rennen (Renntag-Scheduler der GitHub Action)
 ```
-`--write` fasst `raceResults.json` **nur bei `publish`** an und **idempotent** (identische Top-5 → kein
-Schreiben). Supabase-Push (`race_results` + `robot_runs`) nur, wenn `SUPABASE_SERVICE_ROLE_KEY` gesetzt ist.
+`--write` fasst `raceResults.json` **nur bei `publish`** an und **idempotent**. Supabase-Push nur mit `SUPABASE_SERVICE_ROLE_KEY`.
 
 ## Konfidenz-Gate (Datenintegrität ist heilig)
 
@@ -38,24 +55,14 @@ Schreiben). Supabase-Push (`race_results` + `robot_runs`) nur, wenn `SUPABASE_SE
 - Ein unbekannter Finisher wird **nie** erfunden. Diskrepante Schreibweisen löst ein Alias in `aliases.json`
   (einmal mappen → für immer automatisch).
 
-## Benutzung
+## Status
 
-```bash
-node scripts/tobi/test.mjs                     # Offline-Beweis (kein Netz, keine Writes)
-node scripts/tobi/run.mjs                      # alle Rennen, live, Dry-Run (nichts geschrieben)
-node scripts/tobi/run.mjs --race=se-ch-roth    # ein Rennen
-```
-
-## Slice-Status
-
-- **Slice 1 ✅** — Core + PTO-Adapter + `robot_runs`-Migration, offline gegen Roth bewiesen. Dry-Run.
-- **Slice 2 ✅** — **MIKA-Adapter** (echter Kreuzabgleich) + **Kanonik-Map** (`canonical.mjs`,
-  Transliterations-Normalisierung). Roth publisht jetzt **auto** mit 2 einigen Quellen (PTO×MIKA).
-  `node scripts/tobi/test.mjs` = 23/23 offline. IRONMAN-Rennen (Frankfurt/Hamburg/Kona) haben noch nur
-  PTO → stagen, bis ein IRONMAN-Adapter dazukommt.
-- **Slice 3 ✅ (Code gebaut, noch nicht scharf)** — `publish.mjs` (idempotenter `raceResults.json`-Upsert +
-  Supabase-Push) + `run.mjs --write/--today` + Workflow `.github/workflows/ingest-race-results.yml`
-  (renntag-bewusst, hourly 14–21 UTC). Lokal ohne Secret getestet (Roth publisht, Datei unverändert).
-  ⚠️ **Zum Scharfschalten (Dominik):** (1) `SUPABASE_SERVICE_ROLE_KEY` als GitHub-Actions-Secret,
-  (2) `robot_runs`-Migration in Prod anwenden. Bis dahin: JSON-Write ok, DB-Push/Log übersprungen.
-- **Slice 4/5** — In-App-Reveal + Admin-Cockpit.
+- **Slices 1–3 ✅ LIVE** (2026-07-22) — Core + PTO/MIKA-Adapter + Kanonik-Map + `publish.mjs` +
+  Workflow (hourly 14–21 UTC). Secret gesetzt + `robot_runs`-Migration angewandt; Smoke-Test bestanden.
+- **Auto-Discovery ✅** — `raceMap.json`-Registry + Iterieren/Skip + **Temporal-Stabilitäts-Gate**
+  (Hybrid). `node scripts/tobi/test.mjs` = 27/27 offline. Tobi läuft **hands-off 24/7**.
+- **In-App-Reveal ✅** (Slice 4) — `src/app/reveal/[id].tsx` + Dashboard-Cue (separates Feature).
+- **Offen:** IRONMAN-Adapter (Kona/Frankfurt cross-source statt nur PTO+Stabilität) · Kona in `raceMap`
+  (PTO-Slug 2026 noch 404) · Slice 5 (Admin-Cockpit) · Gruppen-Rang im Reveal.
+- **Cross-Saison-Hinweis:** ein bereits publishtes `raceId` wird übersprungen; für die nächste Saison
+  muss die App/Season den alten Eintrag zurücksetzen (raceIds sind jahresunabhängig).

@@ -1,31 +1,30 @@
 /**
- * Tobi · race config — which tippable races Tobi handles, and which adapter refs feed each.
+ * Tobi · races — the races Tobi scores, loaded from raceMap.json (the tippable-race registry) and turned
+ * into ready-to-run adapter refs. Self-discovering: no per-race dates, no hardcoded year — the current year
+ * fills the PTO slug and the MIKA base, so a new season just works. Add a race = one line in raceMap.json.
  *
- *  • raceId  — the app race id (matches predictions.race_id AND raceResults.raceId one-to-one).
- *  • date    — the race date (ISO). Enables the race-day scheduler (`run.mjs --today`). OMIT if unsure —
- *              a dateless race is never auto-run (only via `--race=`); never guess a date (data integrity).
- *  • genders — which podiums this race edition actually scores (some 2026 championships were single-gender).
- *  • pto     — the protriathletes.org race ref { slug, year } for the PTO adapter.
- *  • mika    — the mikatiming iframe race ref { base, event } for the MIKA adapter (Challenge/MIKA-timed).
- *
- * A race with ≥2 configured adapters can reach the ≥2-agreeing-sources bar and AUTO-PUBLISH. IRONMAN
- * races (Frankfurt/Hamburg/Kona) currently have PTO only → they stage until an IRONMAN adapter lands.
+ * Each returned entry: { raceId, genders, pto:{slug,year}, mika?:{base,event} }.
+ *  • genders — the edition's scored podiums (raceMap override, default both). A both-gender race won't be
+ *    published half-done (see core.mjs completeness gate), so this only needs setting for single-gender editions.
  */
-export const TOBI_RACES = [
-  {
-    raceId: 'se-ch-roth',
-    date: '2026-07-05',
-    genders: ['men', 'women'],
-    pto: { slug: 'challenge-roth', year: 2026 },
-    mika: { base: 'https://roth-iframe.r.mikatiming.com/2026/', event: 'P' },
-  },
-  // date omitted for these until confirmed — they run via --race=, not the --today scheduler.
-  { raceId: 'se-im-frankfurt', genders: ['men'], pto: { slug: 'im-germany', year: 2026 } },
-  { raceId: 'se-im-hamburg', genders: ['women'], pto: { slug: 'im-hamburg', year: 2026 } },
-  { raceId: 'se-t100-singapore', genders: ['men'], pto: { slug: 'singapore-t100', year: 2026 } },
-];
+import { readFile } from 'node:fs/promises';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-/** @returns {typeof TOBI_RACES[number] | undefined} */
-export function getTobiRace(raceId) {
-  return TOBI_RACES.find((r) => r.raceId === raceId);
+const HERE = dirname(fileURLToPath(import.meta.url));
+
+/** @returns {Promise<Array<{raceId:string, genders:('men'|'women')[], pto:{slug:string,year:number}, mika?:{base:string,event:string}}>>} */
+export async function loadTobiRaces(year = new Date().getFullYear()) {
+  const j = JSON.parse(await readFile(resolve(HERE, 'raceMap.json'), 'utf8'));
+  return (j.races || []).map((r) => ({
+    raceId: r.raceId,
+    genders: r.genders && r.genders.length ? r.genders : ['men', 'women'],
+    pto: { slug: r.pto, year },
+    mika: r.mika ? { base: r.mika.base.replace('{year}', String(year)), event: r.mika.event } : undefined,
+  }));
+}
+
+/** One configured race by app id (for `run.mjs --race=`). */
+export async function getTobiRace(raceId, year) {
+  return (await loadTobiRaces(year)).find((r) => r.raceId === raceId);
 }

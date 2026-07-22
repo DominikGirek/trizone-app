@@ -1,0 +1,15 @@
+{
+  "_note": "Tobi's tippable-race registry — the ONLY thing to maintain for 24/7 auto-scoring. Each entry maps a VERIFIED PTO race slug → the app raceId (must match predictions.race_id). Tobi iterates these every run, skips already-published, fetches results (PTO always; MIKA where given, for instant cross-source), and auto-publishes when gated. NEVER guess a PTO slug — verify it returns /results. Add `genders` only for a single-gender EDITION (default both); needed so a both-gender race isn't published half-done (which would mis-score the missing gender as 0). `date`+year come from PTO automatically; nothing time-based is stored here. Add Kona once PTO publishes its 2026 slug (currently 404).",
+  "races": [
+    {
+      "raceId": "se-ch-roth",
+      "pto": "challenge-roth",
+      "mika": { "base": "https://roth-iframe.r.mikatiming.com/{year}/", "event": "P" }
+    },
+    { "raceId": "se-im-frankfurt", "pto": "im-germany", "genders": ["men"] },
+    { "raceId": "se-im-hamburg", "pto": "im-hamburg", "genders": ["women"] },
+    { "raceId": "se-t100-singapore", "pto": "singapore-t100", "genders": ["men"] },
+    { "raceId": "se-t100-vancouver", "pto": "vancouver-t100", "genders": ["women"] },
+    { "raceId": "se-im703-wc-nice", "pto": "im-703-world-championship" }
+  ]
+}

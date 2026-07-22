@@ -1,19 +1,16 @@
 /**
- * Tobi · run — for each configured race: run its adapters, evaluate, report a verdict, and (with --write)
- * publish. Slice 3 wiring.
+ * Tobi · run — self-discovering results robot. Iterates the tippable-race registry (raceMap.json), skips
+ * races already fully published, fetches each race's sources (PTO always; MIKA where configured), and —
+ * in --write mode — publishes when the confidence gate clears (≥2 sources agree, OR a single source is
+ * stable across two runs ≥~45 min apart). Fully hands-off: no per-race dates, no manual triggering.
  *
- * Modes:
- *   (default)   DRY RUN — fetch + evaluate + print. No writes.
- *   --write     Act on the verdict: 'publish' → upsert src/data/raceResults.json (+ Supabase race_results
- *               and robot_runs if SUPABASE_SERVICE_ROLE_KEY is set); 'stage'/'fail' → log a robot_runs row
- *               (if the key is set). raceResults.json is NEVER written for a non-publish verdict.
- *   --today     Only races whose `date` == today (the GitHub Action's race-day filter). Idempotent, so an
- *               already-published race is a no-op.
+ * Timing needs no date logic: a race that hasn't happened returns no finishers → skipped silently; a
+ * finished race clears the gate and publishes; a published race is skipped next run. Runs hourly (workflow).
  *
  * Usage:
- *   node scripts/tobi/run.mjs                        # all configured races, live, dry run
- *   node scripts/tobi/run.mjs --race=se-ch-roth      # one race
- *   node scripts/tobi/run.mjs --write --today        # race-day scheduler (used by the workflow)
+ *   node scripts/tobi/run.mjs                       # all registry races, live, dry run
+ *   node scripts/tobi/run.mjs --race=se-ch-roth     # one race (ignores the already-published skip)
+ *   node scripts/tobi/run.mjs --write               # publish/stage/log (Supabase if SERVICE_ROLE set)
  */
 import { readFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
@@ -22,63 +19,83 @@ import { fileURLToPath } from 'node:url';
 import { mikaAdapter } from './adapters/mika.mjs';
 import { ptoAdapter } from './adapters/pto.mjs';
 import { evaluate } from './core.mjs';
-import { getSupabase, logRun, pushRaceResult, upsertRaceResultsFile } from './publish.mjs';
+import { fetchLastRun, getSupabase, logRun, pushRaceResult, upsertRaceResultsFile } from './publish.mjs';
 import { loadRoster } from './roster.mjs';
-import { TOBI_RACES, getTobiRace } from './races.mjs';
+import { loadTobiRaces, getTobiRace } from './races.mjs';
 
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const HERE = dirname(fileURLToPath(import.meta.url));
 const argv = process.argv.slice(2);
 const arg = (name) => (argv.find((a) => a.startsWith(`--${name}=`)) || '').split('=')[1];
 const flag = (name) => argv.includes(`--${name}`);
 
+const TOP_N = 5;
+const ICON = { publish: '🟢 PUBLISH', stage: '🟡 STAGE', fail: '🔴 FAIL' };
+
 async function loadAliases() {
   try {
-    const j = JSON.parse(await readFile(resolve(HERE, 'aliases.json'), 'utf8'));
-    return j.aliases || {};
+    return JSON.parse(await readFile(resolve(HERE, 'aliases.json'), 'utf8')).aliases || {};
   } catch {
     return {};
   }
 }
 
-const ICON = { publish: '🟢 PUBLISH', stage: '🟡 STAGE', fail: '🔴 FAIL' };
+/** raceId → {men, women} of the currently PUBLISHED verified results (to skip finished races). */
+async function loadPublished() {
+  try {
+    const j = JSON.parse(await readFile(resolve(ROOT, 'src/data/raceResults.json'), 'utf8'));
+    return Object.fromEntries((j.results || []).map((r) => [r.raceId, r]));
+  } catch {
+    return {};
+  }
+}
+const isComplete = (entry, genders) => !!entry && genders.every((g) => (entry[g]?.length ?? 0) >= TOP_N);
+const sourcesHaveData = (sources) =>
+  sources.some((s) => s.ok && ((s.men && s.men.length) || (s.women && s.women.length)));
 
 async function main() {
   const only = arg('race');
   const write = flag('write');
-  const todayOnly = flag('today');
   const minSources = Number(arg('min-sources')) || 2;
-  const today = new Date().toISOString().slice(0, 10);
+  const now = Date.now();
 
-  let races = only ? [getTobiRace(only)].filter(Boolean) : TOBI_RACES;
+  let races = only ? [await getTobiRace(only)].filter(Boolean) : await loadTobiRaces();
   if (only && !races.length) {
     console.error(`Unknown race: ${only}`);
     process.exit(1);
   }
-  if (!only && todayOnly) races = races.filter((r) => r.date === today);
-  if (!races.length) {
-    console.log(todayOnly ? `No race scheduled for ${today}. Nothing to do.` : 'No races configured.');
-    return;
-  }
 
-  const [roster, aliases] = await Promise.all([loadRoster(), loadAliases()]);
+  const [roster, aliases, published] = await Promise.all([loadRoster(), loadAliases(), loadPublished()]);
   const sb = write ? await getSupabase() : null;
   const mode = write ? (sb ? 'WRITE + Supabase' : 'WRITE (no SERVICE_ROLE → JSON only)') : 'dry run';
-  console.log(`Tobi (${mode}) · ${roster.canonical.size} canonical / ${roster.known.size} known slugs · ${races.length} race(s) · min-sources ${minSources}\n`);
+  console.log(`Tobi (${mode}) · ${roster.canonical.size} canonical slugs · ${races.length} race(s) · min-sources ${minSources}\n`);
 
+  let acted = 0;
   for (const race of races) {
-    // Run every adapter the race has configured (PTO, MIKA, …) → cross-source check in the core.
+    // Skip races already fully published — no fetch needed (unless a single race was explicitly requested).
+    if (!only && isComplete(published[race.raceId], race.genders)) continue;
+
     const sources = (
       await Promise.all([
-        race.pto ? ptoAdapter(race.pto, { topN: 5 }) : null,
-        race.mika ? mikaAdapter(race.mika, { topN: 5 }) : null,
+        race.pto ? ptoAdapter(race.pto, { topN: TOP_N }) : null,
+        race.mika ? mikaAdapter(race.mika, { topN: TOP_N }) : null,
       ])
     ).filter(Boolean);
-    const verdict = evaluate({ raceId: race.raceId, genders: race.genders, sources }, { aliases, roster, minSources });
+
+    // No finishers anywhere ⇒ the race simply hasn't happened yet. Skip silently (no log noise).
+    if (!only && !sourcesHaveData(sources)) continue;
+
+    const previousRun = sb ? await fetchLastRun(sb, race.raceId) : null;
+    const verdict = evaluate(
+      { raceId: race.raceId, genders: race.genders, sources },
+      { aliases, roster, minSources, previousRun, now },
+    );
+    acted++;
 
     console.log(`${ICON[verdict.status]}  ${race.raceId}  — ${verdict.reason}`);
     for (const g of race.genders) console.log(`     ${g}: ${(verdict.result[g] || []).join(', ') || '—'}`);
     if (verdict.unknownSlugs.length) {
-      console.log(`     ⚠ unbekannt: ${verdict.unknownSlugs.map((u) => `${u.slug} (${u.gender})`).join(', ')} → als Alias in aliases.json mappen`);
+      console.log(`     ⚠ unbekannt: ${verdict.unknownSlugs.map((u) => `${u.slug} (${u.gender})`).join(', ')} → Alias in aliases.json`);
     }
 
     if (write) {
@@ -94,8 +111,8 @@ async function main() {
           raceId: race.raceId,
           men: verdict.result.men || [],
           women: verdict.result.women || [],
-          source: `Tobi: ${verdict.sources.map((s) => s.source.toUpperCase()).join(' + ')} übereinstimmend (auto, ${today})`,
-          verifiedAt: today,
+          source: `Tobi: ${verdict.sources.map((s) => s.source.toUpperCase()).join(' + ')} (auto, ${new Date(now).toISOString().slice(0, 10)})`,
+          verifiedAt: new Date(now).toISOString().slice(0, 10),
         };
         console.log(`     → raceResults.json: ${await upsertRaceResultsFile(entry)}`);
         if (sb) {
@@ -113,11 +130,9 @@ async function main() {
     console.log('');
   }
 
-  if (!write) {
-    console.log('Dry run — nichts geschrieben. `--write` schreibt raceResults.json (+ Supabase, wenn SERVICE_ROLE gesetzt).');
-  } else if (!sb) {
-    console.log('Write ohne Secret: nur raceResults.json angefasst. Leaderboard-Push + robot_runs brauchen SUPABASE_SERVICE_ROLE_KEY.');
-  }
+  if (!acted) console.log('Nichts zu tun — kein Rennen mit frischen Ergebnissen (alle fertig oder noch nicht gelaufen).');
+  else if (!write) console.log('Dry run — nichts geschrieben. `--write` schreibt raceResults.json (+ Supabase, wenn SERVICE_ROLE).');
+  else if (!sb) console.log('Write ohne Secret: nur raceResults.json angefasst. DB-Push/Log brauchen SUPABASE_SERVICE_ROLE_KEY.');
 }
 
 main().catch((e) => {

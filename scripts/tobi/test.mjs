@@ -112,7 +112,30 @@ async function main() {
   check('published men == verified', eq(cross.result.men, VERIFIED.men));
   check('published women == verified', eq(cross.result.women, VERIFIED.women));
 
-  console.log(`\n${failures ? `✗ ${failures} assertion(s) FAILED` : '✓ all assertions passed — Slices 1–2 proven'}`);
+  // 8 — temporal-stability gate (auto-discovery hybrid): a single source publishes only once STABLE
+  console.log('\nTemporal-stability gate (single-source hybrid):');
+  const NOW = Date.parse('2026-07-06T12:00:00Z');
+  const iso = (msAgo) => new Date(NOW - msAgo).toISOString();
+  const evalStab = (previousRun) =>
+    evaluate(
+      { raceId: 'se-ch-roth', genders: ['men', 'women'], sources: [src] },
+      { aliases: aliasesJson, roster, minSources: 2, previousRun, now: NOW },
+    );
+  check('single source, no previous run → stage', evalStab(null).status === 'stage');
+  check(
+    'single source, matching previous ≥45min ago → PUBLISH (stable/final)',
+    evalStab({ men: VERIFIED.men, women: VERIFIED.women, ran_at: iso(60 * 60 * 1000) }).status === 'publish',
+  );
+  check(
+    'single source, matching previous but only 10min ago → stage (not old enough)',
+    evalStab({ men: VERIFIED.men, women: VERIFIED.women, ran_at: iso(10 * 60 * 1000) }).status === 'stage',
+  );
+  check(
+    'single source, NON-matching previous → stage (result changed)',
+    evalStab({ men: [...VERIFIED.men].reverse(), women: VERIFIED.women, ran_at: iso(60 * 60 * 1000) }).status === 'stage',
+  );
+
+  console.log(`\n${failures ? `✗ ${failures} assertion(s) FAILED` : '✓ all assertions passed — Slices 1–2 + auto-discovery proven'}`);
   process.exit(failures ? 1 : 0);
 }
 

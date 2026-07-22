@@ -231,7 +231,24 @@ Der **user-sichtbare Ergebnis-Moment** — Tobis stille Wertung wird erlebbar (d
   — pulst einmal, öffnet den Reveal. `src/store/tips.tsx` trackt „gesehen" (persistiert → Cue verschwindet).
 - Push kommt als dünne letzte Schicht **nach dem Login-Gate** (Reveal-Choreografie steht dann schon).
 - Offen für später: **Slice 5** (Admin-Cockpit: `robot_runs`-Log + Staged-Inbox in-App) + Gruppen-Rang im
-  Reveal + IRONMAN-Adapter (Kona) + kommende Rennen in `races.mjs`.
+  Reveal + IRONMAN-Adapter (Kona) + kommende Rennen in `raceMap.json`.
+
+### Auto-Discovery ✅ (2026-07-22) — Tobi läuft jetzt hands-off 24/7/365
+Antwort auf Dominiks Wunsch „so automatisch wie möglich". Vorher brauchte jedes Rennen einen Hardcode-Eintrag
+(Datum + Adapter) → nicht wirklich automatisch. Jetzt:
+- **`raceMap.json`** = die einzige Pflege: **PTO-Slug → app raceId** (+ optional MIKA + single-gender-Override).
+  Ein neues tippbares Rennen = **eine Zeile** (nur verifizierten PTO-Slug — nie raten).
+- **`run.mjs` iteriert die Registry bei jedem Lauf** (stündlich): schon publishtes Rennen → Skip; noch nicht
+  gelaufen (keine Finisher) → still Skip (kein Log-Rauschen); fertig → Gate → Publish. **Kein Datum nötig**,
+  Jahr wird automatisch gefüllt (PTO-Slug + MIKA-Base `{year}`).
+- **Konfidenz-Gate = HYBRID** (Dominik-Entscheidung „2 Quellen ODER stabil", 2026-07-22): Auto-Publish, wenn
+  alle Slugs kanonisch + jede erwartete Kategorie komplett **UND** (≥2 Quellen einig **ODER** eine einzelne
+  Quelle über 2 Läufe ≥~45 min stabil — finalisierte Ergebnisse ändern sich nicht mehr; vorheriger Lauf aus
+  `robot_runs`). So gehen **alle** Majors automatisch live (Roth sofort via PTO×MIKA; PTO-only nach 1 Stabilitäts-
+  Zyklus), ohne die Datenintegrität-Regel zu brechen. Offline bewiesen (`test.mjs` 27/27).
+- Registry heute: Roth (PTO+MIKA), Frankfurt·Hamburg·Singapur·Vancouver·Nizza-70.3-WM (PTO+Stabilität).
+  **Kona** wartet auf seinen PTO-2026-Slug (aktuell 404). Cross-Saison: publishte raceIds werden übersprungen →
+  Season-Reset ist App-Sache (raceIds sind jahresunabhängig).
 
 ---
 
