@@ -32,16 +32,24 @@ interface TipsValue {
   list: () => (StoredTip & { raceId: string })[];
   /** Set one slot; pass null to clear. An athlete already picked elsewhere in the same gender is moved. */
   setPick: (raceId: string, gender: Gender, index: number, athleteId: string | null, meta?: TipMeta) => void;
+  /** Has the user already opened the result-reveal for this race? Drives the dashboard "new result" cue. */
+  isResultSeen: (raceId: string) => boolean;
+  /** Mark a race's result as revealed (persisted) so its cue disappears. */
+  markResultSeen: (raceId: string) => void;
 }
 
 const TipsContext = createContext<TipsValue | null>(null);
 
 export function TipsProvider({ children }: { children: ReactNode }) {
   const [tips, setTips] = useState<Record<string, StoredTip>>({});
+  const [seen, setSeen] = useState<Record<string, true>>({});
 
   useEffect(() => {
     storage.get<Record<string, StoredTip>>(StorageKeys.tips).then((v) => {
       if (v) setTips(v);
+    });
+    storage.get<Record<string, true>>(StorageKeys.seenResults).then((v) => {
+      if (v) setSeen(v);
     });
   }, []);
 
@@ -67,8 +75,16 @@ export function TipsProvider({ children }: { children: ReactNode }) {
           void syncPrediction(raceId, next[raceId]); // best-effort backend mirror (local stays source of truth)
           return next;
         }),
+      isResultSeen: (raceId) => !!seen[raceId],
+      markResultSeen: (raceId) =>
+        setSeen((prev) => {
+          if (prev[raceId]) return prev;
+          const next = { ...prev, [raceId]: true as const };
+          storage.set(StorageKeys.seenResults, next);
+          return next;
+        }),
     }),
-    [tips],
+    [tips, seen],
   );
 
   return <TipsContext.Provider value={value}>{children}</TipsContext.Provider>;

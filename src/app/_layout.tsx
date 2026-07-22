@@ -70,6 +70,7 @@ function NavigationStack() {
         <Stack.Screen name="login" options={{ headerShown: false, presentation: 'modal' }} />
         <Stack.Screen name="handle" options={{ headerShown: false, presentation: 'modal' }} />
         <Stack.Screen name="member-tips" options={{ headerShown: false, presentation: 'modal' }} />
+        <Stack.Screen name="reveal/[id]" options={{ headerShown: false, presentation: 'fullScreenModal', animation: 'fade' }} />
         <Stack.Screen name="group/new" options={{ headerShown: false, presentation: 'modal' }} />
         <Stack.Screen name="group/[id]" options={{ title: '', headerBackTitle: '' }} />
         <Stack.Screen name="tip/[id]" options={{ title: '', headerBackTitle: '' }} />

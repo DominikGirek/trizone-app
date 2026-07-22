@@ -65,6 +65,21 @@ export async function fetchLeaderboard(limit = 100): Promise<LeaderboardRow[]> {
   return data as LeaderboardRow[];
 }
 
+/**
+ * The signed-in user's GLOBAL rank + field size, for the result-reveal ("Platz X von Y"). Best-effort:
+ * null if unconfigured, not signed in, or not yet on the board. Reads a generous top slice and finds self.
+ */
+export async function fetchMyGlobalRank(): Promise<{ rank: number; total: number } | null> {
+  if (!authConfigured) return null;
+  const uid = await ensureSession();
+  if (!uid) return null;
+  const rows = await fetchLeaderboard(500);
+  if (!rows.length) return null;
+  const idx = rows.findIndex((r) => r.user_id === uid);
+  if (idx < 0) return null;
+  return { rank: idx + 1, total: rows.length };
+}
+
 // ── Handle (public leaderboard name) ───────────────────────────────────────────
 /** The caller's chosen public name, or null if none set / not signed in. Never creates a session. */
 export async function fetchMyHandle(): Promise<string | null> {

@@ -120,6 +120,8 @@
     "feedAthletes": "Athletes",
     "feedEmpty": "Nothing here yet — follow more and it fills up.",
     "caughtUp": "You're all caught up",
+    "resultCueTitle": "{{race}} is scored",
+    "resultCueSub": "Your tip: {{points}} pts — reveal",
     "moreAlerts_one": "+{{count}} more alert",
     "moreAlerts_other": "+{{count}} more alerts",
     "lessAlerts": "Show less",
@@ -474,6 +476,20 @@
     "noTip": "You didn't tip this race",
     "noTipHint": "Here's the official result:",
     "source": "Result verified · source: {{source}}"
+  },
+  "reveal": {
+    "scored": "Scored",
+    "pointsBreakdown": "Men {{men}} · Women {{women}}",
+    "noTipHint": "No tip placed",
+    "reactNoTip": "You didn't tip this race.",
+    "reactHuge": "Incredible call!",
+    "reactStrong": "Strong call!",
+    "reactOk": "Solid!",
+    "reactLow": "On the board.",
+    "reactNone": "Nothing this time — next one!",
+    "globalRank": "Rank {{rank}} of {{total}} overall",
+    "done": "Done",
+    "notScored": "This race isn't scored yet."
   },
   "handle": {
     "title": "Your name",

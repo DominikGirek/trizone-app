@@ -38,5 +38,6 @@ export const StorageKeys = {
   newsVotes: 'trizone.newsVotes',
   hotNewsRead: 'trizone.hotNewsRead',
   tips: 'trizone.tips',
+  seenResults: 'trizone.seenResults',
   accountHint: 'trizone.accountHint',
 } as const;

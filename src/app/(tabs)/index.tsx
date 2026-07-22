@@ -33,8 +33,12 @@ import { getAthletesByIds } from '@/services/athletes';
 import { getAllEvents, openTippableRaces, type FeedItem } from '@/services/events';
 import { fetchNews } from '@/services/news';
 import { getRaceStartList, raceKey } from '@/services/races';
+import { ResultRevealCue } from '@/components/ResultRevealCue';
+import { getRaceResult } from '@/data/raceResults';
+import { scoreTip } from '@/lib/tippspiel';
 import { useFavorites } from '@/store/favorites';
 import { useMyRaces } from '@/store/myRaces';
+import { useTips } from '@/store/tips';
 
 const dateOf = (i: FeedItem) => (i.kind === 'pro' ? i.race.date : i.event.date);
 const statusOf = (i: FeedItem) => (i.kind === 'pro' ? i.race.status : i.event.status);
@@ -157,6 +161,19 @@ export default function DashboardScreen() {
   const { coords } = useLocation();
   const { idsOf } = useFavorites();
   const { next: myNext, isMain, races: myRaces } = useMyRaces();
+  const { list: tipList, isResultSeen } = useTips();
+
+  // The freshest tipped race that Tobi has scored but the user hasn't opened yet → the reveal cue.
+  const revealCue = useMemo(() => {
+    const scored = tipList()
+      .map((tp) => ({ tp, res: getRaceResult(tp.raceId) }))
+      .filter((x) => x.res && !isResultSeen(x.tp.raceId));
+    if (!scored.length) return null;
+    scored.sort((a, b) => (b.res!.verifiedAt ?? '').localeCompare(a.res!.verifiedAt ?? ''));
+    const { tp, res } = scored[0];
+    const points = scoreTip({ men: tp.men, women: tp.women }, { men: res!.men, women: res!.women }).total;
+    return { raceId: tp.raceId, name: tp.name ?? tp.raceId, points };
+  }, [tipList, isResultSeen]);
 
   const athleteIds = idsOf('athlete');
   const seriesIds = idsOf('series');
@@ -433,6 +450,11 @@ export default function DashboardScreen() {
               </Pressable>
             )}
           </View>
+        )}
+
+        {/* Result-reveal cue — a tipped race Tobi just scored (gold, not red — it's a reward, not urgency). */}
+        {revealCue && (
+          <ResultRevealCue raceId={revealCue.raceId} raceName={revealCue.name} points={revealCue.points} />
         )}
 
         {/* Smart hero — one prominent tile, red for the urgent states. */}

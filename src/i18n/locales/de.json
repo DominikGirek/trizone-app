@@ -120,6 +120,8 @@
     "feedAthletes": "Athleten",
     "feedEmpty": "Noch nichts hier — folge mehr, dann füllt sich's.",
     "caughtUp": "Du bist auf dem neuesten Stand",
+    "resultCueTitle": "{{race}} ist ausgewertet",
+    "resultCueSub": "Dein Tipp: {{points}} Punkte — ansehen",
     "moreAlerts_one": "+{{count}} weitere Eilmeldung",
     "moreAlerts_other": "+{{count}} weitere Eilmeldungen",
     "lessAlerts": "Weniger anzeigen",
@@ -474,6 +476,20 @@
     "noTip": "Du hast hier nicht getippt",
     "noTipHint": "So lief das Rennen offiziell:",
     "source": "Ergebnis verifiziert · Quelle: {{source}}"
+  },
+  "reveal": {
+    "scored": "Ausgewertet",
+    "pointsBreakdown": "Männer {{men}} · Frauen {{women}}",
+    "noTipHint": "Kein Tipp abgegeben",
+    "reactNoTip": "Du hast dieses Rennen nicht getippt.",
+    "reactHuge": "Wahnsinns-Tipp!",
+    "reactStrong": "Starker Tipp!",
+    "reactOk": "Solide!",
+    "reactLow": "Immerhin dabei.",
+    "reactNone": "Diesmal nichts — nächstes Mal!",
+    "globalRank": "Platz {{rank}} von {{total}} weltweit",
+    "done": "Fertig",
+    "notScored": "Dieses Rennen ist noch nicht ausgewertet."
   },
   "handle": {
     "title": "Dein Name",
