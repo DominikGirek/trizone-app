@@ -1,7 +1,7 @@
 # TriZone — Robot-Flotte (Design-Doc)
 
-> **Status:** Design abgeschlossen 2026-07-21 (via `/grill-me`). **Tobi Slices 1–2 ✅ gebaut & bewiesen**
-> (Roth auto-publisht offline mit PTO×MIKA, 23/23). Lebendiges Dokument — Entscheidungen ins §5-Log. Code: `scripts/tobi/`.
+> **Status:** Design 2026-07-21 (via `/grill-me`). **Tobi LIVE (Slices 1–3, smoke-test passed) + In-App-Reveal
+> (Slice 4) ✅ OTA 2026-07-22.** Lebendiges Dokument — Entscheidungen ins §5-Log. Code: `scripts/tobi/` + `src/app/reveal/`.
 
 ---
 
@@ -220,6 +220,18 @@ Zwei Teile, beide offline gegen Roth verifiziert (`node scripts/tobi/test.mjs` �
   🟢 PUBLISH, `race_results` upserted, `raceResults.json` unchanged (idempotent). `robot_runs` bekam die
   erste Zeile: `tobi · se-ch-roth · publish · confidence 100 · 2 sources · 5M/5W`. DB-Kette end-to-end
   verifiziert. Ab jetzt wertet sich das Tippspiel beim nächsten mika-getimten Rennen von selbst aus.
+
+### Slice 4 — In-App-Reveal ✅ gebaut & OTA (2026-07-22)
+Der **user-sichtbare Ergebnis-Moment** — Tobis stille Wertung wird erlebbar (der eigentliche Zweck der Flotte).
+- **`src/app/reveal/[id].tsx`** (Vollbild-Modal): Score zählt hoch (easeOut), die offizielle Top-5 landet
+  Zeile für Zeile mit **Haptik-Tick pro Treffer** (+3 exakt / +1 richtige Person), ehrliche Reaktions-Zeile,
+  best-effort **globaler Rang** als Pille. Markiert das Ergebnis beim Öffnen als „gesehen". Gold/Grün-Akzente,
+  **nie Rot** (Rot nur für Dringlichkeit).
+- **`src/components/ResultRevealCue.tsx`**: Dashboard-Karte für ein frisch gewertetes, ungesehenes Tipp-Rennen
+  — pulst einmal, öffnet den Reveal. `src/store/tips.tsx` trackt „gesehen" (persistiert → Cue verschwindet).
+- Push kommt als dünne letzte Schicht **nach dem Login-Gate** (Reveal-Choreografie steht dann schon).
+- Offen für später: **Slice 5** (Admin-Cockpit: `robot_runs`-Log + Staged-Inbox in-App) + Gruppen-Rang im
+  Reveal + IRONMAN-Adapter (Kona) + kommende Rennen in `races.mjs`.
 
 ---
 
