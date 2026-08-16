@@ -27,6 +27,13 @@
       "women": [],
       "source": "stats.protriathletes.org/race/singapore-t100/2026/results",
       "verifiedAt": "2026-06-28"
+    },
+    {
+      "raceId": "se-t100-vancouver",
+      "men": [],
+      "women": ["julie-derron", "kate-waugh", "georgia-taylor-brown", "paula-findlay", "imogen-simmonds"],
+      "source": "Tobi: PTO (auto, 2026-08-16)",
+      "verifiedAt": "2026-08-16"
     }
   ]
 }
