@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-29T11:46:29.466Z",
+  "generatedAt": "2026-10-10T11:20:45.179Z",
   "note": "Verified SWIM-START coordinates per race, keyed by city token(s) (date-independent — a city's swim venue rarely changes year to year). Geocoded from the real swim-venue NAME via OpenStreetMap Nominatim and validated to lie within ~25 km of the event town (guards against the organizer HQ / a wrong-city match / an LLM-invented venue). NEVER the organizer's office. Robot: scripts/ingest-race-venues.mjs regenerates/extends this; only verified coordinates are written, never fabricated.",
   "venues": {
     "roth": {
@@ -199,6 +199,12 @@
       "lon": 18.74364,
       "label": "Schwimmstart Motława River, Gdańsk",
       "source": "OSM: Motława River, Gdańsk (waterway/river, 14.4 km from centre)"
+    },
+    "florianopolis": {
+      "lat": -27.72011,
+      "lon": -48.6014,
+      "label": "Schwimmstart Baía Sul, Florianópolis",
+      "source": "OSM: Baía Sul, Florianópolis (natural/bay, 15.3 km from centre)"
     }
   }
 }
